@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>لوحة الإدارة — بوابة سقبا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   admin.css — لوحة الإدارة
+   Aesthetic: Command Center — Crimson + Dark Steel
+   ═══════════════════════════════════════════════ */
+
+/* ── BASE ──────────────────────────────────────── */
+:root{
+  --ink:#0b1410;--deep:#0e1912;--abyss:#111e15;
+  --t9:#132818;--t8:#183520;--t7:#1e4228;--t2:#4e9e62;--t1:#84c995;
+  --gold:#c9a227;--goldb:#e8c547;--goldd:#8a6d18;--goldg:rgba(201,162,39,.3);
+  --red:#ef4444;--redb2:#dc2626;--redf:rgba(239,68,68,.12);--redbr:rgba(239,68,68,.28);
+  --cyan:#5cb870;
+  --tx1:#edf3f4;--tx2:#8fb8c0;--tx3:#3e6b75;
+  --glass:rgba(6,15,18,.75);--glbr:rgba(239,68,68,.15);--glbrd:rgba(239,68,68,.3);
+  --bd:rgba(255,255,255,.06);--bdm:rgba(255,255,255,.1);
+  --fb:'Tajawal',sans-serif;--fd:'Amiri',serif;
+  --eoe:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;width:100%}
+body{font-family:var(--fb);background:var(--ink);color:var(--tx1);direction:rtl;min-height:100vh;width:100%;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;opacity:.45}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--ink)}::-webkit-scrollbar-thumb{background:rgba(239,68,68,.3);border-radius:99px}
+
+/* ══════════════════════════════════════════════════
+   ADMIN LOGIN PAGE
+   ══════════════════════════════════════════════════ */
+.login-page{
+  min-height:100vh;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem;position:relative;overflow:hidden;z-index:1;
+}
+.login-page::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(239,68,68,.07) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 50% at 15% 80%,rgba(201,162,39,.05) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 40% at 85% 30%,rgba(239,68,68,.04) 0%,transparent 45%),
+    var(--ink);
+}
+/* Red sweep line */
+.login-page::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(239,68,68,.3) 30%,rgba(239,68,68,.8) 50%,rgba(239,68,68,.3) 70%,transparent);
+  background-size:200% 100%;animation:sweep 3s linear infinite;
+}
+@keyframes sweep{0%{background-position:-100% 0}100%{background-position:200% 0}}
+
+.login-wrap{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1.1fr 1fr;
+  max-width:880px;width:100%;
+  background:rgba(6,15,18,.85);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border:1px solid rgba(239,68,68,.15);border-radius:26px;
+  box-shadow:0 50px 120px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.025),inset 0 1px 0 rgba(255,255,255,.04);
+  overflow:hidden;
+  animation:lrise .8s var(--eoe) forwards;opacity:0;
+}
+@keyframes lrise{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+
+/* Left: dramatic warning panel */
+.login-deco{
+  background:linear-gradient(160deg,rgba(239,68,68,.1) 0%,rgba(239,68,68,.04) 40%,rgba(0,0,0,.3) 100%);
+  border-left:1px solid rgba(239,68,68,.12);
+  padding:3rem 2.5rem;
+  display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+.login-deco::before{
+  content:'';position:absolute;top:0;right:0;bottom:0;left:0;
+  background:url("data:image/svg+xml,%3Csvg width='300' height='300' viewBox='0 0 300 300' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='150' cy='150' r='130' stroke='%23ef4444' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='150' cy='150' r='90' stroke='%23ef4444' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='150' cy='150' r='50' stroke='%23c9a227' stroke-width='0.5' opacity='0.12'/%3E%3Cpolygon points='150,20 165,90 230,65 195,120 250,155 185,155 180,225 150,165 120,225 115,155 50,155 105,120 70,65 135,90' fill='none' stroke='%23ef4444' stroke-width='0.4' opacity='0.15'/%3E%3C/svg%3E") center/cover;
+  opacity:.5;pointer-events:none;
+}
+.ld-top{position:relative;z-index:1}
+.ld-shield{
+  width:62px;height:62px;
+  background:linear-gradient(135deg,var(--red),var(--redb2));
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;margin-bottom:1.5rem;
+  box-shadow:0 8px 24px rgba(239,68,68,.4);
+  border:1px solid rgba(255,255,255,.1);
+}
+.ld-title{font-family:var(--fd);font-size:1.8rem;font-weight:700;color:var(--tx1);line-height:1.2;margin-bottom:.7rem}
+.ld-title span{display:block;color:rgba(239,68,68,.9)}
+.ld-desc{font-size:.82rem;color:var(--tx3);line-height:1.8}
+.ld-bottom{position:relative;z-index:1}
+.ld-warning{
+  display:flex;align-items:flex-start;gap:.65rem;
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);
+  border-radius:10px;padding:.9rem 1rem;font-size:.78rem;color:rgba(252,165,165,.8);line-height:1.65;
+}
+.ld-warning-ico{font-size:.9rem;flex-shrink:0;margin-top:.1rem}
+
+/* Right: login form */
+.login-form-panel{padding:2.5rem}
+.lf-head{margin-bottom:1.8rem}
+.lf-title{font-size:1.3rem;font-weight:800;color:var(--tx1);margin-bottom:.3rem}
+.lf-sub{font-size:.8rem;color:var(--tx3)}
+.admin-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
+  border-radius:50px;padding:.22rem .85rem;
+  font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#fca5a5;margin-top:.6rem;
+}
+.lf-back{display:block;text-align:center;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--bd);font-size:.78rem;color:var(--tx3);text-decoration:none;transition:color .2s}
+.lf-back:hover{color:var(--t2)}
+
+@media(max-width:700px){.login-wrap{grid-template-columns:1fr;max-width:420px}.login-deco{display:none}}
+
+/* ══════════════════════════════════════════════════
+   FORM ELEMENTS
+   ══════════════════════════════════════════════════ */
+.fgrp{margin-bottom:1.2rem}
+.flbl{display:block;font-size:.8rem;font-weight:600;color:var(--tx3);margin-bottom:.4rem;letter-spacing:.02em}
+.flbl .req{color:var(--goldb);margin-right:2px}
+.finp,.fsel,.ftxt{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.07);border-radius:9px;
+  padding:.72rem 1rem;color:var(--tx1);
+  font-family:var(--fb);font-size:.9rem;
+  outline:none;transition:all .25s;direction:rtl;
+}
+.finp:focus,.fsel:focus,.ftxt:focus{
+  border-color:rgba(239,68,68,.5);
+  background:rgba(239,68,68,.04);
+  box-shadow:0 0 0 3px rgba(239,68,68,.1);
+}
+.finp::placeholder{color:var(--tx3)}
+.ftxt{resize:vertical;min-height:110px}
+.fsel option{background:var(--t8)}
+.fhint{font-size:.73rem;color:var(--tx3);margin-top:.3rem}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.fgrid .span2{grid-column:1/-1}
+@media(max-width:480px){.fgrid{grid-template-columns:1fr}}
+
+/* ══════════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.75rem 1.6rem;border-radius:9px;
+  font-family:var(--fb);font-size:.9rem;font-weight:700;
+  cursor:pointer;border:none;outline:none;
+  transition:all .25s var(--eoe);white-space:nowrap;
+  text-decoration:none;position:relative;overflow:hidden;
+}
+.btn-red{
+  background:linear-gradient(135deg,var(--red),var(--redb2));
+  color:#fff;box-shadow:0 4px 20px rgba(239,68,68,.35);
+}
+.btn-red:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(239,68,68,.5)}
+.btn-red::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#f87171,var(--red));opacity:0;transition:.25s}
+.btn-red:hover::before{opacity:1}
+.btn-red span{position:relative;z-index:1}
+
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--goldd));color:#050e10;box-shadow:0 4px 16px var(--goldg)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(201,162,39,.5)}
+.btn-gold::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--goldb),var(--gold));opacity:0;transition:.25s}
+.btn-gold:hover::before{opacity:1}
+.btn-gold span{position:relative;z-index:1}
+
+.btn-teal  {background:rgba(92,184,112,.1);color:var(--t2);border:1px solid rgba(92,184,112,.2)}
+.btn-teal:hover{background:rgba(92,184,112,.18);border-color:rgba(92,184,112,.35)}
+.btn-ghost {background:rgba(255,255,255,.04);color:var(--tx2);border:1px solid var(--bd)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--bdm)}
+.btn-danger{background:var(--redf);color:#fca5a5;border:1px solid var(--redbr)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-approve{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.25)}
+.btn-approve:hover{background:rgba(16,185,129,.18)}
+.btn-deliver{background:rgba(92,184,112,.1);color:var(--t2);border:1px solid rgba(92,184,112,.25)}
+.btn-deliver:hover{background:rgba(92,184,112,.18)}
+.btn-sm  {padding:.42rem .85rem;font-size:.77rem;border-radius:7px}
+.btn-lg  {padding:.9rem 2rem;font-size:.95rem;border-radius:10px}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-loading .btxt{opacity:0}
+.btn-loading::after{content:'';position:absolute;width:17px;height:17px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══════════════════════════════════════════════════
+   DASHBOARD LAYOUT
+   ══════════════════════════════════════════════════ */
+.app{display:grid;grid-template-columns:252px 1fr;min-height:100vh;width:100%;position:relative;z-index:1}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+
+/* ── ADMIN SIDEBAR ── */
+.sidebar{
+  background:linear-gradient(180deg,rgba(9,4,4,.98) 0%,rgba(6,9,10,.99) 100%);
+  border-left:1px solid rgba(239,68,68,.12);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  box-shadow:4px 0 40px rgba(0,0,0,.5);
+}
+
+.sb-head{padding:1.5rem;border-bottom:1px solid rgba(239,68,68,.1)}
+.sb-logo-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem}
+.sb-emblem{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--red),var(--redb2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;box-shadow:0 4px 14px rgba(239,68,68,.4);flex-shrink:0;
+  border:1px solid rgba(255,255,255,.1);
+}
+.sb-lbl{font-size:.88rem;font-weight:700;color:var(--tx1)}
+.sb-lbl-sub{font-size:.67rem;color:var(--tx3);margin-top:.1rem}
+
+.sb-nav{flex:1;padding:.85rem .75rem;display:flex;flex-direction:column;gap:.15rem}
+.sb-sec{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(239,68,68,.4);padding:.7rem .75rem .3rem}
+.sb-item{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.72rem 1rem;border-radius:9px;
+  cursor:pointer;border:none;background:transparent;
+  color:var(--tx3);font-family:var(--fb);font-size:.85rem;font-weight:500;
+  transition:all .25s var(--eoe);text-align:right;width:100%;position:relative;
+}
+.sb-item:hover{color:var(--tx1);background:rgba(255,255,255,.04)}
+.sb-item.on{
+  color:#fca5a5;
+  background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.04));
+  border-right:2px solid var(--red);
+}
+.sb-item.on::before{
+  content:'';position:absolute;right:0;top:20%;bottom:20%;
+  width:3px;background:linear-gradient(180deg,#f87171,var(--red));
+  border-radius:99px;box-shadow:0 0 8px rgba(239,68,68,.5);
+}
+.sb-item .ic{font-size:.92rem;width:20px;text-align:center;flex-shrink:0}
+.sb-cnt{
+  margin-right:auto;background:rgba(239,68,68,.15);color:#f87171;
+  border:1px solid rgba(239,68,68,.25);border-radius:50px;
+  padding:.08rem .55rem;font-size:.68rem;font-weight:700;
+}
+.sb-foot{padding:.75rem;border-top:1px solid rgba(239,68,68,.08);display:flex;flex-direction:column;gap:.5rem}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:rgba(4,9,10,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(239,68,68,.08);
+  padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;gap:1rem;
+  box-shadow:0 2px 20px rgba(0,0,0,.4);
+}
+.tb-crumb{display:flex;align-items:center;gap:.5rem;font-size:.84rem}
+.tb-crumb-p{color:var(--tx3)}.tb-sep{color:var(--tx3);font-size:.8rem}.tb-crumb-c{color:var(--tx1);font-weight:600}
+.tb-admin{display:flex;align-items:center;gap:.75rem;font-size:.8rem;color:var(--tx3)}
+.tb-av{width:32px;height:32px;background:linear-gradient(135deg,var(--red),var(--redb2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+
+.main{overflow-y:auto;display:flex;flex-direction:column}
+.content{padding:2rem}
+
+/* ── PANELS ── */
+.panel{
+  background:rgba(6,12,14,.8);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.06);border-radius:16px;
+  overflow:hidden;margin-bottom:1.8rem;
+  box-shadow:0 8px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.03);
+  transition:border-color .3s;
+}
+.panel:hover{border-color:rgba(239,68,68,.15)}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);
+  background:rgba(0,0,0,.25);
+}
+.ph-left{display:flex;align-items:center;gap:.75rem}
+.panel-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0}
+.pi-red  {background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2)}
+.pi-gold {background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.2)}
+.pi-teal {background:rgba(92,184,112,.1);border:1px solid rgba(92,184,112,.18)}
+.pi-sky  {background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2)}
+.pi-pur  {background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2)}
+.panel-title{font-size:.9rem;font-weight:700;color:var(--tx1)}
+.panel-body{padding:1.5rem}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.1rem;margin-bottom:2rem}
+.stat-card{
+  background:rgba(8,12,14,.9);border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;padding:1.25rem;display:flex;align-items:center;gap:1rem;
+  transition:all .3s var(--eoe);position:relative;overflow:hidden;
+}
+.stat-card:hover{border-color:rgba(239,68,68,.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.stat-ico{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.si-red  {background:rgba(239,68,68,.12)}
+.si-gold {background:rgba(201,162,39,.12)}
+.si-teal {background:rgba(92,184,112,.1)}
+.si-sky  {background:rgba(56,189,248,.1)}
+.stat-n{font-size:1.85rem;font-weight:900;color:var(--tx1);line-height:1}
+.stat-l{font-size:.71rem;color:var(--tx3);margin-top:.2rem}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl thead tr{border-bottom:1px solid rgba(255,255,255,.07)}
+.tbl th{
+  padding:.8rem 1rem;text-align:right;
+  font-size:.7rem;font-weight:700;color:var(--tx3);
+  letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
+  background:rgba(0,0,0,.2);
+}
+.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .2s}
+.tbl tbody tr:hover{background:rgba(239,68,68,.03)}
+.tbl td{padding:.82rem 1rem;color:var(--tx2);vertical-align:middle}
+.tbl td:first-child{color:var(--tx1);font-weight:500}
+.tbl td:last-child{white-space:nowrap}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.9rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);
+  flex-wrap:wrap;background:rgba(0,0,0,.15);
+}
+.filt-sel{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:7px;padding:.45rem .85rem;color:var(--tx1);
+  font-family:var(--fb);font-size:.8rem;outline:none;cursor:pointer;transition:.2s;
+}
+.filt-sel:focus{border-color:rgba(239,68,68,.4)}
+.filt-inp{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:7px;padding:.45rem .85rem;color:var(--tx1);
+  font-family:var(--fb);font-size:.8rem;outline:none;direction:rtl;
+  transition:.2s;min-width:200px;
+}
+.filt-inp::placeholder{color:var(--tx3)}
+.filt-inp:focus{border-color:rgba(239,68,68,.4)}
+
+/* ── ACTIONS ── */
+.acts{display:flex;gap:.3rem;flex-wrap:wrap}
+.add-form{padding:1.4rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05)}
+
+/* ── STATUS BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:.24rem .7rem;border-radius:50px;font-size:.7rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.b-pending  {background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.b-approved {background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.25)}
+.b-delivered{background:rgba(92,184,112,.1);color:var(--t2);border:1px solid rgba(92,184,112,.25)}
+.b-rejected {background:var(--redf);color:#fca5a5;border:1px solid var(--redbr)}
+
+/* ── GALLERY ── */
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:1rem;padding:1.4rem 1.5rem}
+.gal-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.06);aspect-ratio:1;background:var(--t9)}
+.gal-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s var(--eoe)}
+.gal-item:hover img{transform:scale(1.08)}
+.gal-ov{position:absolute;inset:0;background:rgba(0,0,0,0);transition:.3s;display:flex;align-items:flex-end;padding:.6rem}
+.gal-item:hover .gal-ov{background:rgba(0,0,0,.7)}
+.gal-del{opacity:0;transition:.3s;font-family:var(--fb);font-size:.73rem;background:rgba(239,68,68,.85);color:#fff;border:none;border-radius:6px;padding:.3rem .65rem;cursor:pointer;width:100%;text-align:center}
+.gal-item:hover .gal-del{opacity:1}
+
+.thumb{width:42px;height:42px;border-radius:7px;object-fit:cover;border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:.2s}
+.thumb:hover{border-color:rgba(239,68,68,.3)}
+
+/* ── LIGHTBOX ── */
+.lb{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.lb.on{opacity:1;pointer-events:all}
+.lb img{max-width:90vw;max-height:88vh;border-radius:12px;object-fit:contain;border:1px solid rgba(255,255,255,.08);box-shadow:0 40px 100px rgba(0,0,0,.8)}
+.lb-close{position:absolute;top:1.5rem;left:1.5rem;width:44px;height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;color:var(--tx2);transition:.25s}
+.lb-close:hover{background:var(--redf);border-color:var(--redbr);color:#fca5a5}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-70px);
+  z-index:9999;display:flex;align-items:center;gap:.65rem;
+  padding:.85rem 1.5rem;border-radius:13px;font-size:.86rem;font-weight:600;
+  backdrop-filter:blur(20px);min-width:260px;justify-content:center;
+  transition:transform .4s var(--eoe);pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-ok {background:rgba(92,184,112,.12);border:1px solid rgba(92,184,112,.3);color:var(--t1)}
+.toast-err{background:var(--redf);border:1px solid var(--redbr);color:#fca5a5}
+
+/* ── VIEWS ── */
+.vp{display:none}.vp.on{display:block;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.pg-title{font-size:1.35rem;font-weight:800;margin-bottom:.3rem;color:var(--tx1)}
+.pg-sub{color:var(--tx3);font-size:.82rem;margin-bottom:2rem}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .sidebar{position:fixed;right:-255px;z-index:200;height:100vh;transition:right .35s var(--eoe)}
+  .sidebar.open{right:0}
+  .content{padding:1rem}
+  .mob-btn{display:flex!important}
+}
+.mob-btn{display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:.45rem .65rem;font-size:1rem;cursor:pointer;color:#f87171;align-items:center}
+
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="login-page" style="display:none;width:100%">
+<div class="login-page">
+  <div class="login-wrap">
+    <!-- Deco panel -->
+    <div class="login-deco">
+      <div class="ld-top">
+        <div style="width:90px;height:90px;margin-bottom:1.5rem"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 20px rgba(201,162,39,.5))"></div>
+        <div class="ld-title">لوحة<span>الإدارة</span></div>
+        <p class="ld-desc">منطقة محظورة — الدخول مقتصر على المشرفين المعتمدين لإدارة بوابة مدينة سقبا.</p>
+      </div>
+      <div class="ld-bottom">
+        <div class="ld-warning">
+          <span class="ld-warning-ico">⚠️</span>
+          أي محاولة دخول غير مصرح بها يتم تسجيلها ومراقبتها. استخدم بيانات حساب المشرف فقط.
+        </div>
+      </div>
+    </div>
+    <!-- Form panel -->
+    <div class="login-form-panel">
+      <div class="lf-head">
+        <h1 class="lf-title">تسجيل دخول المشرف</h1>
+        <p class="lf-sub">أدخل بيانات حساب المشرف للمتابعة</p>
+        <div class="admin-badge">🔴 ADMIN ACCESS ONLY</div>
+      </div>
+      <form onsubmit="doAdminLogin(event)">
+        <div class="fgrp">
+          <label class="flbl">البريد الإلكتروني <span class="req">*</span></label>
+          <input class="finp" id="al-email" type="email" placeholder="admin@saqba.sy" required>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">كلمة المرور <span class="req">*</span></label>
+          <input class="finp" id="al-pass" type="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-red btn-full btn-lg" id="al-btn">
+          <span class="btxt">🛡️ دخول لوحة الإدارة</span>
+        </button>
+      </form>
+      <a href="index.html" class="lf-back">← العودة للبوابة الرئيسية</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════ DASHBOARD ════ -->
+<div id="dash-page" style="display:none;width:100%">
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo-row">
+        <div style="width:42px;height:42px;flex-shrink:0"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 8px rgba(201,162,39,.4))"></div>
+        <div><div class="sb-lbl">بوابة سقبا</div><div class="sb-lbl-sub">لوحة الإدارة</div></div>
+      </div>
+      <div class="admin-badge" style="font-size:.62rem;margin-top:.5rem">🔴 ADMIN PANEL</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">رئيسي</div>
+      <button class="sb-item on" onclick="gv('dash')"       id="ni-dash">      <span class="ic">📊</span>نظرة عامة</button>
+      <div class="sb-sec">الخدمات</div>
+      <button class="sb-item"    onclick="gv('gas')"        id="ni-gas">       <span class="ic">🔥</span>طلبات الغاز<span class="sb-cnt" id="nc-gas">0</span></button>
+      <button class="sb-item"    onclick="gv('complaints')" id="ni-complaints"><span class="ic">📣</span>الشكاوى<span class="sb-cnt" id="nc-comp">0</span></button>
+      <div class="sb-sec">المحتوى</div>
+      <button class="sb-item"    onclick="gv('news')"       id="ni-news">      <span class="ic">📰</span>الأخبار</button>
+      <button class="sb-item"    onclick="gv('gallery')"    id="ni-gallery">   <span class="ic">🖼️</span>معرض الصور</button>
+      <button class="sb-item"    onclick="gv('martyrs')"   id="ni-martyrs">   <span class="ic">🕊️</span>الشهداء<span class="sb-cnt" id="nc-martyrs">0</span></button>
+      <div class="sb-sec">النظام</div>
+      <button class="sb-item"    onclick="gv('users')"      id="ni-users">     <span class="ic">👥</span>المستخدمون</button>
+    </nav>
+    <div class="sb-foot">
+      <a href="index.html" class="btn btn-ghost btn-sm" style="justify-content:center">🏠 البوابة</a>
+      <button class="btn btn-danger btn-sm" onclick="doLogout()" style="justify-content:center">🚪 خروج</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-crumb">
+        <span class="tb-crumb-p">بوابة سقبا</span>
+        <span class="tb-sep">›</span>
+        <span class="tb-crumb-c" id="tb-crumb">نظرة عامة</span>
+      </div>
+      <div class="tb-admin">
+        <span id="tb-admin-name">مشرف النظام</span>
+        <div style="width:32px;height:32px"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:contain"></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="v-dash" class="vp on">
+        <div class="pg-title">لوحة التحكم</div>
+        <div class="pg-sub">نظرة شاملة على نشاط بوابة مدينة سقبا</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-ico si-teal">👥</div><div><div class="stat-n" id="st-u">—</div><div class="stat-l">المستخدمون</div></div></div>
+          <div class="stat-card"><div class="stat-ico si-gold">🔥</div><div><div class="stat-n" id="st-g">—</div><div class="stat-l">طلبات الغاز الكلية</div></div></div>
+          <div class="stat-card"><div class="stat-ico si-red">⏳</div><div><div class="stat-n" id="st-gp">—</div><div class="stat-l">طلبات معلقة</div></div></div>
+          <div class="stat-card"><div class="stat-ico si-gold">📣</div><div><div class="stat-n" id="st-c">—</div><div class="stat-l">الشكاوى الكلية</div></div></div>
+          <div class="stat-card"><div class="stat-ico si-red">🔴</div><div><div class="stat-n" id="st-co">—</div><div class="stat-l">شكاوى مفتوحة</div></div></div>
+          <div class="stat-card"><div class="stat-ico si-sky">📰</div><div><div class="stat-n" id="st-n">—</div><div class="stat-l">الأخبار</div></div></div>
+        </div>
+        <!-- recent gas -->
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">أحدث طلبات الغاز</span></div><button class="btn btn-ghost btn-sm" onclick="gv('gas')">عرض الكل</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>رقم الدور</th><th>الاسم</th><th>الحي</th><th>الاسطوانات</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="d-gas-tbody"><tr><td colspan="7"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-title">جاري التحميل...</div></div></td></tr></tbody></table></div>
+        </div>
+        <!-- recent complaints -->
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">📣</div><span class="panel-title">أحدث الشكاوى</span></div><button class="btn btn-ghost btn-sm" onclick="gv('complaints')">عرض الكل</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>النوع</th><th>الوصف</th><th>صورة</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="d-comp-tbody"><tr><td colspan="6"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-title">جاري التحميل...</div></div></td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── GAS MANAGEMENT ── -->
+      <div id="v-gas" class="vp">
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">إدارة طلبات الغاز</span></div><button class="btn btn-teal btn-sm" onclick="loadGas()">🔄 تحديث</button></div>
+          <div class="filter-bar">
+            <select class="filt-sel" id="gas-sf" onchange="loadGas()">
+              <option value="">جميع الطلبات</option>
+              <option value="pending">قيد الانتظار</option>
+              <option value="approved">مقبول</option>
+              <option value="delivered">تم التسليم</option>
+              <option value="rejected">مرفوض</option>
+            </select>
+            <input class="filt-inp" id="gas-si" placeholder="ابحث باسم أو هاتف..." oninput="filterGas()">
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>رقم الدور</th><th>الاسم</th><th>الهاتف</th><th>الحي</th><th>الاسطوانات</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="gas-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── COMPLAINTS MANAGEMENT ── -->
+      <div id="v-complaints" class="vp">
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">📣</div><span class="panel-title">إدارة الشكاوى</span></div><button class="btn btn-teal btn-sm" onclick="loadComps()">🔄 تحديث</button></div>
+          <div class="filter-bar">
+            <select class="filt-sel" id="comp-sf" onchange="loadComps()">
+              <option value="">جميع الشكاوى</option>
+              <option value="open">مفتوحة</option>
+              <option value="in_progress">قيد المعالجة</option>
+              <option value="resolved">محلولة</option>
+              <option value="closed">مغلقة</option>
+            </select>
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>النوع</th><th>الوصف</th><th>صورة</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="comp-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── NEWS MANAGEMENT ── -->
+      <div id="v-news" class="vp">
+        <div class="panel" style="margin-bottom:1.5rem">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-sky">📰</div><span class="panel-title">إضافة خبر جديد</span></div></div>
+          <form onsubmit="addNews(event)" class="add-form">
+            <div class="fgrid">
+              <div class="fgrp span2"><label class="flbl">عنوان الخبر <span class="req">*</span></label><input class="finp" id="n-title" type="text" placeholder="عنوان الخبر أو الإعلان" required></div>
+              <div class="fgrp span2"><label class="flbl">المحتوى <span class="req">*</span></label><textarea class="ftxt" id="n-body" placeholder="تفاصيل الخبر..." required></textarea></div>
+              <div class="fgrp span2"><label class="flbl">صورة (اختياري)</label><input class="finp" id="n-img" type="file" accept="image/*" style="padding:.5rem"></div>
+            </div>
+            <button type="submit" class="btn btn-gold" id="n-btn"><span class="btxt">➕ نشر الخبر</span></button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-sky">📰</div><span class="panel-title">الأخبار المنشورة</span></div><button class="btn btn-ghost btn-sm" onclick="loadNews()">🔄 تحديث</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>صورة</th><th>العنوان</th><th>المحتوى</th><th>التاريخ</th><th>حذف</th></tr></thead><tbody id="news-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── GALLERY MANAGEMENT ── -->
+      <div id="v-gallery" class="vp">
+        <div class="panel" style="margin-bottom:1.5rem">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-pur">🖼️</div><span class="panel-title">إضافة صورة للمعرض</span></div></div>
+          <form onsubmit="addGal(event)" class="add-form">
+            <div class="fgrid">
+              <div class="fgrp"><label class="flbl">صورة المعرض <span class="req">*</span></label><input class="finp" id="g-img" type="file" accept="image/*" style="padding:.5rem" required></div>
+              <div class="fgrp"><label class="flbl">وصف الصورة</label><input class="finp" id="g-desc" type="text" placeholder="وصف مختصر للصورة"></div>
+            </div>
+            <button type="submit" class="btn btn-gold" id="g-btn"><span class="btxt">➕ إضافة للمعرض</span></button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-pur">🖼️</div><span class="panel-title">صور المعرض</span></div><button class="btn btn-ghost btn-sm" onclick="loadGal()">🔄 تحديث</button></div>
+          <div class="gal-grid" id="gal-grid"></div>
+        </div>
+      </div>
+
+      <!-- ── MARTYRS ── -->
+      <div id="v-martyrs" class="vp">
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">🕊️</div><span class="panel-title">مراجعة إضافات الشهداء</span></div><button class="btn btn-teal btn-sm" onclick="loadMartyrs()">🔄 تحديث</button></div>
+          <div class="filter-bar">
+            <select class="filt-sel" id="martyrs-sf" onchange="loadMartyrs()">
+              <option value="">جميع الإضافات</option>
+              <option value="pending">بانتظار الموافقة</option>
+              <option value="approved">منشور</option>
+              <option value="rejected">مرفوض</option>
+            </select>
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الصورة</th><th>الاسم</th><th>تاريخ الاستشهاد</th><th>الحي</th><th>طريقة الاستشهاد</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="martyrs-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── USERS ── -->
+      <div id="v-users" class="vp">
+        <div class="panel">
+          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">👥</div><span class="panel-title">إدارة المستخدمين</span></div><button class="btn btn-teal btn-sm" onclick="loadUsers()">🔄 تحديث</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>الحي</th><th>تاريخ التسجيل</th><th>الصلاحية</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Lightbox -->
+<div class="lb" id="lb">
+  <div class="lb-close" onclick="document.getElementById('lb').classList.remove('on')">✕</div>
+  <img id="lb-img" src="" alt="">
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   بوابة سقبا — Shared Utilities
+   - XSS Sanitizer
+   - Image Compressor
+   - Form Validators
+   - Helpers
+   ═══════════════════════════════════════════════════ */
+
+// ── XSS SANITIZER ───────────────────────────────────
+// منع حقن الكود الخبيث في innerHTML
+const Sanitizer = {
+  // تحويل الحروف الخطيرة إلى HTML entities
+  escape(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g,  '&amp;')
+      .replace(/</g,  '&lt;')
+      .replace(/>/g,  '&gt;')
+      .replace(/"/g,  '&quot;')
+      .replace(/'/g,  '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  },
+
+  // تنظيف نص مع السماح بـ line breaks فقط
+  text(str) {
+    return this.escape(str).replace(/\n/g, '<br>');
+  },
+
+  // استخدام textContent بدلاً من innerHTML للنصوص البسيطة
+  setTextSafe(el, str) {
+    if (typeof el === 'string') el = document.getElementById(el);
+    if (el) el.textContent = str ?? '';
+  }
+};
+
+// اختصار مريح
+const esc = (s) => Sanitizer.escape(s);
+
+
+// ── IMAGE COMPRESSOR ─────────────────────────────────
+// ضغط الصور قبل رفعها لـ Firebase Storage
+const ImageCompressor = {
+  /**
+   * @param {File} file - ملف الصورة الأصلي
+   * @param {object} options - خيارات الضغط
+   * @param {number} options.maxWidth  - أقصى عرض بالبكسل (افتراضي: 1200)
+   * @param {number} options.maxHeight - أقصى ارتفاع بالبكسل (افتراضي: 1200)
+   * @param {number} options.quality  - جودة JPEG من 0 إلى 1 (افتراضي: 0.82)
+   * @param {number} options.maxSizeKB - الحد الأقصى للحجم بـ KB (افتراضي: 800)
+   * @returns {Promise<File>} - ملف مضغوط
+   */
+  async compress(file, options = {}) {
+    const {
+      maxWidth  = 1200,
+      maxHeight = 1200,
+      quality   = 0.82,
+      maxSizeKB = 800,
+    } = options;
+
+    // إذا الصورة صغيرة أصلاً — أرجعها كما هي
+    if (file.size <= maxSizeKB * 1024) return file;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+
+        // حساب الأبعاد الجديدة مع الحفاظ على النسبة
+        let { width, height } = img;
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        // الرسم على Canvas
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // تحديد نوع الملف الناتج:
+        // PNG  → يبقى PNG  (للحفاظ على الشفافية)
+        // WebP → يبقى WebP (تنسيق حديث وخفيف، لا حاجة للتحويل)
+        // JPEG/HEIC/غيرها → JPEG
+        const outputType =
+          file.type === 'image/png'  ? 'image/png'  :
+          file.type === 'image/webp' ? 'image/webp' :
+          'image/jpeg';
+        const ext =
+          outputType === 'image/png'  ? 'png'  :
+          outputType === 'image/webp' ? 'webp' :
+          'jpg';
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { reject(new Error('فشل ضغط الصورة')); return; }
+            const compressed = new File(
+              [blob],
+              file.name.replace(/\.[^.]+$/, `.${ext}`),
+              { type: outputType, lastModified: Date.now() }
+            );
+            console.log(
+              `[ImageCompressor] ${(file.size/1024).toFixed(0)}KB → ` +
+              `${(compressed.size/1024).toFixed(0)}KB ` +
+              `(${Math.round((1 - compressed.size/file.size)*100)}% تقليص)`
+            );
+            resolve(compressed);
+          },
+          outputType,
+          quality
+        );
+      };
+
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('تعذّر قراءة الصورة')); };
+      img.src = url;
+    });
+  },
+
+  // ضغط مخصص للصور المصغرة (thumbnails)
+  async thumbnail(file) {
+    return this.compress(file, { maxWidth: 400, maxHeight: 400, quality: 0.75, maxSizeKB: 150 });
+  },
+
+  // ضغط للمعرض
+  async gallery(file) {
+    return this.compress(file, { maxWidth: 1400, maxHeight: 1000, quality: 0.85, maxSizeKB: 600 });
+  },
+
+  // ضغط للشكاوى
+  async complaint(file) {
+    return this.compress(file, { maxWidth: 1000, maxHeight: 1000, quality: 0.80, maxSizeKB: 400 });
+  },
+
+  // ضغط للأخبار
+  async news(file) {
+    return this.compress(file, { maxWidth: 1200, maxHeight: 800, quality: 0.85, maxSizeKB: 500 });
+  }
+};
+
+
+// ── FORM VALIDATORS ──────────────────────────────────
+const Validator = {
+  rules: {
+    required:  (v)    => v.trim().length > 0         || 'هذا الحقل مطلوب',
+    minLen:    (n)    => (v) => v.length >= n         || `الحد الأدنى ${n} أحرف`,
+    phone:     (v)    => /^0[0-9]{8,11}$/.test(v.trim()) || 'رقم الهاتف غير صحيح',
+    email:     (v)    => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'البريد الإلكتروني غير صحيح',
+    password:  (v)    => v.length >= 6               || 'كلمة المرور 6 أحرف على الأقل',
+    match:     (other)=> (v) => v === other           || 'كلمتا المرور غير متطابقتان',
+    noXss:     (v)    => !/<[^>]*>/.test(v)           || 'النص يحتوي على رموز غير مسموح بها',
+  },
+
+  // ربط حقل بقاعدة التحقق مع عرض لحظي
+  bind(inputEl, rules = [], options = {}) {
+    const {
+      errorClass = 'finp-err',
+      okClass    = 'finp-ok',
+      feedbackId = null,
+    } = options;
+
+    const validate = () => {
+      const val = inputEl.value;
+      for (const rule of rules) {
+        const result = typeof rule === 'function' ? rule(val) : this.rules[rule]?.(val);
+        if (result !== true) {
+          inputEl.classList.remove(okClass);
+          inputEl.classList.add(errorClass);
+          if (feedbackId) {
+            const fb = document.getElementById(feedbackId);
+            if (fb) { fb.textContent = result; fb.style.display = 'block'; }
+          }
+          return false;
+        }
+      }
+      inputEl.classList.remove(errorClass);
+      inputEl.classList.add(okClass);
+      if (feedbackId) {
+        const fb = document.getElementById(feedbackId);
+        if (fb) fb.style.display = 'none';
+      }
+      return true;
+    };
+
+    inputEl.addEventListener('input', validate);
+    inputEl.addEventListener('blur',  validate);
+    return validate; // أرجع دالة التحقق للاستخدام اليدوي
+  },
+
+  // تحقق من تطابق كلمتي المرور بشكل لحظي
+  bindPasswordMatch(passEl, confirmEl, feedbackId) {
+    const check = () => {
+      const fb = document.getElementById(feedbackId);
+      if (!confirmEl.value) { // لم يبدأ الكتابة بعد
+        confirmEl.classList.remove('finp-ok', 'finp-err');
+        if (fb) fb.style.display = 'none';
+        return;
+      }
+      const match = passEl.value === confirmEl.value;
+      confirmEl.classList.toggle('finp-ok',  match);
+      confirmEl.classList.toggle('finp-err', !match);
+      if (fb) {
+        fb.textContent    = match ? '' : 'كلمتا المرور غير متطابقتان';
+        fb.style.display  = match ? 'none' : 'block';
+        fb.style.color    = '#fca5a5';
+      }
+    };
+    passEl.addEventListener('input',   check);
+    confirmEl.addEventListener('input', check);
+    return check;
+  },
+
+  // قوة كلمة المرور
+  bindPasswordStrength(passEl, strengthBarId) {
+    const bar = document.getElementById(strengthBarId);
+    if (!bar) return;
+
+    passEl.addEventListener('input', () => {
+      const v = passEl.value;
+      let score = 0;
+      if (v.length >= 6)  score++;
+      if (v.length >= 10) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+
+      const levels = [
+        { label: '', color: 'transparent', width: '0%' },
+        { label: 'ضعيفة جداً', color: '#ef4444', width: '20%' },
+        { label: 'ضعيفة',      color: '#f59e0b', width: '40%' },
+        { label: 'متوسطة',     color: '#fbbf24', width: '60%' },
+        { label: 'جيدة',       color: '#34d399', width: '80%' },
+        { label: 'قوية',       color: '#5cb870', width: '100%' },
+      ];
+
+      const lvl = levels[Math.min(score, 5)];
+      const fill = bar.querySelector('.ps-fill');
+      const lbl  = bar.querySelector('.ps-label');
+      if (fill) { fill.style.width = v ? lvl.width : '0%'; fill.style.background = lvl.color; }
+      if (lbl)  lbl.textContent = v ? lvl.label : '';
+    });
+  }
+};
+
+
+// ── TOAST ────────────────────────────────────────────
+function showToast(msg, ok = true) {
+  const existing = document.querySelector('.toast');
+  if (!existing) return;
+  existing.textContent = msg;
+  existing.className   = 'toast ' + (ok ? 'toast-ok' : 'toast-err');
+  existing.classList.add('show');
+  clearTimeout(existing._timer);
+  existing._timer = setTimeout(() => existing.classList.remove('show'), 3500);
+}
+
+
+// ── DATE FORMATTER ───────────────────────────────────
+function formatDate(timestamp) {
+  if (!timestamp) return '—';
+  const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return d.toLocaleDateString('ar-SY', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+
+// ── STATUS MAP ────────────────────────────────────────
+const statusMap = {
+  pending:     { label: 'قيد الانتظار',  cls: 'b-pending'   },
+  approved:    { label: 'مقبول',          cls: 'b-approved'  },
+  delivered:   { label: 'تم التسليم',    cls: 'b-delivered' },
+  rejected:    { label: 'مرفوض',          cls: 'b-rejected'  },
+  open:        { label: 'مفتوحة',         cls: 'b-pending'   },
+  in_progress: { label: 'قيد المعالجة',  cls: 'b-approved'  },
+  resolved:    { label: 'محلولة',         cls: 'b-delivered' },
+  closed:      { label: 'مغلقة',          cls: 'b-rejected'  },
+};
+
+
+// ── FILE SIZE FORMATTER ──────────────────────────────
+function formatFileSize(bytes) {
+  if (bytes < 1024)        return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+</script>
+<script>
+/* Fallbacks */
+if(typeof FirestoreService==='undefined')window.FirestoreService={getDashboardStats:async()=>({totalUsers:0,totalGasRequests:0,pendingGasRequests:0,totalComplaints:0,openComplaints:0,totalNews:0}),getAllGasRequests:async()=>[],updateGasRequestStatus:async()=>{},getAllComplaints:async()=>[],updateComplaintStatus:async()=>{},createNews:async()=>{},getNews:async()=>[],deleteNews:async()=>{},getGallery:async()=>[],addGalleryImage:async()=>{},deleteGalleryImage:async()=>{}};
+if(typeof AuthService==='undefined')window.AuthService={login:async()=>{throw{code:'auth/no-config'}},logout:async()=>{},isAdmin:async()=>false};
+if(typeof formatDate==='undefined')window.formatDate=ts=>{if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'})};
+if(typeof statusMap==='undefined')window.statusMap={pending:{label:'قيد الانتظار',cls:'b-pending'},approved:{label:'مقبول',cls:'b-approved'},delivered:{label:'تم التسليم',cls:'b-delivered'},rejected:{label:'مرفوض',cls:'b-rejected'},open:{label:'مفتوحة',cls:'b-pending'},in_progress:{label:'قيد المعالجة',cls:'b-approved'},resolved:{label:'محلولة',cls:'b-delivered'},closed:{label:'مغلقة',cls:'b-rejected'}};
+
+/* Toast */
+function toast(msg,ok=true){
+  if(typeof showToast!=='undefined'){showToast(msg,ok);return}
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(ok?'toast-ok':'toast-err');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)
+}
+
+/* Auth */
+async function doAdminLogin(e){
+  e.preventDefault();
+  const btn=document.getElementById('al-btn');btn.disabled=true;btn.classList.add('btn-loading');
+  try{
+    const c=await AuthService.login(document.getElementById('al-email').value,document.getElementById('al-pass').value);
+    const ok=await AuthService.isAdmin(c.user.uid);
+    if(!ok){await AuthService.logout();toast('ليس لديك صلاحية الوصول',false);btn.disabled=false;btn.classList.remove('btn-loading')}
+  }catch(er){
+    const m={['auth/user-not-found']:'بريد غير موجود',['auth/wrong-password']:'كلمة المرور خاطئة',['auth/too-many-requests']:'تجاوزت عدد المحاولات'}[er.code]||'حدث خطأ';
+    toast(m,false);btn.disabled=false;btn.classList.remove('btn-loading');
+  }
+}
+async function doLogout(){await AuthService.logout()}
+
+document.addEventListener('userLoggedIn',async e=>{
+  const ok=await AuthService.isAdmin(e.detail.uid);
+  if(!ok){await AuthService.logout();toast('لا تملك صلاحيات الإدارة',false);return}
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('dash-page').style.display='';
+  const ud=await(typeof FirestoreService!=='undefined'?FirestoreService.getUser?FirestoreService.getUser(e.detail.uid):Promise.resolve(null):Promise.resolve(null));
+  document.getElementById('tb-admin-name').textContent=(ud&&ud.name)||'مشرف النظام';
+  loadDash();
+});
+document.addEventListener('userLoggedOut',()=>{
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('dash-page').style.display='none';
+});
+/* Show login initially */
+document.getElementById('login-page').style.display='flex';
+
+/* View nav */
+function gv(v){
+  document.querySelectorAll('.vp').forEach(p=>p.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  const ni=document.getElementById('ni-'+v);if(ni)ni.classList.add('on');
+  const ts={dash:'نظرة عامة',gas:'طلبات الغاز',complaints:'الشكاوى',news:'الأخبار',gallery:'معرض الصور',users:'المستخدمون'};
+  document.getElementById('tb-crumb').textContent=ts[v]||'';
+  if(v==='gas')loadGas();
+  if(v==='complaints')loadComps();
+  if(v==='news')loadNews();
+  if(v==='gallery')loadGal();
+  if(v==='users')loadUsers();
+}
+
+/* Dashboard */
+async function loadDash(){
+  try{
+    const s=await FirestoreService.getDashboardStats();
+    ['u','g','gp','c','co','n'].forEach((k,i)=>{document.getElementById('st-'+k).textContent=[s.totalUsers,s.totalGasRequests,s.pendingGasRequests,s.totalComplaints,s.openComplaints,s.totalNews][i]});
+    document.getElementById('nc-gas').textContent=s.pendingGasRequests;
+    document.getElementById('nc-comp').textContent=s.openComplaints;
+  }catch(e){}
+  try{const r=await FirestoreService.getAllGasRequests();renderGasTbl(r.slice(0,5),'d-gas-tbody')}catch(e){}
+  try{const c=await FirestoreService.getAllComplaints();renderCompTbl(c.slice(0,5),'d-comp-tbody')}catch(e){}
+}
+
+/* Gas */
+let allGas=[];
+async function loadGas(){
+  document.getElementById('gas-tbody').innerHTML=etr(8,'⏳ جاري التحميل...');
+  try{const sf=document.getElementById('gas-sf').value;allGas=await FirestoreService.getAllGasRequests(sf||null);renderGasTbl(allGas,'gas-tbody')}catch(e){document.getElementById('gas-tbody').innerHTML=etr(8,'⚠️ خطأ في التحميل')}
+}
+function filterGas(){const q=document.getElementById('gas-si').value.toLowerCase();renderGasTbl(allGas.filter(r=>r.name?.toLowerCase().includes(q)||r.phone?.includes(q)),'gas-tbody')}
+function renderGasTbl(data,tid){
+  const tb=document.getElementById(tid);
+  if(!data.length){tb.innerHTML=etr(8,'لا توجد نتائج');return}
+  tb.innerHTML=data.map(r=>{const s=statusMap[r.status]||{label:r.status,cls:''};return`<tr>
+    <td><strong style="color:var(--goldb)">#${esc(r.queueNumber)}</strong></td>
+    <td>${esc(r.name||'—')}</td>
+    <td style="direction:ltr;text-align:right">${esc(r.phone||'—')}</td>
+    <td>${esc(r.district||'—')}</td>
+    <td>${esc(r.cylinders)} اسطوانة</td>
+    <td style="font-size:.78rem">${formatDate(r.createdAt)}</td>
+    <td><span class="badge ${s.cls}">${esc(s.label)}</span></td>
+    <td><div class="acts">
+      ${r.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="updGas('${esc(r.id)}','approved')">قبول</button>`:''}
+      ${r.status==='approved'?`<button class="btn btn-deliver btn-sm" onclick="updGas('${esc(r.id)}','delivered')">تسليم</button>`:''}
+      ${r.status!=='rejected'&&r.status!=='delivered'?`<button class="btn btn-danger btn-sm" onclick="updGas('${esc(r.id)}','rejected')">رفض</button>`:''}
+    </div></td>
+  </tr>`}).join('');
+}
+async function updGas(id,status){
+  try{await FirestoreService.updateGasRequestStatus(id,status);toast('تم تحديث الحالة ✓');loadGas();loadDash()}catch(e){toast('خطأ في التحديث',false)}
+}
+
+/* Complaints */
+async function loadComps(){
+  document.getElementById('comp-tbody').innerHTML=etr(6,'⏳ جاري التحميل...');
+  try{const sf=document.getElementById('comp-sf').value;const all=await FirestoreService.getAllComplaints();const d=sf?all.filter(c=>c.status===sf):all;renderCompTbl(d,'comp-tbody')}catch(e){document.getElementById('comp-tbody').innerHTML=etr(6,'⚠️ خطأ')}
+}
+function renderCompTbl(data,tid){
+  const tb=document.getElementById(tid);
+  if(!data.length){tb.innerHTML=etr(6,'لا توجد شكاوى');return}
+  tb.innerHTML=data.map(c=>{const s=statusMap[c.status]||{label:c.status,cls:''};return`<tr>
+    <td>${esc(c.type||'—')}</td>
+    <td style="max-width:200px;font-size:.8rem;color:var(--tx3)">${esc((c.description||'').substring(0,75))}${(c.description||'').length>75?'...':''}</td>
+    <td>${c.image?`<img src="${esc(c.image)}" class="thumb" onclick="openLb('${esc(c.image)}')">`:'—'}</td>
+    <td style="font-size:.78rem">${formatDate(c.createdAt)}</td>
+    <td><span class="badge ${s.cls}">${esc(s.label)}</span></td>
+    <td><div class="acts">
+      ${c.status==='open'?`<button class="btn btn-approve btn-sm" onclick="updComp('${esc(c.id)}','in_progress')">معالجة</button>`:''}
+      ${c.status!=='resolved'&&c.status!=='closed'?`<button class="btn btn-deliver btn-sm" onclick="updComp('${esc(c.id)}','resolved')">حل</button>`:''}
+      ${c.status!=='closed'?`<button class="btn btn-danger btn-sm" onclick="updComp('${esc(c.id)}','closed')">إغلاق</button>`:''}
+    </div></td>
+  </tr>`}).join('');
+}
+async function updComp(id,status){
+  try{await FirestoreService.updateComplaintStatus(id,status);toast('تم تحديث الشكوى ✓');loadComps();loadDash()}catch(e){toast('خطأ في التحديث',false)}
+}
+
+/* News */
+async function addNews(e){
+  e.preventDefault();const btn=document.getElementById('n-btn');btn.disabled=true;btn.classList.add('btn-loading');
+  try{await FirestoreService.createNews({title:document.getElementById('n-title').value,content:document.getElementById('n-body').value},document.getElementById('n-img').files[0]||null);toast('تم نشر الخبر 📰');e.target.reset();loadNews();loadDash()}
+  catch(er){toast('خطأ في نشر الخبر',false)}
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+async function loadNews(){
+  document.getElementById('news-tbody').innerHTML=etr(5,'⏳ جاري التحميل...');
+  try{const n=await FirestoreService.getNews(50);
+    document.getElementById('news-tbody').innerHTML=n.length?n.map(it=>`<tr>
+      <td>${it.image?`<img src="${esc(it.image)}" class="thumb">`:'—'}</td>
+      <td><strong>${esc(it.title)}</strong></td>
+      <td style="max-width:200px;font-size:.8rem;color:var(--tx3)">${esc((it.content||'').substring(0,80))}...</td>
+      <td style="font-size:.78rem">${formatDate(it.createdAt)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="delNews('${esc(it.id)}')">🗑️ حذف</button></td>
+    </tr>`).join(''):etr(5,'لا توجد أخبار منشورة');
+  }catch(e){document.getElementById('news-tbody').innerHTML=etr(5,'⚠️ خطأ')}
+}
+async function delNews(id){if(!confirm('حذف هذا الخبر؟'))return;try{await FirestoreService.deleteNews(id);toast('تم الحذف');loadNews()}catch(e){toast('خطأ في الحذف',false)}}
+
+/* Gallery */
+async function addGal(e){
+  e.preventDefault();const btn=document.getElementById('g-btn');const f=document.getElementById('g-img').files[0];
+  if(!f){toast('اختر صورة',false);return}
+  btn.disabled=true;btn.classList.add('btn-loading');
+  try{await FirestoreService.addGalleryImage({description:document.getElementById('g-desc').value},f);toast('تمت إضافة الصورة 🖼️');e.target.reset();loadGal()}
+  catch(er){toast('خطأ في رفع الصورة',false)}
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+async function loadGal(){
+  const g=document.getElementById('gal-grid');g.innerHTML='<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-title">جاري التحميل...</div></div></div>';
+  try{const items=await FirestoreService.getGallery();
+    g.innerHTML=items.length?items.map(it=>`<div class="gal-item"><img src="${esc(it.image)}" alt="${esc(it.description||'')}" loading="lazy"><div class="gal-ov"><button class="gal-del" onclick="delGal('${esc(it.id)}')">🗑️ حذف</button></div></div>`).join(''):'<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">🖼️</div><div class="empty-title">لا توجد صور</div></div></div>';
+  }catch(e){g.innerHTML='<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">⚠️</div><div class="empty-title">خطأ في التحميل</div></div></div>'}
+}
+async function delGal(id){if(!confirm('حذف هذه الصورة؟'))return;try{await FirestoreService.deleteGalleryImage(id);toast('تم الحذف');loadGal()}catch(e){toast('خطأ في الحذف',false)}}
+
+/* Users */
+async function loadUsers(){
+  document.getElementById('users-tbody').innerHTML=etr(6,'⏳ جاري التحميل...');
+  try{
+    const users = await FirestoreService.getAllUsers();
+    document.getElementById('users-tbody').innerHTML=users.length?users.map(u=>`<tr>
+      <td>${esc(u.name||'—')}</td>
+      <td style="direction:ltr;text-align:right;font-size:.82rem">${esc(u.email||'—')}</td>
+      <td style="direction:ltr;text-align:right">${esc(u.phone||'—')}</td>
+      <td>${esc(u.district||'—')}</td>
+      <td style="font-size:.78rem">${formatDate(u.createdAt)}</td>
+      <td><span class="badge ${u.role==='admin'?'b-approved':'b-pending'}">${u.role==='admin'?'🛡️ مشرف':'👤 مواطن'}</span></td>
+      <td>
+        <button class="btn btn-teal btn-sm" onclick="resetUserPassword('${esc(u.email||'')}','${esc(u.name||'')}')" title="إرسال رابط استعادة كلمة المرور" ${!u.email?'disabled':''}>
+          🔑 إعادة تعيين
+        </button>
+      </td>
+    </tr>`).join(''):etr(6,'لا يوجد مستخدمون');
+  }catch(e){document.getElementById('users-tbody').innerHTML=etr(6,'⚠️ خطأ في التحميل')}
+}
+
+
+/* Martyrs */
+async function loadMartyrs(){
+  document.getElementById('martyrs-tbody').innerHTML=etr(7,'⏳ جاري التحميل...');
+  try{
+    const {getFirestore,collection,getDocs,query,orderBy,where,updateDoc,doc}=window._firestoreAPI||{};
+    if(!window._db){document.getElementById('martyrs-tbody').innerHTML=etr(7,'⚙️ يتطلب إعداد Firebase');return}
+    const sf=document.getElementById('martyrs-sf').value;
+    const db=window._db;
+    const constraints=[orderBy('createdAt','desc')];
+    if(sf)constraints.unshift(where('status','==',sf));
+    const snap=await getDocs(query(collection(db,'martyrs'),...constraints));
+    const data=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('nc-martyrs').textContent=data.filter(m=>m.status==='pending').length;
+    if(!data.length){document.getElementById('martyrs-tbody').innerHTML=etr(7,'لا توجد إضافات');return}
+    document.getElementById('martyrs-tbody').innerHTML=data.map(m=>{
+      const d=m.martyrdomDate?new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—';
+      const s={pending:{l:'بانتظار الموافقة',c:'b-pending'},approved:{l:'منشور',c:'b-approved'},rejected:{l:'مرفوض',c:'b-rejected'}}[m.status]||{l:m.status,c:''};
+      return `<tr>
+        <td>${m.photoUrl?`<img src="${esc(m.photoUrl)}" class="thumb" onclick="openLb('${esc(m.photoUrl)}')">`:'—'}</td>
+        <td><strong>${esc(m.name||'—')}</strong></td>
+        <td style="font-size:.78rem">${esc(d)}</td>
+        <td>${esc(m.district||'—')}</td>
+        <td>${esc(m.cause||'—')}</td>
+        <td><span class="badge ${s.c}">${s.l}</span></td>
+        <td><div class="acts">
+          ${m.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="approveMartyr('${esc(m.id)}')">نشر</button>`:''}
+          ${m.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="rejectMartyr('${esc(m.id)}')">رفض</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('');
+  }catch(e){document.getElementById('martyrs-tbody').innerHTML=etr(7,'⚠️ خطأ في التحميل');console.error(e)}
+}
+async function approveMartyr(id){
+  try{const{getFirestore,doc,updateDoc}=window._firestoreAPI||{};await window._updateDoc(id,'martyrs','approved');toast('تم نشر الشهيد ✅');loadMartyrs()}catch(e){toast('خطأ في التحديث',false)}
+}
+async function rejectMartyr(id){
+  if(!confirm('رفض هذه الإضافة؟'))return;
+  try{await window._updateDoc(id,'martyrs','rejected');toast('تم الرفض');loadMartyrs()}catch(e){toast('خطأ',false)}
+}
+
+/* Reset user password */
+async function resetUserPassword(email, name) {
+  if (!email) { toast('هذا المستخدم ليس لديه إيميل مسجل', false); return; }
+  if (!confirm(`إرسال رابط استعادة كلمة المرور إلى:\n${email}\n\nهل أنت متأكد؟`)) return;
+  try {
+    // sendPasswordResetEmail من Firebase Auth
+    if (window._sendPasswordReset) {
+      await window._sendPasswordReset(email);
+      toast(`✅ تم إرسال رابط الاستعادة إلى ${email}`);
+    } else {
+      toast('خدمة إعادة التعيين غير متاحة حالياً', false);
+    }
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found': 'لا يوجد حساب بهذا البريد',
+      'auth/invalid-email':  'البريد الإلكتروني غير صالح',
+      'auth/too-many-requests': 'طلبات كثيرة — انتظر قليلاً',
+    };
+    toast(msgs[e.code] || 'حدث خطأ في الإرسال', false);
+  }
+}
+
+/* Helpers */
+function etr(cols,msg){return`<tr><td colspan="${cols}"><div class="empty"><div class="empty-ico">📋</div><div class="empty-title">${msg}</div></div></td></tr>`}
+function openLb(src){document.getElementById('lb-img').src=src;document.getElementById('lb').classList.add('on')}
+document.getElementById('lb').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('on')})
+</script>
+</body>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+/* ═══════════════════════════════════════════════════════
+   بوابة سقبا — firebase-config.js
+   Firebase Modular SDK v10 (Tree-shakeable)
+
+   الفرق الجوهري عن نسخة compat:
+   ✅ يُحمَّل فقط ما نستخدمه (Tree-shaking) — أقل حجماً
+   ✅ الصياغة الرسمية الحديثة لـ Firebase 9/10
+   ✅ getCountFromServer لعد الوثائق دون تحميل بياناتها
+   ═══════════════════════════════════════════════════════ */
+
+import { initializeApp }
+  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
+import {
+  getAuth, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+import {
+  getFirestore, collection, doc,
+  addDoc, setDoc, getDoc, getDocs,
+  updateDoc, deleteDoc,
+  query, where, orderBy, limit,
+  serverTimestamp, getCountFromServer
+} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+import {
+  getStorage, ref as sRef,
+  uploadBytes, getDownloadURL
+} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js';
+
+/* ─── استبدل هذه القيم بإعداداتك من Firebase Console ─── */
+const firebaseConfig = {
+  apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
+  authDomain:        'saqba-portal.firebaseapp.com',
+  projectId:         'saqba-portal',
+  storageBucket:     'saqba-portal.firebasestorage.app',
+  messagingSenderId: '135534184893',
+  appId:             '1:135534184893:web:87feb3535016b650052ad4',
+};
+
+const app     = initializeApp(firebaseConfig);
+const auth    = getAuth(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+/* ─── Auth State ─────────────────────────────────────── */
+onAuthStateChanged(auth, (user) => {
+  window.currentUser = user ?? null;
+  document.dispatchEvent(
+    new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user })
+  );
+});
+
+/* ─── رفع صورة مساعدة ───────────────────────────────── */
+async function uploadImage(file, path) {
+  const compressed = typeof ImageCompressor !== 'undefined'
+    ? await ImageCompressor.compress(file) : file;
+  const r = sRef(storage, `${path}/${Date.now()}_${compressed.name}`);
+  await uploadBytes(r, compressed);
+  return getDownloadURL(r);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FirestoreService
+   ═══════════════════════════════════════════════════════ */
+const FirestoreService = {
+
+  /* ── Users ── */
+  async createUser(uid, data) {
+    return setDoc(doc(db, 'users', uid), { ...data, createdAt: serverTimestamp() });
+  },
+  async getUser(uid) {
+    const s = await getDoc(doc(db, 'users', uid));
+    return s.exists() ? { id: s.id, ...s.data() } : null;
+  },
+
+  /* ── Gas Requests ── */
+  async createGasRequest(data) {
+    const qSnap = await getDocs(
+      query(collection(db, 'gas_requests'), where('district', '==', data.district))
+    );
+    const queueNumber = qSnap.size + 1;
+    const ref = await addDoc(collection(db, 'gas_requests'), {
+      ...data, queueNumber, status: 'pending', createdAt: serverTimestamp()
+    });
+    // نُرجع queueNumber مباشرةً لتجنب استدعاء getDoc إضافي
+    return { id: ref.id, queueNumber };
+  },
+  async getUserGasRequests(userId) {
+    const s = await getDocs(
+      query(collection(db,'gas_requests'), where('userId','==',userId), orderBy('createdAt','desc'))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async getAllGasRequests(status = null) {
+    const c = [orderBy('createdAt','desc')];
+    if (status) c.unshift(where('status','==',status));
+    const s = await getDocs(query(collection(db,'gas_requests'), ...c));
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async updateGasRequestStatus(id, status) {
+    return updateDoc(doc(db,'gas_requests',id), { status });
+  },
+
+  /* ── Complaints ── */
+  async createComplaint(data, imageFile) {
+    const image = imageFile
+      ? await uploadImage(imageFile, 'complaints') : null;
+    return addDoc(collection(db,'complaints'), {
+      ...data, image, status: 'open', createdAt: serverTimestamp()
+    });
+  },
+  async getUserComplaints(userId) {
+    const s = await getDocs(
+      query(collection(db,'complaints'), where('userId','==',userId), orderBy('createdAt','desc'))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async getAllComplaints() {
+    const s = await getDocs(
+      query(collection(db,'complaints'), orderBy('createdAt','desc'))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async updateComplaintStatus(id, status) {
+    return updateDoc(doc(db,'complaints',id), { status });
+  },
+
+  /* ── News ── */
+  async getNews(n = 10) {
+    const s = await getDocs(
+      query(collection(db,'news'), orderBy('createdAt','desc'), limit(n))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async createNews(data, imageFile) {
+    const image = imageFile
+      ? await uploadImage(imageFile, 'news') : null;
+    return addDoc(collection(db,'news'), {
+      ...data, image, createdAt: serverTimestamp()
+    });
+  },
+  async deleteNews(id) {
+    return deleteDoc(doc(db,'news',id));
+  },
+
+  /* ── Gallery ── */
+  async getGallery() {
+    const s = await getDocs(
+      query(collection(db,'gallery'), orderBy('createdAt','desc'))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async addGalleryImage(data, imageFile) {
+    const image = await uploadImage(imageFile, 'gallery');
+    return addDoc(collection(db,'gallery'), {
+      ...data, image, createdAt: serverTimestamp()
+    });
+  },
+  async deleteGalleryImage(id) {
+    return deleteDoc(doc(db,'gallery',id));
+  },
+
+  /* ── Dashboard Stats (getCountFromServer = فعّال جداً) ── */
+  async getDashboardStats() {
+    const [u, ga, gp, ca, co, n] = await Promise.all([
+      getCountFromServer(collection(db,'users')),
+      getCountFromServer(collection(db,'gas_requests')),
+      getCountFromServer(query(collection(db,'gas_requests'), where('status','==','pending'))),
+      getCountFromServer(collection(db,'complaints')),
+      getCountFromServer(query(collection(db,'complaints'), where('status','==','open'))),
+      getCountFromServer(collection(db,'news')),
+    ]);
+    return {
+      totalUsers:         u.data().count,
+      totalGasRequests:   ga.data().count,
+      pendingGasRequests: gp.data().count,
+      totalComplaints:    ca.data().count,
+      openComplaints:     co.data().count,
+      totalNews:          n.data().count,
+    };
+  },
+
+  /* ── Users list (for admin) ── */
+  async getAllUsers() {
+    const s = await getDocs(
+      query(collection(db,'users'), orderBy('createdAt','desc'))
+    );
+    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+};
+
+/* ═══════════════════════════════════════════════════════
+   AuthService
+   ═══════════════════════════════════════════════════════ */
+const AuthService = {
+  async register(email, password, userData) {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await FirestoreService.createUser(cred.user.uid, { ...userData, email, role: 'citizen' });
+    return cred.user;
+  },
+  async login(email, password) {
+    return signInWithEmailAndPassword(auth, email, password);
+  },
+  async logout() {
+    return signOut(auth);
+  },
+  async isAdmin(uid) {
+    const user = await FirestoreService.getUser(uid);
+    return user?.role === 'admin';
+  },
+};
+
+/* ─── تصدير عالمي ────────────────────────────────────── */
+window.FirestoreService = FirestoreService;
+window.AuthService      = AuthService;
+
+/* إعادة تعيين كلمة مرور مستخدم — يُستدعى من resetUserPassword() */
+window._sendPasswordReset = async (email) => {
+  const { sendPasswordResetEmail } = await import(
+    'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js'
+  );
+  await sendPasswordResetEmail(auth, email, {
+    url: window.location.origin + '/citizen.html', // رابط إعادة التوجيه بعد التغيير
+  });
+};
+/* Expose Firestore APIs for martyrs management */
+window._db = db;
+window._firestoreAPI = { collection, getDocs, query, orderBy, where, updateDoc, doc };
+window._updateDoc = async (id, col, status) => updateDoc(doc(db, col, id), { status });
+
+</script>
+
+</html>

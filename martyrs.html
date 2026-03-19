@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>شهداء سقبا — بوابة سقبا الرقمية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b1410;--deep:#0e1912;
+  --t9:#082228;--t8:#0b2d34;--t7:#0e3840;--t2:#3ab8ca;--t1:#7dd8e6;
+  --gold:#c9a227;--goldb:#e8c547;--goldd:#8a6d18;--goldg:rgba(201,162,39,.3);
+  --cyan:#00d4d8;
+  --olive:#6b7c3a;--oliveb:#8fa84d;--olivef:rgba(107,124,58,.15);
+  --red:#dc2626;--redf:rgba(220,38,38,.1);--redb:rgba(220,38,38,.25);
+  --tx1:#edf3f0;--tx2:#9bb8a8;--tx3:#4a7060;
+  --glass:rgba(6,13,16,.75);--glbr:rgba(107,124,58,.2);--glbrd:rgba(107,124,58,.4);
+  --bd:rgba(107,124,58,.1);--bdm:rgba(107,124,58,.2);
+  --fb:'Tajawal',sans-serif;--fd:'Amiri',serif;
+  --eoe:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;width:100%}
+body{font-family:var(--fb);background:var(--ink);color:var(--tx1);direction:rtl;min-height:100vh;width:100%;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;opacity:.5}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--ink)}::-webkit-scrollbar-thumb{background:var(--olive);border-radius:99px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(4,8,10,.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(107,124,58,.15);padding:0 2rem;height:66px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.nav-emblem{width:38px;height:38px;background:linear-gradient(135deg,var(--olive),var(--oliveb));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(107,124,58,.3)}
+.nav-title{font-family:var(--fd);font-size:1rem;color:var(--oliveb);display:block}
+.nav-sub{font-size:.65rem;color:var(--tx3);letter-spacing:.1em}
+.nav-back{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--tx3);text-decoration:none;padding:.45rem .9rem;border:1px solid var(--bd);border-radius:7px;background:rgba(0,0,0,.2);transition:all .25s}
+.nav-back:hover{color:var(--t2);border-color:rgba(0,212,216,.25)}
+
+/* HERO */
+.hero{
+  position:relative;padding:5rem 2rem 4rem;text-align:center;overflow:hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(107,124,58,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 20% 80%,rgba(201,162,39,.05) 0%,transparent 50%),
+    var(--ink);
+  z-index:1;
+}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--olive) 30%,var(--gold) 50%,var(--olive) 70%,transparent);background-size:200% 100%;animation:sweep 5s linear infinite}
+@keyframes sweep{0%{background-position:-100% 0}100%{background-position:200% 0}}
+
+/* Crescent & star SVG background */
+.hero-geo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:.04;animation:gspin 120s linear infinite}
+@keyframes gspin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.hero-badge{display:inline-flex;align-items:center;gap:.6rem;background:var(--olivef);border:1px solid var(--glbr);border-radius:50px;padding:.4rem 1.2rem;font-size:.78rem;font-weight:600;color:var(--oliveb);margin-bottom:1.8rem;animation:rise .8s .2s var(--eoe) forwards;opacity:0}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--oliveb);box-shadow:0 0 8px var(--oliveb)}
+
+.hero-title{font-family:var(--fd);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.2;margin-bottom:.5rem;animation:rise .9s .4s var(--eoe) forwards;opacity:0}
+.hero-title .hl{display:block;background:linear-gradient(135deg,var(--goldb),var(--oliveb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-ayah{font-family:var(--fd);font-size:1.1rem;color:var(--tx2);line-height:2;max-width:600px;margin:1.2rem auto;animation:rise .9s .6s var(--eoe) forwards;opacity:0;font-style:italic}
+.hero-ayah-ref{font-size:.8rem;color:var(--tx3);margin-top:.3rem}
+
+.hero-stats{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(107,124,58,.12);animation:rise .9s .8s var(--eoe) forwards;opacity:0}
+.hs-n{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--goldb),var(--oliveb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;display:block}
+.hs-l{font-size:.75rem;color:var(--tx3);margin-top:.25rem}
+
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* FILTER BAR */
+.filter-sec{padding:2rem 2rem 0;max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.filter-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:1.2rem 1.5rem;background:rgba(6,13,16,.8);border:1px solid var(--bd);border-radius:14px;backdrop-filter:blur(12px)}
+.filt-inp{background:rgba(255,255,255,.04);border:1.5px solid var(--bd);border-radius:8px;padding:.6rem 1rem;color:var(--tx1);font-family:var(--fb);font-size:.85rem;outline:none;direction:rtl;transition:all .25s;flex:1;min-width:200px}
+.filt-inp::placeholder{color:var(--tx3)}
+.filt-inp:focus{border-color:var(--oliveb);background:var(--olivef)}
+.filt-sel{background:rgba(255,255,255,.04);border:1.5px solid var(--bd);border-radius:8px;padding:.6rem 1rem;color:var(--tx1);font-family:var(--fb);font-size:.85rem;outline:none;cursor:pointer;transition:all .25s}
+.filt-sel:focus{border-color:var(--oliveb)}
+.filt-sel option{background:var(--t8)}
+.results-count{font-size:.8rem;color:var(--tx3);white-space:nowrap;margin-right:auto}
+
+/* MARTYRS GRID */
+.martyrs-sec{padding:2.5rem 2rem 6rem;max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.martyrs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+
+/* MARTYR CARD */
+.mcard{
+  background:var(--glass);
+  border:1px solid var(--glbr);
+  border-radius:20px;overflow:hidden;
+  cursor:pointer;
+  transition:transform .4s var(--eoe),box-shadow .4s,border-color .3s;
+  position:relative;
+  backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.03);
+}
+.mcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--olive),var(--gold),var(--olive));opacity:.6}
+.mcard:hover{transform:translateY(-6px);border-color:var(--glbrd);box-shadow:0 20px 50px rgba(0,0,0,.4),0 0 40px rgba(107,124,58,.08)}
+
+/* Photo area */
+.mcard-photo{
+  width:100%;height:220px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--t8),var(--t9));
+}
+.mcard-photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s var(--eoe)}
+.mcard:hover .mcard-photo img{transform:scale(1.06)}
+.mcard-photo-placeholder{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;
+  background:linear-gradient(135deg,rgba(107,124,58,.1),rgba(8,34,40,.8));
+}
+.mcard-photo-placeholder svg{opacity:.3;width:64px;height:64px}
+.mcard-photo-placeholder span{font-size:.8rem;color:var(--tx3)}
+
+/* Olive gradient overlay on photo */
+.mcard-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(4,8,10,.9) 100%);
+}
+.mcard-rank{
+  position:absolute;top:1rem;right:1rem;
+  background:linear-gradient(135deg,var(--gold),var(--goldd));
+  color:#050e10;font-size:.68rem;font-weight:800;
+  padding:.25rem .7rem;border-radius:50px;
+  letter-spacing:.05em;
+}
+
+/* Card body */
+.mcard-body{padding:1.4rem}
+.mcard-name{font-family:var(--fd);font-size:1.2rem;font-weight:700;color:var(--tx1);margin-bottom:.35rem;line-height:1.3}
+.mcard-meta{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.mcard-row{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--tx3)}
+.mcard-row-icon{width:16px;text-align:center;flex-shrink:0;font-size:.7rem}
+.mcard-row-val{color:var(--tx2)}
+.mcard-cause{
+  font-size:.82rem;color:var(--tx2);line-height:1.7;
+  padding:.8rem 1rem;
+  background:rgba(107,124,58,.06);border:1px solid rgba(107,124,58,.12);
+  border-radius:8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.mcard-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:1rem;padding-top:.9rem;
+  border-top:1px solid rgba(107,124,58,.1);
+  font-size:.73rem;color:var(--tx3);
+}
+.mcard-district{display:flex;align-items:center;gap:.3rem}
+.mcard-date{font-weight:600;color:var(--gold)}
+
+/* EMPTY / LOADING */
+.empty{text-align:center;padding:5rem 2rem;color:var(--tx3);grid-column:1/-1}
+.empty-ico{font-size:3rem;margin-bottom:1rem;opacity:.4}
+.empty-title{font-size:1rem;font-weight:600;color:var(--tx2);margin-bottom:.4rem}
+.ske{background:linear-gradient(90deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,.06) 50%,rgba(255,255,255,.03) 100%);background-size:200% 100%;animation:sk 1.8s infinite;border-radius:8px}
+@keyframes sk{0%{background-position:-100% 0}100%{background-position:200% 0}}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal{
+  background:rgba(6,13,16,.97);border:1px solid var(--glbr);
+  border-radius:24px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;
+  transform:scale(.93) translateY(16px);transition:transform .35s var(--eoe);
+  box-shadow:0 40px 100px rgba(0,0,0,.7);
+}
+.modal-ov.open .modal{transform:scale(1) translateY(0)}
+
+.modal-photo{width:100%;height:320px;position:relative;overflow:hidden;background:var(--t8)}
+.modal-photo img{width:100%;height:100%;object-fit:cover}
+.modal-photo-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(107,124,58,.1),rgba(8,34,40,.8))}
+.modal-photo-ph svg{opacity:.25;width:80px;height:80px}
+.modal-photo-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(4,8,10,.95) 100%)}
+.modal-photo-name{position:absolute;bottom:1.5rem;right:1.5rem;font-family:var(--fd);font-size:1.6rem;font-weight:700;color:var(--tx1);text-shadow:0 2px 8px rgba(0,0,0,.8)}
+.modal-close{position:absolute;top:1rem;left:1rem;width:40px;height:40px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;color:var(--tx2);transition:all .25s;z-index:1}
+.modal-close:hover{background:var(--redf);border-color:var(--redb);color:#fca5a5}
+
+.modal-body{padding:2rem}
+.modal-section{margin-bottom:1.5rem}
+.modal-section-title{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--oliveb);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.modal-section-title::before{content:'';width:20px;height:1px;background:linear-gradient(90deg,var(--olive),transparent)}
+.modal-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.modal-info-item{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:10px;padding:.85rem 1rem}
+.modal-info-key{font-size:.72rem;color:var(--tx3);margin-bottom:.2rem}
+.modal-info-val{font-size:.88rem;font-weight:600;color:var(--tx1)}
+.modal-cause-text{font-size:.9rem;color:var(--tx2);line-height:1.9;background:rgba(107,124,58,.05);border:1px solid var(--bd);border-radius:12px;padding:1.2rem}
+.modal-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.modal-tag{background:var(--olivef);border:1px solid rgba(107,124,58,.2);border-radius:50px;padding:.2rem .75rem;font-size:.73rem;color:var(--oliveb)}
+
+/* ADD FORM */
+.add-sec{padding:4rem 2rem;background:linear-gradient(180deg,transparent,rgba(107,124,58,.04),transparent);position:relative;z-index:1}
+.add-con{max-width:800px;margin:0 auto}
+.add-card{background:rgba(6,13,16,.85);border:1px solid var(--glbr);border-radius:22px;overflow:hidden;backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.add-head{padding:1.8rem 2rem;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.add-head-title{font-family:var(--fd);font-size:1.4rem;font-weight:700;color:var(--tx1);margin-bottom:.3rem}
+.add-head-sub{font-size:.83rem;color:var(--tx3);line-height:1.7}
+.add-notice{display:flex;gap:.7rem;align-items:flex-start;background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.18);border-radius:10px;padding:.9rem 1.1rem;font-size:.8rem;color:var(--tx2);line-height:1.7;margin:1.5rem 2rem}
+
+.add-form{padding:1.5rem 2rem 2rem}
+.fgrp{margin-bottom:1.2rem}
+.flbl{display:block;font-size:.8rem;font-weight:600;color:var(--tx3);margin-bottom:.4rem}
+.flbl .req{color:var(--goldb);margin-right:2px}
+.finp,.fsel,.ftxt{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(107,124,58,.15);border-radius:9px;padding:.72rem 1rem;color:var(--tx1);font-family:var(--fb);font-size:.9rem;outline:none;transition:all .25s;direction:rtl}
+.finp:focus,.fsel:focus,.ftxt:focus{border-color:var(--oliveb);background:var(--olivef);box-shadow:0 0 0 3px rgba(107,124,58,.12)}
+.finp::placeholder{color:var(--tx3)}
+.ftxt{resize:vertical;min-height:120px}
+.fsel option{background:var(--t8)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+
+/* Photo upload */
+.photo-upload{border:2px dashed rgba(107,124,58,.25);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s;background:rgba(107,124,58,.02);position:relative}
+.photo-upload:hover,.photo-upload.drag{border-color:var(--oliveb);background:var(--olivef)}
+.photo-upload input{display:none}
+.photo-upload-ico{font-size:2.2rem;margin-bottom:.5rem;color:var(--tx3)}
+.photo-upload-txt{font-size:.82rem;color:var(--tx3)}
+.photo-upload-txt strong{color:var(--oliveb)}
+.photo-prev-wrap{display:none;margin-top:.8rem;position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:var(--t9)}
+.photo-prev-wrap.show{display:block}
+.photo-prev-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-prev-rm{position:absolute;top:.5rem;left:.5rem;background:rgba(220,38,38,.8);color:#fff;border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .2s}
+.photo-prev-rm:hover{background:var(--red)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.6rem;border-radius:9px;font-family:var(--fb);font-size:.9rem;font-weight:700;cursor:pointer;border:none;outline:none;transition:all .25s var(--eoe);white-space:nowrap;text-decoration:none;position:relative;overflow:hidden}
+.btn-olive{background:linear-gradient(135deg,var(--olive),#4a5629);color:#f0f0e8;box-shadow:0 4px 18px rgba(107,124,58,.35)}
+.btn-olive::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--oliveb),var(--olive));opacity:0;transition:.25s}
+.btn-olive:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(107,124,58,.5)}
+.btn-olive:hover::before{opacity:1}
+.btn-olive span{position:relative;z-index:1}
+.btn-ghost{background:rgba(107,124,58,.08);color:var(--oliveb);border:1px solid var(--bd)}
+.btn-ghost:hover{background:rgba(107,124,58,.15);border-color:var(--glbr)}
+.btn-sm{padding:.42rem .85rem;font-size:.78rem;border-radius:7px}
+.btn-full{width:100%}
+.btn-lg{padding:.9rem 2rem;font-size:.95rem}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-loading .btxt{opacity:0}
+.btn-loading::after{content:'';position:absolute;width:17px;height:17px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Login prompt */
+.login-prompt{text-align:center;padding:2rem;background:rgba(201,162,39,.04);border:1px dashed rgba(201,162,39,.2);border-radius:14px;margin:1.5rem 2rem}
+.login-prompt p{font-size:.88rem;color:var(--tx2);margin-bottom:1rem}
+
+/* Toast */
+.toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-70px);z-index:9999;display:flex;align-items:center;gap:.65rem;padding:.85rem 1.5rem;border-radius:12px;font-size:.87rem;font-weight:600;backdrop-filter:blur(16px);min-width:260px;justify-content:center;transition:transform .4s var(--eoe);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-ok{background:rgba(107,124,58,.2);border:1px solid rgba(107,124,58,.4);color:var(--oliveb)}
+.toast-err{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);color:#fca5a5}
+
+/* Status badge */
+.pending-badge{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25);border-radius:50px;padding:.2rem .7rem;font-size:.7rem;font-weight:700;display:inline-flex;align-items:center;gap:.3rem}
+.approved-badge{background:rgba(107,124,58,.15);color:var(--oliveb);border:1px solid rgba(107,124,58,.3);border-radius:50px;padding:.2rem .7rem;font-size:.7rem;font-weight:700}
+
+/* Reveal */
+.rev{opacity:0;transform:translateY(24px);transition:opacity .7s var(--eoe),transform .7s var(--eoe)}
+.rev.vis{opacity:1;transform:translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .martyrs-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .modal-info-grid{grid-template-columns:1fr}
+  .add-form{padding:1.2rem}
+  .add-notice{margin:1rem 1.2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <div style="width:38px;height:38px"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 8px rgba(201,162,39,.4))"></div>
+    <div>
+      <span class="nav-title">شهداء سقبا</span>
+      <span class="nav-sub">ذاكرة لا تُنسى</span>
+    </div>
+  </a>
+  <a href="index.html" class="nav-back">← بوابة سقبا</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-geo">
+    <svg width="700" height="700" viewBox="0 0 700 700" fill="none">
+      <circle cx="350" cy="350" r="320" stroke="#6b7c3a" stroke-width="0.6"/>
+      <circle cx="350" cy="350" r="240" stroke="#c9a227" stroke-width="0.5"/>
+      <circle cx="350" cy="350" r="160" stroke="#6b7c3a" stroke-width="0.5"/>
+      <polygon points="350,40 372,140 460,100 420,190 510,220 420,255 460,350 370,310 350,400 330,310 240,350 280,255 190,220 280,190 240,100 328,140" fill="none" stroke="#c9a227" stroke-width="0.5"/>
+    </svg>
+  </div>
+
+  <div class="hero-badge"><span class="hero-badge-dot"></span>سقبا — ريف دمشق</div>
+
+  <h1 class="hero-title">
+    في ذاكرتنا دائماً
+    <span class="hl">شهداء سقبا</span>
+  </h1>
+
+  <div class="hero-ayah">
+    <div>﴿ وَلَا تَحْسَبَنَّ الَّذِينَ قُتِلُوا فِي سَبِيلِ اللَّهِ أَمْوَاتاً ۚ بَلْ أَحْيَاءٌ عِندَ رَبِّهِمْ يُرْزَقُونَ ﴾</div>
+    <div class="hero-ayah-ref">سورة آل عمران — الآية 169</div>
+  </div>
+
+  <div class="hero-stats">
+    <div><span class="hs-n" id="total-count">—</span><span class="hs-l">شهيد مسجّل</span></div>
+    <div><span class="hs-n" id="year-count">—</span><span class="hs-l">عام استشهاد</span></div>
+    <div><span class="hs-n" id="district-count">—</span><span class="hs-l">حي في المدينة</span></div>
+  </div>
+</section>
+
+<!-- FILTER -->
+<div class="filter-sec">
+  <div class="filter-row rev">
+    <input class="filt-inp" id="search-inp" placeholder="🔍  ابحث باسم الشهيد..." oninput="filterMartyrs()">
+    <select class="filt-sel" id="filter-year" onchange="filterMartyrs()">
+      <option value="">كل السنوات</option>
+    </select>
+    <select class="filt-sel" id="filter-district" onchange="filterMartyrs()">
+      <option value="">كل الأحياء</option>
+      <option>حي الجامع</option><option>حي الميدان</option><option>حي البلد</option>
+      <option>حي الشهداء</option><option>حي النور</option><option>حي الزهراء</option>
+      <option>حي القدس</option><option>حي السلام</option><option>حي الوحدة</option>
+      <option>حي الفرحة</option><option>حي الريحان</option><option>حي الياسمين</option>
+    </select>
+    <span class="results-count" id="results-count"></span>
+  </div>
+</div>
+
+<!-- MARTYRS GRID -->
+<div class="martyrs-sec">
+  <div class="martyrs-grid" id="martyrs-grid">
+    <!-- Skeleton loaders -->
+    <div class="mcard" style="pointer-events:none">
+      <div class="ske" style="height:220px;border-radius:0"></div>
+      <div style="padding:1.4rem">
+        <div class="ske" style="height:18px;margin-bottom:10px"></div>
+        <div class="ske" style="height:12px;width:70%;margin-bottom:7px"></div>
+        <div class="ske" style="height:12px;width:50%"></div>
+      </div>
+    </div>
+    <div class="mcard" style="pointer-events:none">
+      <div class="ske" style="height:220px;border-radius:0"></div>
+      <div style="padding:1.4rem">
+        <div class="ske" style="height:18px;margin-bottom:10px"></div>
+        <div class="ske" style="height:12px;width:70%;margin-bottom:7px"></div>
+        <div class="ske" style="height:12px;width:50%"></div>
+      </div>
+    </div>
+    <div class="mcard" style="pointer-events:none">
+      <div class="ske" style="height:220px;border-radius:0"></div>
+      <div style="padding:1.4rem">
+        <div class="ske" style="height:18px;margin-bottom:10px"></div>
+        <div class="ske" style="height:12px;width:70%;margin-bottom:7px"></div>
+        <div class="ske" style="height:12px;width:50%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MARTYR FORM -->
+<div class="add-sec" id="add-sec">
+  <div class="add-con">
+    <div style="text-align:center;margin-bottom:2.5rem" class="rev">
+      <div style="display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--oliveb);margin-bottom:1rem">
+        <span style="width:28px;height:1px;background:linear-gradient(90deg,var(--olive),transparent);display:inline-block"></span>
+        إضافة شهيد
+      </div>
+      <h2 style="font-family:var(--fd);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--tx1)">سجّل شهيداً من عائلتك</h2>
+      <p style="font-size:.88rem;color:var(--tx3);margin-top:.6rem;max-width:500px;margin-inline:auto;line-height:1.8">يمكنك إضافة معلومات الشهيد وصورته ليبقى ذكره خالداً في سجل مدينة سقبا</p>
+    </div>
+
+    <div class="add-card rev">
+      <div class="add-head">
+        <div class="add-head-title">📋 بيانات الشهيد</div>
+        <div class="add-head-sub">جميع المعلومات ستُراجع من قبل إدارة البوابة قبل النشر لضمان الدقة والاحترام.</div>
+      </div>
+
+      <!-- Login required notice (shown when not logged in) -->
+      <div class="login-prompt" id="login-prompt">
+        <p>يجب تسجيل الدخول كمواطن لإضافة معلومات الشهيد</p>
+        <a href="citizen.html" class="btn btn-olive btn-sm"><span>تسجيل الدخول</span></a>
+      </div>
+
+      <div class="add-notice">
+        <span>⚠️</span>
+        <span>يُرجى التأكد من صحة المعلومات المدخلة. سيتم مراجعة الإضافة من قبل إدارة البوابة قبل نشرها. البيانات الخاطئة أو غير المحترمة ستُحذف فوراً.</span>
+      </div>
+
+      <form class="add-form" id="martyr-form" onsubmit="submitMartyr(event)" style="display:none">
+        <div class="fgrid">
+          <div class="fgrp">
+            <label class="flbl">الاسم الكامل للشهيد <span class="req">*</span></label>
+            <input class="finp" id="m-name" type="text" placeholder="الاسم الثلاثي أو الرباعي" required>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">تاريخ الاستشهاد <span class="req">*</span></label>
+            <input class="finp" id="m-date" type="date" required>
+          </div>
+        </div>
+
+        <div class="fgrid">
+          <div class="fgrp">
+            <label class="flbl">العمر عند الاستشهاد</label>
+            <input class="finp" id="m-age" type="number" placeholder="مثال: 24" min="1" max="100">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">الحي <span class="req">*</span></label>
+            <select class="fsel" id="m-district" required>
+              <option value="">اختر الحي...</option>
+              <option>حي الجامع</option><option>حي الميدان</option><option>حي البلد</option>
+              <option>حي الشهداء</option><option>حي النور</option><option>حي الزهراء</option>
+              <option>حي القدس</option><option>حي السلام</option><option>حي الوحدة</option>
+              <option>حي الفرحة</option><option>حي الريحان</option><option>حي الياسمين</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">طريقة الاستشهاد <span class="req">*</span></label>
+          <select class="fsel" id="m-cause" required>
+            <option value="">اختر...</option>
+            <option>قصف جوي</option>
+            <option>قصف مدفعي</option>
+            <option>قناص</option>
+            <option>تحت التعذيب في المعتقل</option>
+            <option>اشتباك مسلح</option>
+            <option>انفجار عبوة ناسفة</option>
+            <option>حصار وتجويع</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">تفاصيل إضافية عن طريقة الاستشهاد</label>
+          <textarea class="ftxt" id="m-details" placeholder="يمكنك إضافة تفاصيل إضافية عن ظروف الاستشهاد إن أردت..."></textarea>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">صورة الشهيد</label>
+          <div class="photo-upload" id="photo-upload-zone"
+               onclick="document.getElementById('m-photo').click()"
+               ondragover="event.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="handlePhotoDrop(event)">
+            <input type="file" id="m-photo" accept="image/*" onchange="handlePhotoSelect(event)">
+            <div class="photo-upload-ico">📷</div>
+            <div class="photo-upload-txt"><strong>انقر لرفع صورة</strong> أو اسحب وأفلت<br><span style="font-size:.75rem;margin-top:.3rem;display:block">JPG, PNG, WEBP — الحد الأقصى 5MB</span></div>
+          </div>
+          <div class="photo-prev-wrap" id="photo-prev">
+            <img id="photo-prev-img" src="" alt="">
+            <button type="button" class="photo-prev-rm" onclick="clearPhoto()">✕</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.5rem">
+          <button type="submit" class="btn btn-olive btn-lg" id="submit-btn">
+            <span class="btxt">📤 إرسال للمراجعة</span>
+          </button>
+          <button type="reset" class="btn btn-ghost btn-lg" onclick="clearPhoto()">إعادة تعيين</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-inner"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── XSS escape ─── */
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'})};
+const fmtDateShort=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts);return d.getFullYear()};
+
+/* ─── Toast ─── */
+function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(ok?'toast-ok':'toast-err');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
+
+/* ─── Reveal on scroll ─── */
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');ro.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+
+/* ─── Photo upload ─── */
+let selectedPhoto=null;
+function handlePhotoSelect(e){const f=e.target.files[0];if(f)setPhoto(f)}
+function handlePhotoDrop(e){
+  e.preventDefault();
+  document.getElementById('photo-upload-zone').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))setPhoto(f);
+  else toast('يرجى تحديد ملف صورة فقط',false);
+}
+function setPhoto(f){
+  if(f.size>5*1024*1024){toast('حجم الصورة يتجاوز 5MB',false);return}
+  selectedPhoto=f;
+  const url=URL.createObjectURL(f);
+  document.getElementById('photo-prev-img').src=url;
+  document.getElementById('photo-prev').classList.add('show');
+}
+function clearPhoto(){
+  selectedPhoto=null;
+  document.getElementById('m-photo').value='';
+  document.getElementById('photo-prev').classList.remove('show');
+  document.getElementById('photo-prev-img').src='';
+}
+
+/* ─── All martyrs data ─── */
+let allMartyrs=[];
+
+/* ─── Render card ─── */
+function renderCard(m,idx){
+  const year=m.martyrdomDate?new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).getFullYear():'';
+  return `
+  <div class="mcard rev" onclick="openModal('${esc(m.id)}')">
+    <div class="mcard-photo">
+      ${m.photoUrl
+        ?`<img src="${esc(m.photoUrl)}" alt="${esc(m.name)}" loading="lazy">`
+        :`<div class="mcard-photo-placeholder">
+           <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="22" r="12" stroke="#4a7060" stroke-width="2"/><path d="M8 56c0-13.3 10.7-24 24-24s24 10.7 24 24" stroke="#4a7060" stroke-width="2"/></svg>
+           <span>لا توجد صورة</span>
+         </div>`}
+      <div class="mcard-overlay"></div>
+      ${idx<3?`<span class="mcard-rank">⭐ ${idx===0?'الأول':idx===1?'الثاني':'الثالث'}</span>`:''}
+    </div>
+    <div class="mcard-body">
+      <div class="mcard-name">${esc(m.name)}</div>
+      <div class="mcard-meta">
+        ${m.age?`<div class="mcard-row"><span class="mcard-row-icon">👤</span><span class="mcard-row-val">${esc(String(m.age))} عاماً</span></div>`:''}
+        <div class="mcard-row"><span class="mcard-row-icon">📍</span><span class="mcard-row-val">${esc(m.district||'—')}</span></div>
+        <div class="mcard-row"><span class="mcard-row-icon">⚔️</span><span class="mcard-row-val">${esc(m.cause||'—')}</span></div>
+      </div>
+      ${m.details?`<div class="mcard-cause">${esc(m.details)}</div>`:''}
+      <div class="mcard-footer">
+        <span class="mcard-district">🕌 ${esc(m.district||'سقبا')}</span>
+        <span class="mcard-date">${year||'—'}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ─── Open modal ─── */
+function openModal(id){
+  const m=allMartyrs.find(x=>x.id===id);
+  if(!m)return;
+  const year=m.martyrdomDate?new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).getFullYear():'—';
+  const dateStr=m.martyrdomDate?new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—';
+
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="modal-photo" style="position:relative">
+      ${m.photoUrl
+        ?`<img src="${esc(m.photoUrl)}" alt="${esc(m.name)}">`
+        :`<div class="modal-photo-ph"><svg viewBox="0 0 64 64" fill="none" style="width:80px;height:80px"><circle cx="32" cy="22" r="12" stroke="#4a7060" stroke-width="2"/><path d="M8 56c0-13.3 10.7-24 24-24s24 10.7 24 24" stroke="#4a7060" stroke-width="2"/></svg></div>`}
+      <div class="modal-photo-overlay"></div>
+      <div class="modal-photo-name">${esc(m.name)}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">المعلومات الأساسية</div>
+        <div class="modal-info-grid">
+          <div class="modal-info-item"><div class="modal-info-key">الاسم الكامل</div><div class="modal-info-val">${esc(m.name)}</div></div>
+          <div class="modal-info-item"><div class="modal-info-key">تاريخ الاستشهاد</div><div class="modal-info-val">${esc(dateStr)}</div></div>
+          ${m.age?`<div class="modal-info-item"><div class="modal-info-key">العمر</div><div class="modal-info-val">${esc(String(m.age))} عاماً</div></div>`:''}
+          <div class="modal-info-item"><div class="modal-info-key">الحي</div><div class="modal-info-val">🕌 ${esc(m.district||'—')}</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">طريقة الاستشهاد</div>
+        <div class="modal-tags"><span class="modal-tag">⚔️ ${esc(m.cause||'—')}</span></div>
+      </div>
+      ${m.details?`
+      <div class="modal-section">
+        <div class="modal-section-title">التفاصيل</div>
+        <div class="modal-cause-text">${esc(m.details)}</div>
+      </div>`:''}
+      <div style="text-align:center;padding:1rem 0;font-family:var(--fd);font-size:1rem;color:var(--tx3);font-style:italic">
+        رحمه الله وأسكنه فسيح جناته
+      </div>
+    </div>`;
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ─── Filter ─── */
+function filterMartyrs(){
+  const q=document.getElementById('search-inp').value.toLowerCase();
+  const yr=document.getElementById('filter-year').value;
+  const dist=document.getElementById('filter-district').value;
+  const filtered=allMartyrs.filter(m=>{
+    const matchName=!q||m.name.toLowerCase().includes(q);
+    const matchYr=!yr||(m.martyrdomDate&&new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).getFullYear()===parseInt(yr));
+    const matchDist=!dist||m.district===dist;
+    return matchName&&matchYr&&matchDist;
+  });
+  renderMartyrs(filtered);
+  document.getElementById('results-count').textContent=filtered.length?`${filtered.length} شهيد`:'';
+}
+
+function renderMartyrs(data){
+  const grid=document.getElementById('martyrs-grid');
+  if(!data.length){
+    grid.innerHTML=`<div class="empty"><div class="empty-ico">🕊️</div><div class="empty-title">لا توجد نتائج</div><div style="font-size:.82rem;margin-top:.3rem">جرّب تغيير معايير البحث</div></div>`;
+    return;
+  }
+  grid.innerHTML=data.map((m,i)=>renderCard(m,i)).join('');
+  document.querySelectorAll('.mcard.rev').forEach(el=>ro.observe(el));
+}
+
+/* ─── Stats ─── */
+function updateStats(){
+  document.getElementById('total-count').textContent=allMartyrs.length.toLocaleString('ar');
+  const years=new Set(allMartyrs.map(m=>m.martyrdomDate?new Date(m.martyrdomDate.seconds?m.martyrdomDate.seconds*1000:m.martyrdomDate).getFullYear():'').filter(Boolean));
+  const districts=new Set(allMartyrs.map(m=>m.district).filter(Boolean));
+  document.getElementById('year-count').textContent=[...years].length.toLocaleString('ar');
+  document.getElementById('district-count').textContent=[...districts].length.toLocaleString('ar');
+
+  // Populate year filter
+  const sel=document.getElementById('filter-year');
+  const sorted=[...years].sort((a,b)=>b-a);
+  sorted.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o)});
+}
+
+/* ─── Submit martyr ─── */
+async function submitMartyr(e){
+  e.preventDefault();
+  if(!window.currentUser){toast('يجب تسجيل الدخول أولاً',false);return}
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.classList.add('btn-loading');
+  try{
+    await window.MartyrService.addMartyr({
+      name:     document.getElementById('m-name').value,
+      martyrdomDate: document.getElementById('m-date').value,
+      age:      parseInt(document.getElementById('m-age').value)||null,
+      district: document.getElementById('m-district').value,
+      cause:    document.getElementById('m-cause').value,
+      details:  document.getElementById('m-details').value,
+      submittedBy: window.currentUser.uid,
+    }, selectedPhoto);
+    toast('تم إرسال الإضافة بنجاح — ستظهر بعد مراجعة الإدارة 🕊️');
+    document.getElementById('martyr-form').reset();
+    clearPhoto();
+  }catch(err){toast('حدث خطأ في الإرسال',false);console.error(err)}
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+
+/* ─── Auth state ─── */
+document.addEventListener('userLoggedIn',()=>{
+  document.getElementById('login-prompt').style.display='none';
+  document.getElementById('martyr-form').style.display='block';
+});
+document.addEventListener('userLoggedOut',()=>{
+  document.getElementById('login-prompt').style.display='block';
+  document.getElementById('martyr-form').style.display='none';
+});
+</script>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+import { initializeApp }     from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
+import { getAuth, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs,
+         query, orderBy, where, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js';
+
+/* ─── استبدل بإعداداتك ─── */
+const firebaseConfig = {
+  apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
+  authDomain:        'saqba-portal.firebaseapp.com',
+  projectId:         'saqba-portal',
+  storageBucket:     'saqba-portal.firebasestorage.app',
+  messagingSenderId: '135534184893',
+  appId:             '1:135534184893:web:87feb3535016b650052ad4',
+};
+
+try {
+  const app     = initializeApp(firebaseConfig);
+  const auth    = getAuth(app);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
+
+  /* Auth state */
+  onAuthStateChanged(auth, user => {
+    window.currentUser = user ?? null;
+    document.dispatchEvent(new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user }));
+  });
+
+  /* Martyr Service */
+  window.MartyrService = {
+    async loadMartyrs() {
+      /* فقط الشهداء المقبولين (status=approved) تظهر للعامة */
+      const q    = query(collection(db,'martyrs'), where('status','==','approved'), orderBy('martyrdomDate','desc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+    async addMartyr(data, photoFile) {
+      let photoUrl = null;
+      if (photoFile) {
+        /* ضغط الصورة قبل الرفع */
+        const compressed = await compressImage(photoFile, 800, 800, 0.82);
+        const r = sRef(storage, `martyrs/${Date.now()}_${compressed.name}`);
+        await uploadBytes(r, compressed);
+        photoUrl = await getDownloadURL(r);
+      }
+      return addDoc(collection(db,'martyrs'), {
+        ...data,
+        photoUrl,
+        status:    'pending',   /* تنتظر موافقة الإدارة */
+        createdAt: serverTimestamp(),
+      });
+    },
+  };
+
+  /* تحميل الشهداء */
+  try {
+    allMartyrs = await window.MartyrService.loadMartyrs();
+  } catch(e) { allMartyrs = []; }
+
+  updateStats();
+  renderMartyrs(allMartyrs);
+
+} catch(e) {
+  console.log('Firebase not configured — demo mode');
+  updateStats();
+  document.getElementById('martyrs-grid').innerHTML =
+    `<div class="empty" style="grid-column:1/-1">
+       <div class="empty-ico">⚙️</div>
+       <div class="empty-title">يتطلب إعداد Firebase</div>
+       <div style="font-size:.82rem;margin-top:.4rem">أضف إعدادات Firebase لعرض الشهداء</div>
+     </div>`;
+}
+
+/* ─── Image compressor ─── */
+function compressImage(file, maxW, maxH, quality) {
+  return new Promise(resolve => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      if(w > maxW || h > maxH) { const r=Math.min(maxW/w,maxH/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      const type = file.type==='image/png'?'image/png': file.type==='image/webp'?'image/webp':'image/jpeg';
+      c.toBlob(blob=>resolve(new File([blob], file.name, {type})), type, quality);
+    };
+    img.src = url;
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>نظام توزيع الغاز — بوابة سقبا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b1410;--deep:#0e1912;--abyss:#111e15;
+  --t9:#132818;--t8:#183520;--t7:#1e4228;--t2:#4e9e62;--t1:#84c995;
+  --gold:#c9a227;--goldb:#e8c547;--goldd:#8a6d18;--goldg:rgba(201,162,39,.35);
+  --cyan:#5cb870;--red:#ef4444;--redf:rgba(239,68,68,.12);--redb:rgba(239,68,68,.28);
+  --tx1:#eef7f8;--tx2:#9bbfc5;--tx3:#4d7e87;
+  --glass:rgba(8,34,40,.65);--glbr:rgba(92,184,112,.16);--bd:rgba(92,184,112,.08);
+  --fb:'Tajawal',sans-serif;--fd:'Amiri',serif;
+  --eoe:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;width:100%}
+body{font-family:var(--fb);background:var(--ink);color:var(--tx1);direction:rtl;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--ink)}::-webkit-scrollbar-thumb{background:var(--t7);border-radius:99px}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;opacity:.5}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:opacity .5s}
+#loader.hide{opacity:0;pointer-events:none}
+.loader-eagle{width:70px;height:70px;animation:spin 2s linear infinite;filter:drop-shadow(0 0 20px rgba(201,162,39,.5))}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(11,20,16,.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(92,184,112,.1);padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.nav-logo{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(201,162,39,.4))}
+.nav-title{font-family:var(--fd);font-size:.95rem;color:var(--goldb);display:block}
+.nav-sub{font-size:.62rem;color:var(--tx3);letter-spacing:.08em;display:flex;align-items:center;gap:.3rem}
+.nav-dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 6px var(--cyan)}50%{opacity:.5}}
+.nav-back{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--tx3);text-decoration:none;padding:.4rem .85rem;border:1px solid var(--bd);border-radius:7px;background:rgba(0,0,0,.2);transition:all .25s}
+.nav-back:hover{color:var(--t2);border-color:rgba(92,184,112,.25)}
+#logout-btn{display:none;align-items:center;gap:.4rem;font-size:.8rem;color:#fca5a5;padding:.4rem .85rem;border:1px solid rgba(239,68,68,.2);border-radius:7px;background:rgba(239,68,68,.06);cursor:pointer;font-family:var(--fb);transition:all .25s}
+#logout-btn:hover{background:rgba(239,68,68,.12)}
+
+/* MAIN */
+.page{min-height:100vh;position:relative;z-index:1}
+.wrap{max-width:520px;margin:0 auto;padding:2rem 1.2rem 5rem}
+
+/* CARD */
+.card{background:rgba(8,34,40,.7);backdrop-filter:blur(16px);border:1px solid rgba(92,184,112,.14);border-radius:22px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);animation:rise .7s var(--eoe) forwards;opacity:0}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.card-head{padding:1.3rem 1.6rem;border-bottom:1px solid rgba(92,184,112,.08);background:rgba(0,0,0,.2);display:flex;align-items:center;gap:.75rem}
+.card-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.ci-gold{background:rgba(201,162,39,.15);border:1px solid rgba(201,162,39,.2)}
+.ci-green{background:rgba(92,184,112,.1);border:1px solid rgba(92,184,112,.2)}
+.ci-red{background:var(--redf);border:1px solid var(--redb)}
+.card-title{font-size:.92rem;font-weight:700;color:var(--tx1)}
+.card-body{padding:1.6rem}
+
+/* FORMS */
+.fgrp{margin-bottom:1.1rem}
+.flbl{display:block;font-size:.8rem;font-weight:600;color:var(--tx3);margin-bottom:.4rem}
+.flbl .req{color:var(--goldb);margin-right:2px}
+.finp,.fsel{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(92,184,112,.12);border-radius:9px;padding:.72rem 1rem;color:var(--tx1);font-family:var(--fb);font-size:.9rem;outline:none;transition:all .25s;direction:rtl}
+.finp:focus,.fsel:focus{border-color:var(--cyan);background:rgba(92,184,112,.05);box-shadow:0 0 0 3px rgba(92,184,112,.12)}
+.finp::placeholder{color:var(--tx3)}
+.fsel option{background:var(--t8)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:480px){.fgrid{grid-template-columns:1fr}}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.6rem;border-radius:9px;font-family:var(--fb);font-size:.9rem;font-weight:700;cursor:pointer;border:none;outline:none;transition:all .25s var(--eoe);white-space:nowrap;text-decoration:none;position:relative;overflow:hidden;width:100%}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--goldd));color:#050e10;box-shadow:0 4px 20px var(--goldg)}
+.btn-gold::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--goldb),var(--gold));opacity:0;transition:.25s}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,162,39,.5)}
+.btn-gold:hover::before{opacity:1}
+.btn-gold span{position:relative;z-index:1}
+.btn-green{background:linear-gradient(135deg,#2d7a3f,#1e5a2d);color:#e8f5eb;box-shadow:0 4px 18px rgba(45,122,63,.3)}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(45,122,63,.5)}
+.btn-ghost{background:rgba(92,184,112,.06);color:var(--t2);border:1px solid var(--bd)}
+.btn-ghost:hover{background:rgba(92,184,112,.12)}
+.btn-danger{background:var(--redf);color:#fca5a5;border:1px solid var(--redb)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-sm{padding:.42rem .85rem;font-size:.78rem;border-radius:7px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-loading .btxt{opacity:0}
+.btn-loading::after{content:'';position:absolute;width:17px;height:17px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* UPLOAD ZONE */
+.upzone{border:2px dashed rgba(92,184,112,.2);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .3s;background:rgba(92,184,112,.02);position:relative}
+.upzone:hover,.upzone.done{border-color:var(--cyan);background:rgba(92,184,112,.06)}
+.upzone input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upzone-ico{font-size:1.8rem;margin-bottom:.4rem;color:var(--tx3);transition:.3s}
+.upzone.done .upzone-ico{color:var(--t2)}
+.upzone-txt{font-size:.8rem;color:var(--tx3);transition:.3s}
+.upzone.done .upzone-txt{color:var(--t2);font-weight:600}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:.24rem .7rem;border-radius:50px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.b-pending{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.b-verified{background:rgba(92,184,112,.12);color:var(--t2);border:1px solid rgba(92,184,112,.25)}
+.b-cooldown{background:var(--redf);color:#fca5a5;border:1px solid var(--redb)}
+
+/* TICKET CARD */
+.ticket-card{background:linear-gradient(145deg,rgba(92,184,112,.08),rgba(201,162,39,.04),rgba(0,0,0,.2));border:1px solid rgba(201,162,39,.3);border-radius:20px;padding:2rem;text-align:center;position:relative;overflow:hidden}
+.ticket-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),var(--gold),transparent);background-size:200% 100%;animation:sweep 3s linear infinite}
+@keyframes sweep{0%{background-position:-100% 0}100%{background-position:200% 0}}
+
+/* QR */
+.qr-wrap{width:170px;height:170px;margin:0 auto 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(92,184,112,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.qr-scan{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(92,184,112,.8);box-shadow:0 0 10px var(--cyan);animation:scan 2s infinite}
+@keyframes scan{0%{top:0}50%{top:100%}100%{top:0}}
+
+/* COOLDOWN */
+.cooldown-timer{background:rgba(0,0,0,.5);border-radius:16px;padding:1.5rem;text-align:center;display:inline-block;min-width:180px}
+
+/* TOAST */
+.toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-70px);z-index:9999;display:flex;align-items:center;gap:.65rem;padding:.85rem 1.5rem;border-radius:13px;font-size:.87rem;font-weight:600;backdrop-filter:blur(20px);min-width:260px;justify-content:center;transition:transform .4s var(--eoe);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-ok{background:rgba(92,184,112,.18);border:1px solid rgba(92,184,112,.4);color:var(--t1)}
+.toast-err{background:var(--redf);border:1px solid var(--redb);color:#fca5a5}
+
+/* NOTICE */
+.notice{background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.18);border-radius:10px;padding:.9rem 1.1rem;font-size:.8rem;color:var(--tx2);line-height:1.75;margin-bottom:1.2rem;display:flex;gap:.65rem}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.stat{background:rgba(8,34,40,.8);border:1px solid rgba(92,184,112,.12);border-radius:14px;padding:1.2rem;text-align:center}
+.stat-n{font-size:2rem;font-weight:900;color:var(--goldb);line-height:1}
+.stat-l{font-size:.72rem;color:var(--tx3);margin-top:.3rem}
+
+/* ADMIN CARD */
+.acard{background:rgba(255,255,255,.025);border:1px solid rgba(92,184,112,.1);border-radius:12px;padding:1.2rem;margin-bottom:.85rem;transition:border-color .25s}
+.acard:hover{border-color:rgba(92,184,112,.25)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.8rem 0}
+.info-item{background:rgba(0,0,0,.25);border-radius:8px;padding:.6rem .8rem}
+.info-key{font-size:.68rem;color:var(--tx3);margin-bottom:.15rem}
+.info-val{font-size:.8rem;font-weight:600;color:var(--tx1);font-family:monospace}
+.acts{display:flex;gap:.5rem;margin-top:.85rem}
+
+/* TABS */
+.tabs{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:10px;padding:.25rem;gap:.2rem;margin-bottom:1.2rem}
+.tabbtn{flex:1;padding:.55rem 1rem;border:none;border-radius:7px;background:transparent;color:var(--tx3);font-family:var(--fb);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .25s}
+.tabbtn.on{background:linear-gradient(135deg,var(--gold),var(--goldd));color:#050e10;box-shadow:0 2px 10px var(--goldg)}
+
+/* VIEWS */
+.view{display:none;animation:fadein .3s ease}
+.view.on{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB4ADgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDy6xlxjNb9hN05rlLWUg9a27GbpzWRgjrLOfpzV9ZgR1rnbWYgVdS4IHWpaKNOSQYrNv5sA80j3Bxyazb2ctnmhIChqEp5OaKo30uT1oqhNmNa7h1rYsN2OlU7SHOMjNbdlCOKBItWxbGMVaG/HSpbWFeKvpbqR0pNlGVL5mzGKzblZSDxXTPbjGMVnX1vgHAoTA5C7D5ORRWhfQUUyWipYzKMDFbli8Rxk1xttP71sWN0fWgEztrOSHjmtBZYcdRXJWVxJI6xxozs3RVGSfwrSVbv+zf7R8pha+f9n83PHmYzt+uOcVLsUjZkliweRWdfTQ4OTVC4uJImMcisjr1Vhgj8Kzbu74PNNIA1CaPPGKKxLu5JzzRTJbOft5eRXQeH7V76U/vPLiTG98ZPPRVH8THsB9egJrmNPe3a7hW6e4WFmAYwReZJ9FXua9SjNj/ZsenQW/kQoylYg4Zkk6jeRwZT3/uisK9b2ei3NaNL2mpSiukgsv7V0OW8sLyyuEXzI7kSHa8bYc4UbeRgdQdw6EVqvoekSeAj4hsNbvribzRH5TxmJCRw0mwjgjsf4uTwOKyHTUrW6Wa1t3mB+QTW8+GkDMeJFPDA4wO+M5z1qL+150J366zoqbYrVY2+YNnoMBQB1w3Bx9ax9o3Zo15Erpmgkv2u0XUdYkvr+8vLgo0zzbTsVVBcDB3cnBxgDafU4xPENs9hPgSiaByfLlAxnHUEdVYdwfr0INbaRXAuHuZ182XdtEt4Tuh2nAZVDFTtJHGMDk9DU89xbNYSWV0j3MbsSySygO7jrtY9JR27MMUvrHK/Ir6u5LzPPLibOeaKp6jLbfaZFtXnaIMQvnxeW49ivY0V3LVXOJ6MyAwZSrdDwa3NI8Tmxso7SSCWTy/lVLeNY0jQ9cEnLO3djXNK9TI4qalOM1aRVOpKm7o7iDxHqd1Et2bdNPskdjM8biSZsgIFjXqMKdoODjcTxxVvz7cMSdIBQr5Rtw/HlY27Qc/e6D6968/gunsrlbu3jjaZchWcZ2Z6kDpn68VqHxOn2XaLKTzfMxs39ItuB8397PPSuWpQafuLQ6qdeLXvvU3p/EWq2cDXfkw6lZSurQyyuI5QNuwrIvU5UYJwMlc81jar4mk1GzazSCWLzPldJ1WWORB03dw69mFY01093ctd3EcSztjcYxgNjuR6/pTWkraOHgrNrUxliJbJ6EpYIoVegGBRVYyUVuYFUGnqxFR04U2hEu+kzznFNFFFgHbqQtSUlAATRSYooAQU9VNNBFSoRSYCBaUindqbzmgBMUhFSZFN4oAjwc0U4kUUwIs09TRRQwHA0E0UUAGaTNFFADaKKKAP/9k=" class="loader-eagle" alt="">
+  <div style="font-size:.82rem;color:var(--tx3);font-family:var(--fb)">جاري الاتصال بقاعدة البيانات...</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <img src="data:image/jpeg;base64,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" class="nav-logo" alt="سقبا">
+    <div>
+      <span class="nav-title">نظام الغاز</span>
+      <span class="nav-sub"><span class="nav-dot"></span>متصل بالسيرفر</span>
+    </div>
+  </a>
+  <div style="display:flex;gap:.5rem;align-items:center">
+    <a href="index.html" class="nav-back">← البوابة</a>
+    <button id="logout-btn" onclick="doLogout()">خروج ⇐</button>
+  </div>
+</nav>
+
+<div class="page">
+<div class="wrap">
+
+  <!-- VIEW: LOGIN -->
+  <div id="v-login" class="view on">
+    <div style="text-align:center;margin-bottom:2rem;padding-top:1rem">
+      <img src="data:image/jpeg;base64,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" style="width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 0 24px rgba(201,162,39,.4));margin-bottom:1rem">
+      <div style="font-family:var(--fd);font-size:1.8rem;font-weight:700;color:var(--tx1);margin-bottom:.3rem">نظام توزيع الغاز</div>
+      <div style="font-size:.83rem;color:var(--tx3)">مدينة سقبا — النظام الإلكتروني الموحد</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-icon ci-gold">🔑</div><span class="card-title">تسجيل الدخول</span></div>
+      <div class="card-body">
+        <form onsubmit="doLogin(event)">
+          <div class="fgrp">
+            <label class="flbl">الرقم الوطني <span class="req">*</span></label>
+            <input class="finp" id="login-id" type="text" placeholder="أدخل رقمك الوطني" dir="ltr" style="text-align:center;font-family:monospace;font-size:1.1rem;letter-spacing:.08em" required>
+          </div>
+          <button type="submit" class="btn btn-gold" id="login-btn">
+            <span class="btxt">🔐 دخول للنظام</span>
+          </button>
+        </form>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--bd);text-align:center">
+          <button onclick="showView('v-register')" class="btn btn-ghost" style="font-size:.85rem">
+            ➕ تسجيل عائلة جديدة
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: REGISTER -->
+  <div id="v-register" class="view">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon ci-green">📋</div>
+        <div>
+          <div class="card-title">تسجيل عائلة جديدة</div>
+          <div style="font-size:.72rem;color:var(--tx3);margin-top:.1rem">البيانات ترسل للإدارة للمراجعة</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="notice">
+          <span>⚠️</span>
+          <span>أدخل رقم هاتف <strong>حقيقي وفعّال</strong> — ستتواصل الإدارة معك على هذا الرقم عند الحاجة</span>
+        </div>
+        <form onsubmit="doRegister(event)">
+          <div class="fgrp">
+            <label class="flbl">الاسم الثلاثي (رب الأسرة) <span class="req">*</span></label>
+            <input class="finp" id="reg-name" type="text" placeholder="محمد أحمد علي" required>
+          </div>
+          <div class="fgrid">
+            <div class="fgrp">
+              <label class="flbl">الرقم الوطني <span class="req">*</span></label>
+              <input class="finp" id="reg-natid" type="text" dir="ltr" style="font-family:monospace" pattern="[0-9]+" required>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">رقم دفتر العائلة <span class="req">*</span></label>
+              <input class="finp" id="reg-famid" type="text" dir="ltr" style="font-family:monospace" pattern="[0-9]+" required>
+            </div>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">رقم الهاتف <span class="req">*</span></label>
+            <input class="finp" id="reg-phone" type="tel" placeholder="09XXXXXXXX" dir="ltr" pattern="[0-9]+" required>
+          </div>
+          <div class="fgrid" style="margin-bottom:1.2rem">
+            <div class="upzone" id="uz-book" onclick="document.getElementById('f-book').click()">
+              <input type="file" id="f-book" accept="image/*" onchange="setUpload('uz-book','📷','✅ تم الإرفاق')">
+              <div class="upzone-ico" id="ui-book">📷</div>
+              <div class="upzone-txt" id="ut-book">صورة دفتر العائلة</div>
+            </div>
+            <div class="upzone" id="uz-proof" onclick="document.getElementById('f-proof').click()">
+              <input type="file" id="f-proof" accept="image/*" onchange="setUpload('uz-proof','📄','✅ تم الإرفاق')">
+              <div class="upzone-ico" id="ui-proof">📄</div>
+              <div class="upzone-txt" id="ut-proof">إثبات السكن</div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-green" id="reg-btn">
+            <span class="btxt">📤 إرسال البيانات للمراجعة</span>
+          </button>
+          <button type="button" onclick="showView('v-login')" class="btn btn-ghost" style="margin-top:.6rem;font-size:.82rem">
+            → العودة لتسجيل الدخول
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: CITIZEN DASHBOARD -->
+  <div id="v-citizen" class="view">
+    <!-- User info bar -->
+    <div style="background:rgba(8,34,40,.7);border:1px solid var(--bd);border-radius:14px;padding:1rem 1.3rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--goldd));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">👤</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.9rem;font-weight:700;color:var(--tx1)" id="c-name">...</div>
+        <div style="font-size:.72rem;color:var(--tx3)">رقم وطني: <span id="c-natid" style="font-family:monospace;color:var(--tx2)">...</span></div>
+      </div>
+      <span id="c-status-badge" class="badge b-pending">قيد المراجعة</span>
+    </div>
+
+    <!-- Dynamic content based on gasStatus -->
+    <div id="citizen-content"></div>
+  </div>
+
+  <!-- VIEW: ADMIN DASHBOARD -->
+  <div id="v-admin" class="view">
+    <div style="font-family:var(--fd);font-size:1.4rem;font-weight:700;color:var(--tx1);margin-bottom:.3rem">لوحة الإدارة</div>
+    <div style="font-size:.8rem;color:var(--tx3);margin-bottom:1.5rem">إدارة طلبات الغاز والعائلات</div>
+
+    <div class="stats" id="admin-stats">
+      <div class="stat"><div class="stat-n" id="st-total">0</div><div class="stat-l">إجمالي العائلات</div></div>
+      <div class="stat"><div class="stat-n" id="st-pending" style="color:#fbbf24">0</div><div class="stat-l">بانتظار التدقيق</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tabbtn on" onclick="adminTab('pending',this)">⏳ بانتظار التدقيق</button>
+      <button class="tabbtn" onclick="adminTab('all',this)">📋 جميع العائلات</button>
+    </div>
+
+    <div id="admin-list"></div>
+  </div>
+
+  <!-- VIEW: DISTRIBUTOR DASHBOARD -->
+  <div id="v-distributor" class="view">
+    <div class="card">
+      <div class="card-head"><div class="card-icon ci-green">📦</div><span class="card-title">واجهة الموزع المعتمد</span></div>
+      <div class="card-body">
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:.5rem">📲</div>
+          <div style="font-size:.85rem;color:var(--tx3)">أدخل رقم التذكرة أو الرقم الوطني لتأكيد التسليم</div>
+        </div>
+        <form onsubmit="doDeliver(event)">
+          <div class="fgrp">
+            <input class="finp" id="scan-code" type="text" placeholder="GAS-1234 أو الرقم الوطني..." dir="ltr" style="text-align:center;font-family:monospace;font-size:1.1rem;letter-spacing:.05em" required>
+          </div>
+          <button type="submit" class="btn btn-green" id="deliver-btn">
+            <span class="btxt">✅ تأكيد التسليم وتفعيل عداد الحظر</span>
+          </button>
+        </form>
+        <div class="notice" style="margin-top:1rem">
+          <span>⚠️</span>
+          <span>بمجرد التأكيد يُحرق الرمز وتبدأ فترة المنع <strong>(20 يوم)</strong> فوراً في حساب المواطن.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+</div><!-- /page -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const COOLDOWN_DAYS = 20;
+
+let dbUsers={}, currentId=null, currentRole=null;
+
+/* Toast */
+function toast(msg,ok=true){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast '+(ok?'toast-ok':'toast-err');
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* Views */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+/* Upload zones */
+function setUpload(zoneId, ico, txt){
+  const z=document.getElementById(zoneId);
+  z.classList.add('done');
+  z.querySelector('.upzone-ico').textContent=ico==='📷'?'✅':'✅';
+  z.querySelector('.upzone-txt').textContent=txt;
+}
+
+/* Logout */
+function doLogout(){
+  currentId=null; currentRole=null;
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('login-id').value='';
+  showView('v-login');
+}
+
+/* LOGIN */
+async function doLogin(e){
+  e.preventDefault();
+  const id=document.getElementById('login-id').value.trim();
+  const btn=document.getElementById('login-btn');
+  if(!id)return;
+  btn.disabled=true;btn.classList.add('btn-loading');
+
+  // انتظر حتى يتحمل البيانات
+  let attempts=0;
+  while(Object.keys(dbUsers).length===0 && attempts<20){
+    await new Promise(r=>setTimeout(r,200));
+    attempts++;
+  }
+
+  const user=dbUsers[id];
+  if(!user){
+    toast('الرقم الوطني غير مسجل — أنشئ حساباً أولاً',false);
+    btn.disabled=false;btn.classList.remove('btn-loading');
+    return;
+  }
+
+  currentId=id;
+  currentRole=user.role||'citizen';
+  document.getElementById('logout-btn').style.display='flex';
+
+  if(currentRole==='admin'){
+    toast('أهلاً — صلاحيات الإدارة');
+    renderAdmin();
+    showView('v-admin');
+  } else if(currentRole==='distributor'){
+    toast('أهلاً — واجهة الموزع');
+    showView('v-distributor');
+  } else {
+    toast(`أهلاً بعائلة ${esc(user.name)}`);
+    renderCitizen(user);
+    showView('v-citizen');
+  }
+
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+
+/* REGISTER */
+async function doRegister(e){
+  e.preventDefault();
+  const btn=document.getElementById('reg-btn');
+  const name=document.getElementById('reg-name').value.trim();
+  const natId=document.getElementById('reg-natid').value.trim();
+  const famId=document.getElementById('reg-famid').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
+
+  if(dbUsers[natId]){toast('الرقم الوطني مسجل مسبقاً!',false);return}
+  if(Object.values(dbUsers).some(u=>u.familyBookId===famId)){
+    toast('رقم دفتر العائلة مستخدم مسبقاً — يمنع التكرار!',false);return;
+  }
+
+  btn.disabled=true;btn.classList.add('btn-loading');
+  try{
+    await window._setDoc(natId,{
+      nationalId:natId, familyBookId:famId, name, phone,
+      role:'citizen', status:'pending', gasStatus:'none',
+      lastReceived:null, ticket:null,
+      createdAt:new Date().toISOString()
+    });
+    toast('تم التسجيل بنجاح — حسابك قيد المراجعة 🎉');
+    document.getElementById('login-id').value=natId;
+    showView('v-login');
+  }catch(err){toast('خطأ في إرسال البيانات',false);console.error(err)}
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+
+/* CITIZEN RENDER */
+function renderCitizen(user){
+  const el=document.getElementById('citizen-content');
+  document.getElementById('c-name').textContent=user.name;
+  document.getElementById('c-natid').textContent=user.nationalId;
+
+  // Status badge
+  const sb=document.getElementById('c-status-badge');
+  if(user.status==='verified'){sb.className='badge b-verified';sb.textContent='✅ موثّق'}
+  else{sb.className='badge b-pending';sb.textContent='⏳ قيد المراجعة'}
+
+  if(user.status==='pending'){
+    el.innerHTML=`
+      <div class="card" style="border-color:rgba(251,191,36,.25)">
+        <div class="card-body" style="text-align:center;padding:2.5rem 2rem">
+          <div style="font-size:3rem;margin-bottom:1rem">⏳</div>
+          <div style="font-family:var(--fd);font-size:1.5rem;color:var(--goldb);margin-bottom:.6rem">حسابك قيد المراجعة</div>
+          <div style="font-size:.85rem;color:var(--tx3);line-height:1.85;background:rgba(201,162,39,.05);border:1px solid rgba(201,162,39,.12);border-radius:10px;padding:1rem">
+            تقوم الإدارة بمطابقة بياناتك ومراجعة المستندات.<br>
+            <strong style="color:var(--goldb);display:block;margin-top:.5rem">📞 سنتواصل معك على (${esc(user.phone||'—')}) إن لزم الأمر.</strong>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const gs=user.gasStatus||'none';
+  let html='';
+
+  if(gs==='eligible'){
+    html=`
+      <div class="card" style="border-color:rgba(92,184,112,.3)">
+        <div class="card-body" style="text-align:center;padding:2.5rem 2rem;position:relative;overflow:hidden">
+          <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(92,184,112,.08),transparent 70%);pointer-events:none"></div>
+          <div style="font-size:3rem;margin-bottom:1rem">🔥</div>
+          <div style="font-family:var(--fd);font-size:1.6rem;font-weight:700;color:var(--t1);margin-bottom:.5rem">دورك متاح الآن</div>
+          <div style="font-size:.85rem;color:var(--tx3);margin-bottom:1.5rem">يمكنك حجز أسطوانة غاز منزلي والحصول على التذكرة</div>
+          <button onclick="doBookGas()" class="btn btn-green">
+            <span class="btxt">✅ تأكيد الحجز وإصدار التذكرة</span>
+          </button>
+        </div>
+      </div>`;
+
+  } else if(gs==='booked' && user.ticket){
+    html=`
+      <div class="ticket-card">
+        <div style="font-size:.72rem;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1rem">تذكرة الغاز الإلكترونية</div>
+        <div class="qr-wrap">
+          <div class="qr-scan"></div>
+          <svg width="140" height="140" viewBox="0 0 140 140" fill="none">
+            <rect x="8" y="8" width="40" height="40" rx="3" fill="none" stroke="var(--t2)" stroke-width="2.5"/>
+            <rect x="15" y="15" width="26" height="26" rx="1" fill="var(--t2)" opacity=".25"/>
+            <rect x="92" y="8" width="40" height="40" rx="3" fill="none" stroke="var(--t2)" stroke-width="2.5"/>
+            <rect x="99" y="15" width="26" height="26" rx="1" fill="var(--t2)" opacity=".25"/>
+            <rect x="8" y="92" width="40" height="40" rx="3" fill="none" stroke="var(--t2)" stroke-width="2.5"/>
+            <rect x="15" y="99" width="26" height="26" rx="1" fill="var(--t2)" opacity=".25"/>
+            <rect x="58" y="10" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="67" y="10" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="58" y="19" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="76" y="10" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="67" y="28" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="10" y="58" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="19" y="67" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="58" y="58" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="67" y="67" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="76" y="58" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="85" y="67" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="94" y="58" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="58" y="76" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="76" y="85" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="112" y="58" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="58" y="94" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="67" y="103" width="6" height="6" rx="1" fill="var(--goldb)"/>
+            <rect x="94" y="94" width="6" height="6" rx="1" fill="var(--t2)"/>
+            <rect x="112" y="103" width="6" height="6" rx="1" fill="var(--goldb)"/>
+          </svg>
+        </div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-bottom:.4rem">رقم التذكرة</div>
+        <div style="font-size:1.6rem;font-weight:900;color:var(--t2);font-family:monospace;letter-spacing:.08em;background:rgba(0,0,0,.3);border-radius:8px;padding:.5rem 1.2rem;display:inline-block;margin-bottom:1rem">${esc(user.ticket)}</div>
+        <div style="font-size:.78rem;color:var(--tx2);background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.15);border-radius:9px;padding:.8rem;line-height:1.7">
+          ⚠️ أبرز هذه الشاشة للموزع المعتمد.<br>
+          <strong style="color:var(--goldb)">فترة الـ 20 يوم تبدأ فقط بعد مسح الرمز واستلامك الفعلي.</strong>
+        </div>
+      </div>`;
+
+  } else if(gs==='cooldown'){
+    const last=user.lastReceived?new Date(user.lastReceived):null;
+    const diffDays=last?Math.ceil(Math.abs(new Date()-last)/86400000):0;
+    const remaining=Math.max(0, COOLDOWN_DAYS-diffDays);
+
+    if(remaining<=0){
+      // انتهى الحظر — حدّث تلقائياً
+      window._updateStatus(user.nationalId,{gasStatus:'eligible'}).catch(()=>{});
+      renderCitizen({...user,gasStatus:'eligible'});
+      return;
+    }
+
+    html=`
+      <div class="card" style="border-color:rgba(239,68,68,.25)">
+        <div class="card-body" style="text-align:center;padding:2.5rem 2rem">
+          <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+          <div style="font-family:var(--fd);font-size:1.4rem;color:#fca5a5;margin-bottom:.5rem">النظام مقفل مؤقتاً</div>
+          <div style="font-size:.83rem;color:var(--tx3);margin-bottom:1.5rem">لقد استلمت مخصصاتك — يرجى الانتظار لتحقيق العدالة بين الجميع</div>
+          <div class="cooldown-timer">
+            <div style="font-size:.7rem;color:var(--tx3);letter-spacing:.1em;margin-bottom:.4rem">الأيام المتبقية</div>
+            <div style="font-size:4rem;font-weight:900;color:#f87171;font-family:var(--fd);line-height:1">${remaining}</div>
+            <div style="font-size:.78rem;color:var(--tx3);margin-top:.2rem">يوم</div>
+          </div>
+        </div>
+      </div>`;
+
+  } else {
+    html=`
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:2.5rem 2rem">
+          <div style="font-size:3rem;margin-bottom:1rem">📋</div>
+          <div style="font-family:var(--fd);font-size:1.3rem;color:var(--goldb);margin-bottom:.5rem">لم يتم تخصيص دور بعد</div>
+          <div style="font-size:.83rem;color:var(--tx3)">انتظر موافقة الإدارة على حسابك أو تواصل معهم</div>
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+/* Book gas */
+async function doBookGas(){
+  const user=dbUsers[currentId];
+  if(!user)return;
+  const ticket=`GAS-${Math.floor(1000+Math.random()*9000)}-${user.nationalId.slice(-3)}`;
+  try{
+    await window._updateStatus(user.nationalId,{gasStatus:'booked',ticket});
+    toast('تم الحجز وإصدار التذكرة 🎉');
+  }catch(e){toast('خطأ في الحجز',false)}
+}
+
+/* ADMIN RENDER */
+function renderAdmin(){
+  const all=Object.values(dbUsers);
+  document.getElementById('st-total').textContent=all.length;
+  document.getElementById('st-pending').textContent=all.filter(u=>u.status==='pending').length;
+  adminTab('pending',document.querySelector('.tabbtn.on'));
+}
+
+function adminTab(filter,btn){
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const list=document.getElementById('admin-list');
+  const users=Object.values(dbUsers).filter(u=>filter==='pending'?u.status==='pending':true);
+
+  if(!users.length){
+    list.innerHTML=`<div style="text-align:center;padding:3rem;color:var(--tx3)"><div style="font-size:2rem;margin-bottom:.5rem">✅</div><div>لا توجد ${filter==='pending'?'طلبات معلقة':'عائلات مسجلة'}</div></div>`;
+    return;
+  }
+
+  list.innerHTML=users.map(u=>`
+    <div class="acard">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:.95rem;font-weight:700;color:var(--tx1)">${esc(u.name)}</div>
+          <div style="font-size:.72rem;color:var(--tx3);margin-top:.15rem">${esc(u.phone||'—')}</div>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          ${u.phone?`<a href="tel:${esc(u.phone)}" style="background:rgba(92,184,112,.1);border:1px solid rgba(92,184,112,.2);border-radius:7px;padding:.3rem .65rem;font-size:.72rem;color:var(--t2);text-decoration:none;display:flex;align-items:center;gap:.3rem">📞 اتصال</a>`:''}
+          <span class="badge ${u.status==='verified'?'b-verified':'b-pending'}">${u.status==='verified'?'✅ موثّق':'⏳ معلق'}</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-key">الرقم الوطني</div><div class="info-val">${esc(u.nationalId)}</div></div>
+        <div class="info-item"><div class="info-key">دفتر العائلة</div><div class="info-val">${esc(u.familyBookId)}</div></div>
+      </div>
+      ${u.status==='pending'?`
+      <div class="acts">
+        <button onclick="adminApprove('${esc(u.nationalId)}')" class="btn btn-green btn-sm" style="width:auto;flex:1">✅ اعتماد</button>
+        <button onclick="adminReject('${esc(u.nationalId)}')" class="btn btn-danger btn-sm" style="width:auto">رفض</button>
+      </div>`:''}
+    </div>`).join('');
+}
+
+async function adminApprove(id){
+  try{
+    await window._updateStatus(id,{status:'verified',gasStatus:'eligible'});
+    toast('تم اعتماد العائلة ✅');
+    renderAdmin();
+  }catch(e){toast('خطأ',false)}
+}
+async function adminReject(id){
+  if(!confirm('حذف هذا الطلب نهائياً؟'))return;
+  try{
+    await window._deleteDoc(id);
+    toast('تم حذف الطلب');
+    renderAdmin();
+  }catch(e){toast('خطأ',false)}
+}
+
+/* DISTRIBUTOR DELIVER */
+async function doDeliver(e){
+  e.preventDefault();
+  const code=document.getElementById('scan-code').value.trim();
+  const btn=document.getElementById('deliver-btn');
+  const target=Object.values(dbUsers).find(u=>u.ticket===code||u.nationalId===code);
+
+  if(!target){toast('لم يُعثر على هذا الرمز',false);return}
+  if(target.gasStatus!=='booked'){toast('هذا المواطن لا يملك حجزاً فعالاً حالياً',false);return}
+
+  btn.disabled=true;btn.classList.add('btn-loading');
+  try{
+    await window._updateStatus(target.nationalId,{
+      gasStatus:'cooldown',
+      lastReceived:new Date().toISOString(),
+      ticket:null
+    });
+    toast(`✅ تم التسليم لـ: ${esc(target.name)}`);
+    document.getElementById('scan-code').value='';
+  }catch(e){toast('خطأ في الاتصال',false)}
+  btn.disabled=false;btn.classList.remove('btn-loading');
+}
+</script>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+import { initializeApp }     from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
+import { getFirestore, collection, doc,
+         setDoc, updateDoc, deleteDoc,
+         onSnapshot }         from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+import { getAuth, signInAnonymously, onAuthStateChanged }
+                               from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
+  authDomain:        'saqba-portal.firebaseapp.com',
+  projectId:         'saqba-portal',
+  storageBucket:     'saqba-portal.firebasestorage.app',
+  messagingSenderId: '135534184893',
+  appId:             '1:135534184893:web:87feb3535016b650052ad4',
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+const COL  = 'gas_registry'; // مجموعة خاصة بنظام الغاز
+
+/* Anonymous auth للقراءة */
+await signInAnonymously(auth).catch(e=>console.warn('Auth:',e));
+
+/* Real-time listener */
+onSnapshot(collection(db, COL), snap => {
+  snap.forEach(d => { dbUsers[d.id] = d.data(); });
+  // تحديث واجهة المواطن المسجل إذا تغيرت بياناته
+  if(window.currentId && dbUsers[window.currentId]) {
+    window.renderCitizen(dbUsers[window.currentId]);
+  }
+  if(window.currentRole==='admin') window.renderAdmin();
+});
+
+/* Expose DB operations */
+window._setDoc    = (id, data) => setDoc(doc(db, COL, id), data);
+window._updateStatus = (id, data) => updateDoc(doc(db, COL, id), data);
+window._deleteDoc = (id) => deleteDoc(doc(db, COL, id));
+
+/* Hide loader */
+document.getElementById('loader').classList.add('hide');
+setTimeout(()=>document.getElementById('loader').remove(), 600);
+
+/* Expose globals for renderCitizen */
+window.renderCitizen = renderCitizen;
+window.renderAdmin   = renderAdmin;
+</script>
+</body>
+</html>

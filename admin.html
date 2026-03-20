@@ -914,6 +914,10 @@ function formatFileSize(bytes) {
 </script>
 <script>
 /* Fallbacks */
+let _firebaseReadyResolve;
+window._firebaseReady = new Promise(r => _firebaseReadyResolve = r);
+window._firebaseReadyResolve = _firebaseReadyResolve;
+
 if(typeof FirestoreService==='undefined')window.FirestoreService={getDashboardStats:async()=>({totalUsers:0,totalGasRequests:0,pendingGasRequests:0,totalComplaints:0,openComplaints:0,totalNews:0}),getAllGasRequests:async()=>[],updateGasRequestStatus:async()=>{},getAllComplaints:async()=>[],updateComplaintStatus:async()=>{},createNews:async()=>{},getNews:async()=>[],deleteNews:async()=>{},getGallery:async()=>[],addGalleryImage:async()=>{},deleteGalleryImage:async()=>{}};
 if(typeof AuthService==='undefined')window.AuthService={login:async()=>{throw{code:'auth/no-config'}},logout:async()=>{},isAdmin:async()=>false};
 if(typeof formatDate==='undefined')window.formatDate=ts=>{if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'})};
@@ -928,6 +932,7 @@ function toast(msg,ok=true){
 /* Auth */
 async function doAdminLogin(e){
   e.preventDefault();
+  await window._firebaseReady;
   const btn=document.getElementById('al-btn');btn.disabled=true;btn.classList.add('btn-loading');
   try{
     const c=await AuthService.login(document.getElementById('al-email').value,document.getElementById('al-pass').value);

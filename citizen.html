@@ -1804,12 +1804,12 @@ window.FirestoreService = {
     // رفع الصور
     let photoUrl = null, proofUrl = null;
     if (photoFile) {
-      const r = sRef(storage, \`families/\${data.nationalId}/book_\${Date.now()}\`);
+      const r = sRef(storage, `families/${data.nationalId}/book_${Date.now()}`);
       await uploadBytes(r, photoFile);
       photoUrl = await getDownloadURL(r);
     }
     if (proofFile) {
-      const r = sRef(storage, \`families/\${data.nationalId}/proof_\${Date.now()}\`);
+      const r = sRef(storage, `families/${data.nationalId}/proof_${Date.now()}`);
       await uploadBytes(r, proofFile);
       proofUrl = await getDownloadURL(r);
     }

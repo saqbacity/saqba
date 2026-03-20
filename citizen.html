@@ -544,16 +544,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="fgrp"><label class="flbl">الاسم الكامل <span class="req">*</span></label><input class="finp" id="r-name" type="text" placeholder="محمد أحمد" required></div>
         <div class="fgrp"><label class="flbl">رقم الهاتف <span class="req">*</span></label><input class="finp" id="r-phone" type="tel" placeholder="09XXXXXXXX" required></div>
       </div>
-      <div class="fgrp">
-        <label class="flbl">الحي <span class="req">*</span></label>
-        <select class="fsel" id="r-dist" required>
-          <option value="">اختر الحي...</option>
-          <option>حي الجامع</option><option>حي الميدان</option><option>حي البلد</option>
-          <option>حي الشهداء</option><option>حي النور</option><option>حي الزهراء</option>
-          <option>حي القدس</option><option>حي السلام</option><option>حي الوحدة</option>
-          <option>حي الفرحة</option><option>حي الريحان</option><option>حي الياسمين</option>
-        </select>
-      </div>
+
       <div class="fgrp">
           <label class="flbl">البريد الإلكتروني <span class="req">*</span></label>
           <input class="finp" id="r-email" type="email" placeholder="example@email.com" required>
@@ -1208,6 +1199,11 @@ function formatFileSize(bytes) {
 </script>
 <script>
 /* Fallbacks */
+/* Firebase ready promise — ينتظر تحميل الـ module قبل أي عملية */
+let _firebaseReadyResolve;
+window._firebaseReady = new Promise(r => _firebaseReadyResolve = r);
+window._firebaseReadyResolve = _firebaseReadyResolve;
+
 if(typeof FirestoreService==='undefined')window.FirestoreService={createGasRequest:async()=>{throw'no-firebase'},getUserGasRequests:async()=>[],getUserComplaints:async()=>[],createComplaint:async()=>{throw'no-firebase'},getUser:async()=>null,createUser:async()=>{}};
 if(typeof AuthService==='undefined')window.AuthService={login:async()=>{throw{code:'auth/no-config'}},register:async()=>{throw{code:'auth/no-config'}},logout:async()=>{}};
 if(typeof formatDate==='undefined')window.formatDate=ts=>{if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'})};
@@ -1258,6 +1254,7 @@ function aerr(c){return{['auth/user-not-found']:'لا يوجد حساب بهذا
 /* Login */
 async function doLogin(e){
   e.preventDefault();
+  await window._firebaseReady;
   const btn=document.getElementById('login-btn');
   btn.disabled=true;btn.classList.add('btn-loading');
   try{await AuthService.login(document.getElementById('l-email').value,document.getElementById('l-pass').value)}
@@ -1267,6 +1264,8 @@ async function doLogin(e){
 /* Register */
 async function doRegister(e){
   e.preventDefault();
+  // انتظر تحميل Firebase أولاً
+  await window._firebaseReady;
   if(document.getElementById('r-pass').value!==document.getElementById('r-conf').value){
     toast('كلمتا المرور غير متطابقتان',false);
     document.getElementById('r-conf').classList.add('finp-err');
@@ -1282,8 +1281,24 @@ async function doRegister(e){
   }
   const btn=document.getElementById('reg-btn');
   btn.disabled=true;btn.classList.add('btn-loading');
-  try{await AuthService.register(document.getElementById('r-email').value,document.getElementById('r-pass').value,{name:document.getElementById('r-name').value,phone:document.getElementById('r-phone').value,district:document.getElementById('r-dist').value});toast('تم إنشاء الحساب بنجاح! 🎉')}
-  catch(er){toast(aerr(er.code),false);btn.disabled=false;btn.classList.remove('btn-loading')}
+  try{
+    await AuthService.register(
+      document.getElementById('r-email').value,
+      document.getElementById('r-pass').value,
+      {
+        name:  document.getElementById('r-name').value,
+        phone: document.getElementById('r-phone').value,
+      }
+    );
+    toast('تم إنشاء الحساب بنجاح! 🎉');
+    // الانتقال لتسجيل الدخول بعد ثانيتين
+    setTimeout(()=>atab('login',document.querySelectorAll('.atab')[0]),2000);
+  } catch(er) {
+    console.error('Register error:', er);
+    toast(aerr(er.code)||'حدث خطأ في إنشاء الحساب', false);
+    btn.disabled=false;
+    btn.classList.remove('btn-loading');
+  }
 }
 
 async function doLogout(){await AuthService.logout()}
@@ -1812,6 +1827,9 @@ window.FirestoreService = {
   },
 };
 window.AuthService = AuthService;
+
+/* أعلن أن Firebase جاهز */
+if(window._firebaseReadyResolve) window._firebaseReadyResolve();
 
 </script>
 

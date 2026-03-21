@@ -1389,11 +1389,32 @@ function aerr(c){return{['auth/user-not-found']:'لا يوجد حساب بهذا
 /* Login */
 async function doLogin(e){
   e.preventDefault();
-  await window._firebaseReady;
   const btn=document.getElementById('login-btn');
-  btn.disabled=true;btn.classList.add('btn-loading');
-  try{await AuthService.login(document.getElementById('l-email').value,document.getElementById('l-pass').value)}
-  catch(er){toast(aerr(er.code),false);btn.disabled=false;btn.classList.remove('btn-loading')}
+  btn.disabled=true; btn.classList.add('btn-loading');
+  try{
+    // انتظر Firebase مع timeout
+    await Promise.race([
+      window._firebaseReady,
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),8000))
+    ]);
+    await AuthService.login(
+      document.getElementById('l-email').value.trim(),
+      document.getElementById('l-pass').value
+    );
+    // النجاح — userLoggedIn event سيُطلق تلقائياً
+  } catch(er){
+    console.error('Login error:', er.code, er.message);
+    const msgs = {
+      'auth/user-not-found':    'لا يوجد حساب بهذا البريد',
+      'auth/wrong-password':    'كلمة المرور غير صحيحة',
+      'auth/invalid-credential':'البريد أو كلمة المرور غير صحيحة',
+      'auth/invalid-email':     'البريد الإلكتروني غير صالح',
+      'auth/too-many-requests': 'تجاوزت عدد المحاولات — انتظر قليلاً',
+      'timeout':                'انتهت مهلة الاتصال',
+    };
+    toast(msgs[er.code] || msgs[er.message] || 'حدث خطأ في تسجيل الدخول', false);
+    btn.disabled=false; btn.classList.remove('btn-loading');
+  }
 }
 
 /* Register */
@@ -1532,7 +1553,15 @@ const COOLDOWN_DAYS = 20;
    cooldown    → في فترة الحظر
 */
 
-function refreshGasView() {
+async function refreshGasView() {
+  if (!uid) return;
+
+  // إعادة قراءة بيانات المستخدم من Firestore للحصول على أحدث حالة
+  try {
+    const fresh = await FirestoreService.getUser(uid);
+    if (fresh) udata = fresh;
+  } catch(e) { /* استخدم udata الموجود */ }
+
   if (!udata) return;
 
   // إخفاء كل الحالات
@@ -1667,7 +1696,19 @@ async function submitGasKyc(e) {
       gasRequestedAt:      new Date().toISOString(),
     });
 
+    // ✅ تحديث udata المحلي فوراً حتى تعمل refreshGasView بشكل صحيح
+    udata = { ...udata,
+      familyBookId:        famId,
+      familyBookImg:       bookUrl,
+      nationalIdImg:       natUrl,
+      addressProofImg:     proofUrl,
+      gasStatus:           'kyc_pending',
+      gasVerificationNote: note || null,
+      gasRequestedAt:      new Date().toISOString(),
+    };
+
     toast('✅ تم إرسال وثائقك بنجاح — سيتم التواصل معك قريباً');
+    document.getElementById('gas-kyc-form').style.display='none';
     refreshGasView();
   } catch(err) {
     console.error('KYC error:', err);

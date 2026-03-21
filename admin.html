@@ -467,6 +467,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <button class="sb-item"    onclick="gv('martyrs')"   id="ni-martyrs">   <span class="ic">🕊️</span>الشهداء<span class="sb-cnt" id="nc-martyrs">0</span></button>
       <div class="sb-sec">النظام</div>
       <button class="sb-item"    onclick="gv('users')"      id="ni-users">     <span class="ic">👥</span>المستخدمون</button>
+      <button class="sb-item"    onclick="gv('kyc')"        id="ni-kyc">       <span class="ic">📄</span>توثيق الغاز<span class="sb-cnt" id="nc-kyc">0</span></button>
     </nav>
     <div class="sb-foot">
       <a href="index.html" class="btn btn-ghost btn-sm" style="justify-content:center">🏠 البوابة</a>
@@ -1021,13 +1022,14 @@ function gv(v){
   document.getElementById('v-'+v).classList.add('on');
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
   const ni=document.getElementById('ni-'+v);if(ni)ni.classList.add('on');
-  const ts={dash:'نظرة عامة',gas:'طلبات الغاز',complaints:'الشكاوى',news:'الأخبار',gallery:'معرض الصور',users:'المستخدمون'};
+  const ts={dash:'نظرة عامة',gas:'طلبات الغاز',complaints:'الشكاوى',news:'الأخبار',gallery:'معرض الصور',users:'المستخدمون',kyc:'توثيق الغاز'};
   document.getElementById('tb-crumb').textContent=ts[v]||'';
   if(v==='gas')loadGas();
   if(v==='complaints')loadComps();
   if(v==='news')loadNews();
   if(v==='gallery')loadGal();
   if(v==='users')loadUsers();
+  if(v==='kyc')loadKyc();
 }
 
 /* Dashboard */
@@ -1422,7 +1424,7 @@ import {
   addDoc, setDoc, getDoc, getDocs,
   updateDoc, deleteDoc,
   query, where, orderBy, limit,
-  serverTimestamp, getCountFromServer
+  serverTimestamp, getCountFromServer, onSnapshot
 } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 import {
   getStorage, ref as sRef,
@@ -1638,6 +1640,16 @@ window._getAllUsers = async () => {
 window._updateUserDoc = async (uid, data) => updateDoc(doc(db,'users',uid), data);
 
 /* ✅ أعلن أن Firebase جاهز — يجب أن يكون في نهاية الـ module */
+/* Real-time KYC badge — يُحدّث العداد فور وصول طلب جديد */
+onSnapshot(collection(db,'users'), snap => {
+  const pending = snap.docs.filter(d => d.data().gasStatus === 'kyc_pending').length;
+  const el = document.getElementById('nc-kyc');
+  if(el) el.textContent = pending;
+  // إذا قسم KYC مفتوح حالياً — حدّث القائمة تلقائياً
+  const kycView = document.getElementById('v-kyc');
+  if(kycView && kycView.classList.contains('on') && typeof loadKyc === 'function') loadKyc();
+});
+
 if(window._firebaseReadyResolve) window._firebaseReadyResolve();
 
 </script>

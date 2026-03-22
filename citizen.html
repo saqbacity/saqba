@@ -1706,7 +1706,7 @@ function ttab(id,btn){
 
 /* Overview */
 async function loadOverview(){
-  if(!uid || !udata || !udata.name) return; // udata فارغ = Firebase لم يتحمل بعد
+  if(!uid || !udata) return;
   try{
     const FS = window.FirestoreService;
     const[g,c] = await Promise.all([
@@ -2071,10 +2071,14 @@ async function doGas(e) {
     await window.FirestoreService.updateUser(uid, { gasStatus: 'booked' });
     udata.gasStatus = 'booked';
 
-    document.getElementById('q-num').textContent = queueNumber;
+    // إظهار رقم الدور
+    document.getElementById('gas-booking-section').style.display='block';
     document.getElementById('gas-form').style.display='none';
     document.getElementById('gas-ok').style.display='block';
-    toast('تم تسجيل طلبك بنجاح! 🎉');
+    document.getElementById('q-num').textContent = queueNumber;
+    toast('تم تسجيل طلبك بنجاح! رقم دورك: ' + queueNumber + ' 🎉');
+    // تحديث النظرة العامة
+    loadOverview();
   } catch(er) {
     console.error(er);
     toast('حدث خطأ في تسجيل الطلب', false);
@@ -2270,15 +2274,18 @@ const FirestoreService = {
   },
   async getUserGasRequests(userId) {
     const s = await getDocs(
-      query(collection(db,'gas_requests'), where('userId','==',userId), orderBy('createdAt','desc'))
+      query(collection(db,'gas_requests'), where('userId','==',userId))
     );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+    return s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   },
   async getAllGasRequests(status = null) {
-    const c = [orderBy('createdAt','desc')];
-    if (status) c.unshift(where('status','==',status));
-    const s = await getDocs(query(collection(db,'gas_requests'), ...c));
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+    const q = status
+      ? query(collection(db,'gas_requests'), where('status','==',status))
+      : collection(db,'gas_requests');
+    const s = await getDocs(q);
+    return s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   },
   async updateGasRequestStatus(id, status) {
     return updateDoc(doc(db,'gas_requests',id), { status });
@@ -2294,9 +2301,10 @@ const FirestoreService = {
   },
   async getUserComplaints(userId) {
     const s = await getDocs(
-      query(collection(db,'complaints'), where('userId','==',userId), orderBy('createdAt','desc'))
+      query(collection(db,'complaints'), where('userId','==',userId))
     );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+    return s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   },
   async getAllComplaints() {
     const s = await getDocs(

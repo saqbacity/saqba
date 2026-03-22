@@ -2033,6 +2033,18 @@ onAuthStateChanged(auth, (user) => {
   document.dispatchEvent(
     new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user })
   );
+  // بعد تسجيل الدخول — ابدأ مراقبة KYC
+  if(user){
+    onSnapshot(collection(db,'users'), snap => {
+      const pending = snap.docs.filter(d => d.data().gasStatus === 'kyc_pending').length;
+      const el = document.getElementById('nc-kyc');
+      if(el) el.textContent = pending;
+      const bnc = document.getElementById('bnc-kyc');
+      if(bnc){ bnc.textContent=pending; bnc.classList.toggle('show', pending>0); }
+      const kycView = document.getElementById('v-kyc');
+      if(kycView && kycView.classList.contains('on') && typeof loadKyc === 'function') loadKyc();
+    });
+  }
 });
 window.AuthService      = AuthService;
 
@@ -2066,18 +2078,6 @@ window._updateUserDoc = async (uid, data) => updateDoc(doc(db,'users',uid), data
 
 /* ✅ أعلن أن Firebase جاهز — يجب أن يكون في نهاية الـ module */
 /* Real-time KYC badge — يُحدّث العداد فور وصول طلب جديد */
-onSnapshot(collection(db,'users'), snap => {
-  const pending = snap.docs.filter(d => d.data().gasStatus === 'kyc_pending').length;
-  const el = document.getElementById('nc-kyc');
-  if(el) el.textContent = pending;
-  // bottom nav badge
-  const bnc = document.getElementById('bnc-kyc');
-  if(bnc){ bnc.textContent=pending; bnc.classList.toggle('show', pending>0); }
-  // إذا قسم KYC مفتوح حالياً — حدّث القائمة تلقائياً
-  const kycView = document.getElementById('v-kyc');
-  if(kycView && kycView.classList.contains('on') && typeof loadKyc === 'function') loadKyc();
-});
-
 if(window._firebaseReadyResolve) window._firebaseReadyResolve();
 
 </script>

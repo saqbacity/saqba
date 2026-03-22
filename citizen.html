@@ -1619,54 +1619,33 @@ async function doRegister(e){
 async function doLogout(){await AuthService.logout()}
 
 /* Auth state */
-document.addEventListener('userLoggedIn',async e=>{
-  const user=e.detail; uid=user.uid;
-  document.getElementById('page-loader').style.display='none';
-  document.getElementById('auth-page').style.display='none';
-  document.getElementById('dash-page').style.display='';
+document.addEventListener('userLoggedIn', async e => {
+  const user = e.detail;
+  uid = user.uid;
 
-  // انتظر حتى يكون FirestoreService الحقيقي جاهزاً (بدل promise معقد)
-  await waitForRealFirebase();
+  document.getElementById('page-loader').style.display = 'none';
+  document.getElementById('auth-page').style.display   = 'none';
+  document.getElementById('dash-page').style.display   = '';
 
+  // window.FirestoreService جاهز الآن لأن onAuthStateChanged يُطلق بعده
   udata = await window.FirestoreService.getUser(uid) || {};
-  const nm = udata.name || user.email;
 
-  // Sidebar
+  const nm = udata.name || user.email;
   document.getElementById('sb-name').textContent = nm;
-  document.getElementById('sb-dist').textContent = udata.district||'';
   document.getElementById('wname').textContent   = nm;
 
-  // Gas form defaults
   if(udata.name)  document.getElementById('g-name').value  = udata.name;
   if(udata.phone) document.getElementById('g-phone').value = udata.phone;
 
-  // Profile tab
   fillProfile();
-
-  // تحميل البيانات
   loadOverview();
   refreshGasView();
 
-  const h = location.hash.replace('#','');
+  const h = location.hash.replace('#', '');
   if(['gas','complaint','track','profile'].includes(h)) gv(h);
 
   window.dispatchEvent(new Event('userLoggedIn_fcm'));
 });
-
-// انتظر حتى يُسجَّل FirestoreService الحقيقي من module
-function waitForRealFirebase(){
-  return new Promise(resolve => {
-    const check = setInterval(()=>{
-      if(window.FirestoreService && typeof window.FirestoreService.getUser === 'function'
-         && window.FirestoreService !== window._placeholderFS){
-        clearInterval(check);
-        resolve();
-      }
-    }, 30);
-    // timeout بعد 8 ثوانٍ
-    setTimeout(()=>{ clearInterval(check); resolve(); }, 8000);
-  });
-}
 
 function fillProfile(){
   const gsLabels = {none:'لم يتم التوثيق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق ✅',booked:'لديك حجز نشط',cooldown:'فترة انتظار'};
@@ -2254,13 +2233,7 @@ async function initFCM() {
 /* استدعاء FCM بعد تسجيل الدخول */
 window.addEventListener('userLoggedIn_fcm', () => initFCM());
 
-/* ─── Auth State ─────────────────────────────────────── */
-onAuthStateChanged(auth, (user) => {
-  window.currentUser = user ?? null;
-  document.dispatchEvent(
-    new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user })
-  );
-});
+/* ─── Auth State يُسجَّل في آخر الملف بعد تجهيز window.FirestoreService ─── */
 
 /* ─── رفع صورة مساعدة ───────────────────────────────── */
 async function uploadImage(file, path) {
@@ -2530,6 +2503,14 @@ window._setAuthPersistence = (type) =>
 
 /* أعلن أن Firebase جاهز */
 if(window._firebaseReadyResolve) window._firebaseReadyResolve();
+
+/* ─── Auth State — بعد window.FirestoreService ─── */
+onAuthStateChanged(auth, (user) => {
+  window.currentUser = user ?? null;
+  document.dispatchEvent(
+    new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user })
+  );
+});
 
 </script>
 

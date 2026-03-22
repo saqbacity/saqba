@@ -245,44 +245,51 @@ window.doDeliver = async function(){
   try{
     const deliveryTime = new Date().toISOString();
 
-    // ابحث برقم الدور
-    const snap = await getDocs(query(
+    // ── خطوة 1: ابحث برقم الدور بغض النظر عن الحالة ──
+    const snapAny = await getDocs(query(
       collection(db,'gas_requests'),
-      where('queueNumber','==', qNum),
-      where('status','==','booked')
+      where('queueNumber','==', qNum)
     ));
 
-    if(snap.empty){
-      // ابحث برقم دفتر العائلة
-      const snap2 = await getDocs(query(
-        collection(db,'gas_requests'),
-        where('familyBookId','==', famId),
-        where('status','==','booked')
-      ));
-      if(snap2.empty){ showErr('لم يُعثر على طلب بهذا الرقم'); btn.disabled=false; btn.classList.remove('btn-loading'); return; }
-      const d2 = snap2.docs[0];
-      if(d2.data().queueNumber !== qNum){ showErr('رقم الدور لا يتطابق مع دفتر العائلة'); btn.disabled=false; btn.classList.remove('btn-loading'); return; }
-      await _deliver(d2, deliveryTime);
-      showOk(d2.data().name||'المواطن');
+    if(snapAny.empty){
+      showErr('❌ رقم الدور ' + qNum + ' غير موجود في النظام');
       btn.disabled=false; btn.classList.remove('btn-loading'); return;
     }
 
-    const gasDoc  = snap.docs[0];
-    const gasData = gasDoc.data();
+    const anyDoc  = snapAny.docs[0];
+    const anyData = anyDoc.data();
 
-    // تحقق من دفتر العائلة
-    if(gasData.familyBookId && gasData.familyBookId !== famId){
-      showErr('رقم دفتر العائلة لا يتطابق مع رقم الدور');
-      btn.disabled=false; btn.classList.remove('btn-loading');
-      return;
+    // ── خطوة 2: تحقق من دفتر العائلة ──
+    if(anyData.familyBookId && anyData.familyBookId !== famId){
+      showErr('❌ رقم دفتر العائلة خاطئ لهذا الدور');
+      btn.disabled=false; btn.classList.remove('btn-loading'); return;
     }
 
-    await _deliver(gasDoc, deliveryTime);
-    showOk(gasData.name||'المواطن');
+    // ── خطوة 3: تحقق من الحالة ──
+    if(anyData.status === 'delivered'){
+      // احسب كم يوم مضى
+      const del   = anyData.deliveredAt?.toDate?.() || new Date(anyData.deliveredAt || Date.now());
+      const diff  = Math.ceil((Date.now()-del)/86400000);
+      const rem   = 22 - diff;
+      if(rem > 0)
+        showErr('⏱️ تم الاستلام مسبقاً — يتبقى ' + rem + ' يوم للدور القادم');
+      else
+        showErr('✅ تم الاستلام سابقاً — يمكن الطلب الآن من بوابة المواطن');
+      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+    }
+
+    if(anyData.status === 'rejected'){
+      showErr('❌ هذا الطلب مرفوض — يجب على المواطن تقديم طلب جديد');
+      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+    }
+
+    // ── خطوة 4: نفّذ التسليم ──
+    await _deliver(anyDoc, deliveryTime);
+    showOk(anyData.name || 'المواطن');
 
   }catch(e){
     console.error(e);
-    showErr('خطأ في الاتصال بقاعدة البيانات');
+    showErr('خطأ في الاتصال بقاعدة البيانات: ' + e.message);
   }
 
   btn.disabled=false;

@@ -1625,7 +1625,6 @@ async function doRegister(e){
 }
 
 async function doLogout(){ window.AuthService?.logout().then(()=>location.reload()); }
-function doLogout_old(){await window.AuthService.logout()}
 
 /* Auth state */
 document.addEventListener('userLoggedIn', async e => {

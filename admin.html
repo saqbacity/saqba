@@ -608,21 +608,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         </div>
 
         <!-- ── الرسوم البيانية ── -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.8rem" id="charts-row">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.2rem" id="charts-row">
           <!-- حالات طلبات الغاز -->
           <div class="panel">
-            <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">حالات طلبات الغاز</span></div>
-            <div class="panel-body" style="padding:1.2rem">
-              <canvas id="chart-gas" height="200"></canvas>
-              <div id="chart-gas-empty" style="display:none;text-align:center;padding:2rem;color:var(--tx3)">لا توجد بيانات بعد</div>
+            <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title" style="font-size:.82rem">حالات الغاز</span></div>
+            <div class="panel-body" style="padding:.5rem">
+              <canvas id="chart-gas" height="100" style="max-height:100px"></canvas>
+              <div id="chart-gas-empty" style="display:none;text-align:center;padding:1.5rem;color:var(--tx3);font-size:.8rem">لا توجد بيانات</div>
             </div>
           </div>
           <!-- حالات الشكاوى -->
           <div class="panel">
-            <div class="panel-head"><div class="panel-icon pi-teal">📣</div><span class="panel-title">حالات الشكاوى</span></div>
-            <div class="panel-body" style="padding:1.2rem">
-              <canvas id="chart-comp" height="200"></canvas>
-              <div id="chart-comp-empty" style="display:none;text-align:center;padding:2rem;color:var(--tx3)">لا توجد بيانات بعد</div>
+            <div class="panel-head"><div class="panel-icon pi-teal">📣</div><span class="panel-title" style="font-size:.82rem">حالات الشكاوى</span></div>
+            <div class="panel-body" style="padding:.5rem">
+              <canvas id="chart-comp" height="100" style="max-height:100px"></canvas>
+              <div id="chart-comp-empty" style="display:none;text-align:center;padding:1.5rem;color:var(--tx3);font-size:.8rem">لا توجد بيانات</div>
             </div>
           </div>
         </div>
@@ -1236,7 +1236,7 @@ function renderCharts(gasData){
           plugins:{
             legend:{
               position:'bottom',
-              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:12},padding:12}
+              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:10},padding:8},boxWidth:12
             },
             tooltip:{
               callbacks:{
@@ -1279,7 +1279,7 @@ function renderCharts(gasData){
           plugins:{
             legend:{
               position:'bottom',
-              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:12},padding:12}
+              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:10},padding:8},boxWidth:12
             }
           }
         }
@@ -1353,9 +1353,14 @@ async function updGas(id, status){
     const req = allGas.find(r => r.id === id);
     if(req?.userId){
       if(status === 'rejected'){
-        // عند الرفض — أعد المواطن لـ eligible ليتمكن من الطلب مجدداً
         await updateDoc(doc(db,'users',req.userId),{
           gasStatus: 'eligible', ticket: null
+        });
+      }
+      if(status === 'delivered'){
+        const now = new Date().toISOString();
+        await updateDoc(doc(db,'users',req.userId),{
+          gasStatus: 'cooldown', ticket: null, lastReceived: now
         });
       }
       // إشعار

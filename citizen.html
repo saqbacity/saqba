@@ -322,7 +322,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 .topbar-back:hover{color:var(--t2);border-color:var(--glbr)}
 
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.main{flex:1;overflow-y:scroll;display:flex;flex-direction:column;height:100vh}
 .content{padding:2rem;max-width:900px;width:100%;margin:0 auto}
 
 /* ── PANELS ── */
@@ -487,7 +487,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── VIEW PANELS ── */
 .vp{display:none}
 .vp.on{display:block;animation:fadein .35s ease}
-#v-overview{display:block}/* الصفحة الافتراضية */
+#v-overview{display:block}
 
 /* ── MOBILE ── */
 .mob-btn{display:none;background:rgba(92,184,112,.08);border:1px solid var(--bd);border-radius:8px;padding:.45rem .65rem;font-size:1.1rem;cursor:pointer;color:var(--t2);align-items:center}
@@ -689,7 +689,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 </div>
 
 <!-- ════ DASHBOARD ════ -->
-<div id="dash-page" style="display:none;width:100%">
+<div id="dash-page" style="display:none;width:100%;min-height:100vh">
 <div class="app">
 
   <!-- Sidebar -->
@@ -1114,6 +1114,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           </div>
         </div>
       </div>
+      </div><!-- /v-complaint -->
 
       <!-- ── DISTRIBUTOR ── -->
       <div id="v-distributor" class="vp" style="display:none">
@@ -1635,7 +1636,7 @@ document.addEventListener('userLoggedIn', async e => {
 
   document.getElementById('page-loader').style.display = 'none';
   document.getElementById('auth-page').style.display   = 'none';
-  document.getElementById('dash-page').style.display   = '';
+  document.getElementById('dash-page').style.display   = 'block';
 
   // window.FirestoreService جاهز الآن لأن onAuthStateChanged يُطلق بعده
   udata = await window.FirestoreService.getUser(uid) || {};

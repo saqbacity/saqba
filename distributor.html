@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>بوابة الموزع — سقبا</title>
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b1410">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap">
@@ -14,124 +13,69 @@
   --ink:#0b1410;--t2:#5cb870;--goldb:#e8c547;--gold:#c9a227;
   --tx1:#e8f5e9;--tx2:#9bbfc5;--tx3:#5a8a90;
   --bd:rgba(92,184,112,.15);--fb:'Tajawal',sans-serif;
-  --red:#ef4444;--redf:rgba(239,68,68,.12);--redb:rgba(239,68,68,.3);
 }
 html,body{min-height:100vh;background:var(--ink);color:var(--tx1);font-family:var(--fb)}
-
-/* ── PAGE ── */
-.page{
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:1.5rem;
-  background:radial-gradient(ellipse at 50% 0%,rgba(92,184,112,.08),transparent 60%);
-}
-
-/* ── LOGO ── */
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;background:radial-gradient(ellipse at 50% 0%,rgba(92,184,112,.08),transparent 60%)}
 .logo-row{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;justify-content:center}
 .logo-ico{width:52px;height:52px;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
-.logo-text{font-size:1.1rem;font-weight:800;color:var(--tx1)}
+.logo-text{font-size:1.1rem;font-weight:800}
 .logo-sub{font-size:.72rem;color:var(--tx3);margin-top:.1rem}
-
-/* ── PIN SCREEN ── */
-.card{
-  width:100%;max-width:420px;
-  background:rgba(8,34,40,.7);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--bd);border-radius:20px;
-  padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.4);
-}
-.card-title{font-size:1.1rem;font-weight:800;margin-bottom:.25rem;color:var(--tx1)}
+.card{width:100%;max-width:420px;background:rgba(8,34,40,.7);backdrop-filter:blur(20px);border:1px solid var(--bd);border-radius:20px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.card-title{font-size:1.1rem;font-weight:800;margin-bottom:.25rem}
 .card-sub{font-size:.82rem;color:var(--tx3);margin-bottom:1.5rem}
-
-label{font-size:.82rem;font-weight:600;color:var(--tx2);display:block;margin-bottom:.4rem}
-input{
-  width:100%;padding:.75rem 1rem;
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--bd);border-radius:10px;
-  color:var(--tx1);font-family:var(--fb);font-size:1rem;
-  outline:none;transition:border-color .2s;
-  margin-bottom:1rem;
-}
+label{font-size:.82rem;font-weight:600;color:var(--tx2);display:block;margin-bottom:.4rem;margin-top:.8rem}
+input{width:100%;padding:.75rem 1rem;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:10px;color:var(--tx1);font-family:var(--fb);font-size:1rem;outline:none;transition:border-color .2s}
 input:focus{border-color:var(--t2)}
 input[type=number]{font-family:monospace;font-size:1.2rem;text-align:center;letter-spacing:.08em}
-
-.btn{
-  width:100%;padding:.85rem;border-radius:12px;border:none;cursor:pointer;
-  font-family:var(--fb);font-size:1rem;font-weight:700;
-  transition:all .25s;position:relative;
-}
+.btn{width:100%;padding:.85rem;border-radius:12px;border:none;cursor:pointer;font-family:var(--fb);font-size:1rem;font-weight:700;transition:all .25s;position:relative;margin-top:1.2rem}
 .btn-primary{background:linear-gradient(135deg,var(--goldb),var(--gold));color:#0b1410}
-.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--tx2);margin-top:.75rem}
+.btn-primary:hover:not(:disabled){filter:brightness(1.1)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--tx2)}
 .btn-ghost:hover{background:rgba(255,255,255,.09)}
-
-/* Loading spinner */
-.btn-loading .btxt{opacity:0}
-.btn-loading::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── RESULT ── */
-.result{
-  border-radius:16px;padding:1.5rem;margin-top:1.2rem;
-  text-align:center;display:none;
-}
-.result.ok{background:rgba(92,184,112,.1);border:1px solid rgba(92,184,112,.3)}
-.result.err{background:var(--redf);border:1px solid var(--redb)}
-.result-ico{font-size:3rem;margin-bottom:.75rem}
-.result-name{font-size:1.3rem;font-weight:800;color:var(--tx1);margin-bottom:.3rem}
-.result-sub{font-size:.85rem;color:var(--tx2)}
-.result-countdown{
-  font-size:2.5rem;font-weight:900;color:var(--goldb);
-  margin:.75rem 0 .25rem;font-family:monospace;
-}
-.result-err-msg{font-size:.95rem;color:#fca5a5;font-weight:600}
-
-/* ── DIVIDER ── */
-.divider{display:flex;align-items:center;gap:.75rem;margin:.75rem 0;color:var(--tx3);font-size:.78rem}
+.spin .btxt{opacity:0}
+.spin::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* نتيجة */
+#result-box{display:none;border-radius:16px;padding:1.5rem;margin-top:1.2rem;text-align:center}
+#result-box.ok{background:rgba(92,184,112,.12);border:2px solid rgba(92,184,112,.4)}
+#result-box.err{background:rgba(239,68,68,.1);border:2px solid rgba(239,68,68,.35)}
+#result-ico{font-size:2.8rem;margin-bottom:.6rem}
+#result-title{font-size:1.1rem;font-weight:800;margin-bottom:.3rem}
+#result-msg{font-size:.88rem;color:var(--tx2);line-height:1.6}
+.divider{display:flex;align-items:center;gap:.75rem;margin:1rem 0;color:var(--tx3);font-size:.78rem}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bd)}
-
-/* ── BACK LINK ── */
-.back{display:flex;align-items:center;gap:.4rem;color:var(--tx3);text-decoration:none;font-size:.8rem;margin-top:1.5rem;transition:color .2s}
+.back{display:flex;align-items:center;gap:.4rem;color:var(--tx3);text-decoration:none;font-size:.8rem;margin-top:1.5rem}
 .back:hover{color:var(--t2)}
-
-/* Mobile */
-@media(max-width:480px){.card{border-radius:16px;padding:1.5rem}.page{justify-content:flex-start;padding-top:2rem}}
+#pin-err{color:#fca5a5;font-size:.82rem;margin-top:.6rem;display:none;text-align:center;font-weight:600}
+@media(max-width:480px){.page{justify-content:flex-start;padding-top:2rem}.card{border-radius:16px;padding:1.5rem}}
 </style>
 </head>
 <body>
 
+<!-- شاشة PIN -->
 <div class="page" id="pin-page">
   <div class="logo-row">
     <div class="logo-ico">📦</div>
-    <div>
-      <div class="logo-text">بوابة الموزع</div>
-      <div class="logo-sub">مدينة سقبا — توزيع الغاز</div>
-    </div>
+    <div><div class="logo-text">بوابة الموزع</div><div class="logo-sub">مدينة سقبا — توزيع الغاز</div></div>
   </div>
-
-  <!-- شاشة إدخال PIN -->
-  <div class="card" id="pin-card">
+  <div class="card">
     <div class="card-title">🔑 رمز الدخول</div>
     <div class="card-sub">أدخل رمز الموزع المعتمد للمتابعة</div>
     <label>رمز الموزع</label>
     <input type="password" id="pin-input" placeholder="••••" maxlength="8" autocomplete="off">
-    <button class="btn btn-primary" onclick="checkPin()"><span class="btxt">دخول ←</span></button>
-    <div id="pin-err" style="color:#fca5a5;font-size:.8rem;margin-top:.5rem;display:none">رمز خاطئ — حاول مجدداً</div>
+    <button class="btn btn-primary" id="pin-btn" onclick="checkPin()"><span class="btxt">دخول ←</span></button>
+    <div id="pin-err">❌ رمز خاطئ — حاول مجدداً</div>
   </div>
-
-  <a href="index.html" class="back">← العودة للبوابة الرئيسية</a>
+  <a href="index.html" class="back">← العودة للبوابة</a>
 </div>
 
 <!-- شاشة التسليم -->
 <div class="page" id="deliver-page" style="display:none">
   <div class="logo-row">
     <div class="logo-ico">📦</div>
-    <div>
-      <div class="logo-text">تأكيد التسليم</div>
-      <div class="logo-sub">أدخل رقم الدور ودفتر العائلة</div>
-    </div>
+    <div><div class="logo-text">تأكيد تسليم الغاز</div><div class="logo-sub">أدخل البيانات للتحقق والتسليم</div></div>
   </div>
-
   <div class="card">
     <div class="card-title">🔥 تسليم اسطوانة غاز</div>
     <div class="card-sub">يجب تطابق رقم الدور مع رقم دفتر العائلة</div>
@@ -143,79 +87,32 @@ input[type=number]{font-family:monospace;font-size:1.2rem;text-align:center;lett
     <input type="text" id="d-famid" placeholder="رقم دفتر العائلة" dir="ltr" style="font-family:monospace">
 
     <button class="btn btn-primary" id="d-btn" onclick="doDeliver()">
-      <span class="btxt">✅ تأكيد التسليم</span>
+      <span class="btxt">✅ تحقق وتأكيد التسليم</span>
     </button>
 
-    <!-- نتيجة ناجحة -->
-    <div class="result ok" id="r-ok">
-      <div class="result-ico">✅</div>
-      <div class="result-name" id="r-name">—</div>
-      <div class="result-sub">تم تسليم اسطوانة الغاز بنجاح</div>
-      <div class="result-countdown" id="r-days">22</div>
-      <div class="result-sub" style="font-size:.78rem">يوم حتى الطلب القادم</div>
-    </div>
-
-    <!-- نتيجة خطأ -->
-    <div class="result err" id="r-err">
-      <div class="result-ico">❌</div>
-      <div class="result-err-msg" id="r-errmsg">خطأ</div>
+    <!-- صندوق النتيجة الموحد -->
+    <div id="result-box">
+      <div id="result-ico"></div>
+      <div id="result-title"></div>
+      <div id="result-msg"></div>
     </div>
 
     <div class="divider">أو</div>
     <button class="btn btn-ghost" onclick="clearForm()">🔄 تسليم جديد</button>
   </div>
-
   <a href="index.html" class="back">← العودة للبوابة</a>
 </div>
 
+<!-- Firebase Compat (لا مشاكل scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-// ── PIN — غيّره هنا ──────────────────────────────
-const DISTRIBUTOR_PIN  = '1234';   // ← غيّر هذا الرمز
-const COOLDOWN_DAYS    = 22;
-// ────────────────────────────────────────────────
+// ═══ الإعدادات ═══
+const PIN = '1234'; // ← غيّر هذا الرمز
+const COOLDOWN = 22;
 
-function checkPin(){
-  const v = document.getElementById('pin-input').value;
-  if(v === DISTRIBUTOR_PIN){
-    document.getElementById('pin-page').style.display   = 'none';
-    document.getElementById('deliver-page').style.display = '';
-  } else {
-    document.getElementById('pin-err').style.display = '';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
-  }
-}
-document.getElementById('pin-input').addEventListener('keydown', e => {
-  if(e.key==='Enter') checkPin();
-});
-
-function showOk(name){
-  document.getElementById('r-ok').style.display   = '';
-  document.getElementById('r-err').style.display  = 'none';
-  document.getElementById('r-name').textContent   = name;
-  document.getElementById('r-days').textContent   = COOLDOWN_DAYS;
-}
-function showErr(msg){
-  document.getElementById('r-err').style.display  = '';
-  document.getElementById('r-ok').style.display   = 'none';
-  document.getElementById('r-errmsg').textContent = msg;
-}
-function clearForm(){
-  document.getElementById('d-queue').value = '';
-  document.getElementById('d-famid').value = '';
-  document.getElementById('r-ok').style.display  = 'none';
-  document.getElementById('r-err').style.display = 'none';
-  document.getElementById('d-queue').focus();
-}
-</script>
-
-<!-- Firebase Module -->
-<script type="module">
-import { initializeApp }   from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, updateDoc, query, where, serverTimestamp }
-  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
-
-const app = initializeApp({
+// ═══ Firebase ═══
+firebase.initializeApp({
   apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
   authDomain:        'saqba-portal.firebaseapp.com',
   projectId:         'saqba-portal',
@@ -223,101 +120,145 @@ const app = initializeApp({
   messagingSenderId: '135534184893',
   appId:             '1:135534184893:web:87feb3535016b650052ad4',
 });
-const db = getFirestore(app);
+const db = firebase.firestore();
 
-window.doDeliver = async function(){
-  const qNum  = parseInt(document.getElementById('d-queue').value) || 0;
+// ═══ PIN ═══
+function checkPin(){
+  const v = document.getElementById('pin-input').value;
+  if(v === PIN){
+    document.getElementById('pin-page').style.display   = 'none';
+    document.getElementById('deliver-page').style.display = '';
+  } else {
+    document.getElementById('pin-err').style.display = 'block';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+document.getElementById('pin-input').addEventListener('keydown', e => {
+  if(e.key === 'Enter') checkPin();
+});
+
+// ═══ عرض النتيجة ═══
+function showResult(type, ico, title, msg){
+  const box = document.getElementById('result-box');
+  box.className = type; // 'ok' أو 'err'
+  box.style.display = 'block';
+  document.getElementById('result-ico').textContent   = ico;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-msg').textContent   = msg;
+}
+
+// ═══ إعادة تعيين ═══
+function clearForm(){
+  document.getElementById('d-queue').value = '';
+  document.getElementById('d-famid').value = '';
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('d-queue').focus();
+}
+
+// ═══ تأكيد التسليم ═══
+async function doDeliver(){
+  const qStr  = document.getElementById('d-queue').value.trim();
   const famId = document.getElementById('d-famid').value.trim();
   const btn   = document.getElementById('d-btn');
 
   // تحقق من الإدخال
-  if(!qNum && !famId){
-    window.showErr('يرجى إدخال رقم الدور ورقم دفتر العائلة');
+  if(!qStr && !famId){
+    showResult('err','⚠️','بيانات ناقصة','يرجى إدخال رقم الدور ورقم دفتر العائلة');
     return;
   }
-  if(!qNum){
-    window.showErr('يرجى إدخال رقم الدور');
+  if(!qStr){
+    showResult('err','⚠️','رقم الدور مفقود','يرجى إدخال رقم الدور في الطابور');
     return;
   }
   if(!famId){
-    window.showErr('يرجى إدخال رقم دفتر العائلة');
+    showResult('err','⚠️','رقم دفتر العائلة مفقود','يرجى إدخال رقم دفتر العائلة');
+    return;
+  }
+
+  const qNum = parseInt(qStr);
+  if(isNaN(qNum) || qNum < 1){
+    showResult('err','⚠️','رقم دور غير صالح','أدخل رقم دور صحيح (رقم موجب)');
     return;
   }
 
   btn.disabled = true;
-  btn.classList.add('btn-loading');
-  document.getElementById('r-ok').style.display  = 'none';
-  document.getElementById('r-err').style.display = 'none';
+  btn.classList.add('spin');
+  document.getElementById('result-box').style.display = 'none';
 
   try{
-    // ── ابحث برقم الدور (بدون orderBy لتفادي index) ──
-    const snap = await getDocs(query(
-      collection(db,'gas_requests'),
-      where('queueNumber','==', qNum)
-    ));
+    // ── ابحث برقم الدور ──
+    const snap = await db.collection('gas_requests')
+      .where('queueNumber', '==', qNum)
+      .get();
 
     if(snap.empty){
-      window.showErr('❌ رقم الدور ' + qNum + ' غير موجود في النظام');
-      btn.disabled=false; btn.classList.remove('btn-loading');
-      return;
+      showResult('err','❌','رقم الدور غير موجود',
+        'لا يوجد طلب برقم الدور ' + qNum + ' في النظام.\nتحقق من الرقم وحاول مجدداً.');
+      btn.disabled=false; btn.classList.remove('spin'); return;
     }
 
     const gasDoc  = snap.docs[0];
     const gasData = gasDoc.data();
 
     // ── تحقق من دفتر العائلة ──
-    if(gasData.familyBookId && gasData.familyBookId !== famId){
-      window.showErr('❌ رقم دفتر العائلة لا يتطابق مع رقم الدور ' + qNum);
-      btn.disabled=false; btn.classList.remove('btn-loading');
-      return;
+    const storedFamId = gasData.familyBookId || '';
+    if(storedFamId && storedFamId !== famId){
+      showResult('err','❌','رقم دفتر العائلة خاطئ',
+        'رقم دفتر العائلة لا يتطابق مع رقم الدور ' + qNum + '.\nتأكد من الرقم وحاول مجدداً.');
+      btn.disabled=false; btn.classList.remove('spin'); return;
     }
 
-    // ── تحقق من الحالة ──
+    // ── تحقق من حالة الطلب ──
     if(gasData.status === 'delivered'){
-      const delDate = gasData.deliveredAt?.toDate
-        ? gasData.deliveredAt.toDate()
-        : new Date(gasData.deliveredAt || Date.now());
-      const diff = Math.ceil((Date.now() - delDate.getTime()) / 86400000);
-      const rem  = 22 - diff;
-      if(rem > 0)
-        window.showErr('⏱️ تم الاستلام مسبقاً — يتبقى ' + rem + ' يوم للدور القادم');
-      else
-        window.showErr('ℹ️ تم الاستلام سابقاً — يمكن للمواطن الطلب الآن');
-      btn.disabled=false; btn.classList.remove('btn-loading');
-      return;
+      let remMsg = '';
+      if(gasData.deliveredAt){
+        const delDate = gasData.deliveredAt.toDate ? gasData.deliveredAt.toDate() : new Date(gasData.deliveredAt);
+        const diff    = Math.ceil((Date.now() - delDate.getTime()) / 86400000);
+        const rem     = COOLDOWN - diff;
+        remMsg = rem > 0
+          ? '\nيتبقى ' + rem + ' يوم حتى يمكن تسجيل دور جديد.'
+          : '\nانتهت فترة الانتظار — يمكن للمواطن الطلب الآن.';
+      }
+      showResult('err','⏱️','تم الاستلام مسبقاً',
+        'هذا الدور محروق — تم تسليم الأسطوانة سابقاً.' + remMsg);
+      btn.disabled=false; btn.classList.remove('spin'); return;
     }
 
     if(gasData.status === 'rejected'){
-      window.showErr('❌ هذا الطلب مرفوض — يجب على المواطن تقديم طلب جديد');
-      btn.disabled=false; btn.classList.remove('btn-loading');
-      return;
+      showResult('err','🚫','الطلب مرفوض',
+        'هذا الطلب مرفوض من الإدارة.\nيجب على المواطن تقديم طلب جديد من بوابة المواطن.');
+      btn.disabled=false; btn.classList.remove('spin'); return;
     }
 
     // ── نفّذ التسليم ──
-    const deliveryTime = new Date().toISOString();
-    await updateDoc(doc(db,'gas_requests',gasDoc.id),{
-      status: 'delivered',
-      deliveredAt: serverTimestamp(),
+    const now = new Date().toISOString();
+    await gasDoc.ref.update({
+      status:      'delivered',
+      deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     if(gasData.userId){
-      await updateDoc(doc(db,'users',gasData.userId),{
+      await db.collection('users').doc(gasData.userId).update({
         gasStatus:    'cooldown',
-        lastReceived: deliveryTime,
+        lastReceived: now,
         ticket:       null,
       });
     }
 
-    window.showOk(gasData.name || 'المواطن');
+    const name = gasData.name || 'المواطن';
+    showResult('ok','✅','تم التسليم بنجاح',
+      'تم تسليم اسطوانة الغاز لـ: ' + name +
+      '\nبدأ عداد ' + COOLDOWN + ' يوم.\nيمكن تسجيل دور جديد بعد ' + COOLDOWN + ' يوماً.');
 
   }catch(err){
-    console.error('doDeliver error:', err);
-    window.showErr('خطأ في الاتصال: ' + (err.message || err));
+    console.error(err);
+    showResult('err','⚠️','خطأ في الاتصال',
+      'تعذّر الاتصال بقاعدة البيانات.\n' + (err.message || err));
   }
 
   btn.disabled = false;
-  btn.classList.remove('btn-loading');
-};
+  btn.classList.remove('spin');
+}
 </script>
-
 </body>
 </html>

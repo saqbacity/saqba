@@ -1620,52 +1620,64 @@ async function doLogout(){await AuthService.logout()}
 
 /* Auth state */
 document.addEventListener('userLoggedIn',async e=>{
-  const user=e.detail;uid=user.uid;
+  const user=e.detail; uid=user.uid;
   document.getElementById('page-loader').style.display='none';
   document.getElementById('auth-page').style.display='none';
   document.getElementById('dash-page').style.display='';
-  udata=await FirestoreService.getUser(uid)||{};
-  const nm=udata.name||user.email;
-  document.getElementById('sb-name').textContent=nm;
-  document.getElementById('sb-dist').textContent=udata.district||'';
-  document.getElementById('wname').textContent=nm;
-  document.getElementById('p-name').textContent  = udata.name||'—';
-  document.getElementById('p-email').textContent = udata.email||user.email;
-  document.getElementById('p-phone').textContent = udata.phone||'—';
-  document.getElementById('p-date').textContent  = formatDate(udata.createdAt);
-  // حقول التوثيق
-  document.getElementById('p-famid').textContent = udata.familyBookId||'—';
-  // حالة الغاز في الـ profile
-  const gsLabels = {
-    none:'لم يتم التوثيق', kyc_pending:'قيد المراجعة',
-    kyc_rejected:'مرفوض', eligible:'موثّق ✅',
-    booked:'لديك حجز نشط', cooldown:'فترة انتظار'
-  };
-  const gsEl = document.getElementById('p-gas-status');
-  const gsCls = {none:'',kyc_pending:'b-pending',kyc_rejected:'b-rejected',
-                 eligible:'b-approved',booked:'b-pending',cooldown:'b-rejected'};
-  const gs = udata.gasStatus||'none';
-  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
-  // آخر استلام + تاريخ السماح القادم
-  if(udata.lastReceived){
-    const lastRow = document.getElementById('p-last-row');
-    const nextRow = document.getElementById('p-next-row');
-    if(lastRow) lastRow.style.display='';
-    if(nextRow) nextRow.style.display='';
-    document.getElementById('p-last-received').textContent = formatDate(udata.lastReceived);
-    const nextDate = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
-    document.getElementById('p-next-allowed').textContent  = nextDate.toLocaleDateString('ar-SY');
-  }
-  if(udata.name) document.getElementById('g-name').value=udata.name;
-  if(udata.phone) document.getElementById('g-phone').value=udata.phone;
-  if(udata.district) document.getElementById('g-dist').value=udata.district;
+
+  // ✅ انتظر Firebase أولاً قبل أي استدعاء
+  await window._firebaseReady;
+
+  udata = await FirestoreService.getUser(uid) || {};
+  const nm = udata.name || user.email;
+
+  // Sidebar
+  document.getElementById('sb-name').textContent = nm;
+  document.getElementById('sb-dist').textContent = udata.district||'';
+  document.getElementById('wname').textContent   = nm;
+
+  // Profile tab
+  fillProfile();
+
+  // Gas form defaults
+  if(udata.name)  document.getElementById('g-name').value  = udata.name;
+  if(udata.phone) document.getElementById('g-phone').value = udata.phone;
+
+  // تحميل النظرة العامة وحالة الغاز
   loadOverview();
   refreshGasView();
-  const h=location.hash.replace('#','');
-  if(['gas','complaint','track','profile'].includes(h))gv(h);
-  // تفعيل الإشعارات بعد الدخول
+
+  const h = location.hash.replace('#','');
+  if(['gas','complaint','track','profile'].includes(h)) gv(h);
+
   window.dispatchEvent(new Event('userLoggedIn_fcm'));
 });
+
+function fillProfile(){
+  const gsLabels = {none:'لم يتم التوثيق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق ✅',booked:'لديك حجز نشط',cooldown:'فترة انتظار'};
+  const gsCls    = {none:'',kyc_pending:'b-pending',kyc_rejected:'b-rejected',eligible:'b-approved',booked:'b-pending',cooldown:'b-rejected'};
+  const gs = udata.gasStatus||'none';
+
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('p-name',  udata.name||'—');
+  set('p-email', udata.email||'—');
+  set('p-phone', udata.phone||'—');
+  set('p-date',  formatDate(udata.createdAt));
+  set('p-famid', udata.familyBookId||'—');
+
+  const gsEl = document.getElementById('p-gas-status');
+  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+
+  if(udata.lastReceived){
+    const lr = document.getElementById('p-last-row');
+    const nr = document.getElementById('p-next-row');
+    if(lr) lr.style.display='';
+    if(nr) nr.style.display='';
+    set('p-last-received', formatDate(udata.lastReceived));
+    const next = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
+    set('p-next-allowed', next.toLocaleDateString('ar-SY'));
+  }
+}
 document.addEventListener('userLoggedOut',()=>{
   document.getElementById('page-loader').style.display='none';
   document.getElementById('auth-page').style.display='';
@@ -1706,111 +1718,99 @@ function ttab(id,btn){
 
 /* Overview */
 async function loadOverview(){
-  if(!uid) return;
+  if(!uid || !udata) return;
   try{
-    // تحديث udata أولاً لضمان أحدث حالة
-    const fresh = await FirestoreService.getUser(uid);
-    if(fresh) udata = fresh;
-
-    const[g,c]=await Promise.all([
+    const[g,c] = await Promise.all([
       FirestoreService.getUserGasRequests(uid),
       FirestoreService.getUserComplaints(uid)
     ]);
 
-    // ── إحصاءات ──
+    // إحصاءات
     document.getElementById('ov-gn').textContent = g.length;
     document.getElementById('ov-cn').textContent = c.length;
 
-    // ── حالة الغاز الحالية ──
-    const gs = udata.gasStatus || 'none';
-    const statusEl = document.getElementById('ov-gas-status');
-    const gasLabels = {
-      none:         {ico:'🔐', txt:'لم يتم توثيق الهوية بعد',        cls:'',          btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">ابدأ التوثيق</button>`},
-      kyc_pending:  {ico:'⏳', txt:'وثائقك قيد المراجعة من الإدارة',  cls:'b-pending', btn:''},
-      kyc_rejected: {ico:'❌', txt:'تم رفض طلب التوثيق',              cls:'b-rejected',btn:`<button class="btn btn-danger btn-sm" onclick="gv('gas')" style="margin-top:.75rem">إعادة التقديم</button>`},
-      eligible:     {ico:'✅', txt:'موثّق — يمكنك طلب الغاز الآن',    cls:'b-approved',btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`},
-      booked:       {ico:'📋', txt:'لديك طلب قيد الانتظار',            cls:'b-pending', btn:`<button class="btn btn-ghost btn-sm" onclick="gv('gas')" style="margin-top:.75rem">عرض الدور</button>`},
-      cooldown:     {ico:'⏱️', txt:'في فترة الانتظار',                cls:'b-rejected',btn:''},
-    };
-    const info = { ...(gasLabels[gs] || gasLabels.none) };
+    // حالة الغاز
+    renderGasStatus();
 
-    // عداد cooldown
-    let extra = '';
-    if(gs === 'cooldown' && udata.lastReceived){
-      const diff      = Math.ceil((Date.now() - new Date(udata.lastReceived)) / 86400000);
-      const remaining = COOLDOWN_DAYS - diff;
-      if(remaining > 0){
-        const nextDate = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
-        extra = `<div style="margin-top:.4rem;font-size:.82rem;color:var(--tx2)">
-          يتبقى <strong style="color:#f87171">${remaining} يوم</strong> — يمكن الطلب في:
-          <strong style="color:var(--goldb)">${nextDate.toLocaleDateString('ar-SY')}</strong>
-        </div>`;
-      } else {
-        info.txt = 'انتهت فترة الانتظار — يمكنك الطلب الآن';
-        info.cls = 'b-approved';
-        info.btn = `<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`;
-      }
-    }
-
-    // رقم الدور إذا كان booked
-    if(gs === 'booked' && g.length){
-      const last = g[0];
-      info.txt = `لديك طلب قيد الانتظار — رقم الدور: #${last.queueNumber}`;
-    }
-
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.4rem">
-        <span style="font-size:1.5rem;margin-top:.1rem">${info.ico}</span>
-        <div>
-          <span class="badge ${info.cls}" style="font-size:.82rem">${info.txt}</span>
-          ${extra}
-          ${info.btn}
-        </div>
-      </div>`;
-
-    // ── سجل طلبات الغاز ──
+    // سجل الغاز
+    const gEl = document.getElementById('ov-glist');
     if(g.length){
-      document.getElementById('ov-glist').innerHTML = '<div class="req-list">' +
-        g.slice(0,5).map(r => {
-          const s = statusMap[r.status] || {label:r.status, cls:''};
-          let cd = '';
-          if(r.status==='delivered'){
-            const ref = r.deliveredAt ? new Date(r.deliveredAt) : (udata.lastReceived ? new Date(udata.lastReceived) : null);
-            if(ref){
-              const diff2 = Math.ceil((Date.now()-ref)/86400000);
-              const rem2  = COOLDOWN_DAYS - diff2;
-              cd = rem2>0
-                ? `<span style="font-size:.7rem;color:#f87171">⏱️ ${rem2} يوم للطلب القادم</span>`
-                : `<span style="font-size:.7rem;color:var(--t2)">✅ يمكن الطلب الآن</span>`;
-            }
-          }
-          return `<div class="req-item">
-            <div class="req-num">#${esc(String(r.queueNumber))}</div>
-            <div class="req-info">
-              <div class="req-title">طلب أسطوانة غاز</div>
-              <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span>${cd}</div>
-            </div>
-            <span class="badge ${s.cls}">${esc(s.label)}</span>
-          </div>`;
-        }).join('') + '</div>';
+      gEl.innerHTML = '<div class="req-list">' + g.slice(0,5).map(r=>{
+        const s   = statusMap[r.status]||{label:r.status,cls:''};
+        const ref = r.deliveredAt ? new Date(r.deliveredAt) : null;
+        let cd = '';
+        if(ref){
+          const rem = COOLDOWN_DAYS - Math.ceil((Date.now()-ref)/86400000);
+          cd = rem>0
+            ? `<span style="font-size:.7rem;color:#f87171"> · ⏱️ ${rem} يوم للطلب القادم</span>`
+            : `<span style="font-size:.7rem;color:var(--t2)"> · ✅ يمكن الطلب الآن</span>`;
+        }
+        return `<div class="req-item">
+          <div class="req-num">#${esc(String(r.queueNumber||'—'))}</div>
+          <div class="req-info">
+            <div class="req-title">طلب أسطوانة غاز</div>
+            <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span>${cd}</div>
+          </div>
+          <span class="badge ${s.cls}">${esc(s.label)}</span>
+        </div>`;
+      }).join('') + '</div>';
     }
 
-    // ── آخر الشكاوى ──
+    // سجل الشكاوى
+    const cEl = document.getElementById('ov-clist');
     if(c.length){
-      document.getElementById('ov-clist').innerHTML = '<div class="req-list">' +
-        c.slice(0,3).map(r => {
-          const s = statusMap[r.status]||{label:r.status,cls:''};
-          return `<div class="req-item">
-            <div class="req-info">
-              <div class="req-title">${esc(r.type)}</div>
-              <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div>
-            </div>
-            <span class="badge ${s.cls}">${esc(s.label)}</span>
-          </div>`;
-        }).join('') + '</div>';
+      cEl.innerHTML = '<div class="req-list">' + c.slice(0,3).map(r=>{
+        const s = statusMap[r.status]||{label:r.status,cls:''};
+        return `<div class="req-item">
+          <div class="req-info">
+            <div class="req-title">${esc(r.type)}</div>
+            <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div>
+          </div>
+          <span class="badge ${s.cls}">${esc(s.label)}</span>
+        </div>`;
+      }).join('') + '</div>';
     }
 
-  }catch(e){ console.error('loadOverview:', e) }
+  }catch(err){ console.error('loadOverview:', err); }
+}
+
+function renderGasStatus(){
+  const el = document.getElementById('ov-gas-status');
+  if(!el) return;
+  const gs = udata.gasStatus || 'none';
+
+  const map = {
+    none:         {ico:'🔐', lbl:'لم يتم التوثيق',              cls:'',          act:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.6rem">ابدأ التوثيق</button>`},
+    kyc_pending:  {ico:'⏳', lbl:'وثائقك قيد المراجعة',          cls:'b-pending', act:''},
+    kyc_rejected: {ico:'❌', lbl:'تم رفض طلب التوثيق',           cls:'b-rejected',act:`<button class="btn btn-danger btn-sm" onclick="gv('gas')" style="margin-top:.6rem">إعادة التقديم</button>`},
+    eligible:     {ico:'✅', lbl:'موثّق — يمكنك طلب الغاز الآن', cls:'b-approved',act:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.6rem">🔥 اطلب الآن</button>`},
+    booked:       {ico:'📋', lbl:'لديك طلب في الطابور',           cls:'b-pending', act:`<button class="btn btn-ghost btn-sm" onclick="gv('gas')" style="margin-top:.6rem">عرض الدور</button>`},
+    cooldown:     {ico:'⏱️', lbl:'فترة الانتظار',                cls:'b-rejected',act:''},
+  };
+  const info = map[gs] || map.none;
+  let extra = '';
+
+  if(gs === 'cooldown' && udata.lastReceived){
+    const diff = Math.ceil((Date.now()-new Date(udata.lastReceived))/86400000);
+    const rem  = COOLDOWN_DAYS - diff;
+    if(rem > 0){
+      const nxt = new Date(new Date(udata.lastReceived).getTime()+COOLDOWN_DAYS*86400000);
+      extra = `<div style="margin-top:.4rem;font-size:.82rem;color:var(--tx2)">
+        يتبقى <strong style="color:#f87171">${rem} يوم</strong> —
+        يمكن الطلب في: <strong style="color:var(--goldb)">${nxt.toLocaleDateString('ar-SY')}</strong>
+      </div>`;
+    }
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:.7rem">
+      <span style="font-size:1.4rem;line-height:1.3">${info.ico}</span>
+      <div>
+        <span class="badge ${info.cls}">${info.lbl}</span>
+        ${extra}
+        ${info.act}
+      </div>
+    </div>`;
 }
 
 /* Track */

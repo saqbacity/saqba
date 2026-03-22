@@ -656,7 +656,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             </select>
             <input class="filt-inp" id="gas-si" placeholder="ابحث باسم أو هاتف..." oninput="filterGas()">
           </div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>رقم الدور</th><th>الاسم</th><th>الهاتف</th><th>الحي</th><th>الاسطوانات</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="gas-tbody"></tbody></table></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>رقم الدور</th><th>الاسم</th><th>الهاتف</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="gas-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -1331,44 +1331,67 @@ async function loadGas(){
 function filterGas(){const q=document.getElementById('gas-si').value.toLowerCase();renderGasTbl(allGas.filter(r=>r.name?.toLowerCase().includes(q)||r.phone?.includes(q)),'gas-tbody')}
 function renderGasTbl(data,tid){
   const tb=document.getElementById(tid);
-  if(!data.length){tb.innerHTML=etr(8,'لا توجد نتائج');return}
+  if(!data.length){tb.innerHTML=etr(6,'لا توجد نتائج');return}
   tb.innerHTML=data.map(r=>{const s=statusMap[r.status]||{label:r.status,cls:''};return`<tr>
-    <td><strong style="color:var(--goldb)">#${esc(r.queueNumber)}</strong></td>
+    <td><strong style="color:var(--goldb)">#${esc(String(r.queueNumber))}</strong></td>
     <td>${esc(r.name||'—')}</td>
     <td style="direction:ltr;text-align:right">${esc(r.phone||'—')}</td>
-    <td>${esc(r.district||'—')}</td>
-    <td>${esc(r.cylinders)} اسطوانة</td>
     <td style="font-size:.78rem">${formatDate(r.createdAt)}</td>
     <td><span class="badge ${s.cls}">${esc(s.label)}</span></td>
     <td><div class="acts">
-      ${r.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="updGas('${esc(r.id)}','approved')">قبول</button>`:''}
-      ${r.status==='approved'?`<button class="btn btn-deliver btn-sm" onclick="updGas('${esc(r.id)}','delivered')">تسليم</button>`:''}
-      ${r.status!=='rejected'&&r.status!=='delivered'?`<button class="btn btn-danger btn-sm" onclick="updGas('${esc(r.id)}','rejected')">رفض</button>`:''}
+      ${r.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="updGas('${esc(r.id)}','approved')">✅ قبول</button>`:''}
+      ${r.status!=='rejected'&&r.status!=='delivered'?`<button class="btn btn-danger btn-sm" onclick="updGas('${esc(r.id)}','rejected')">❌ رفض</button>`:''}
+      <button class="btn btn-sm" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171" onclick="deleteGas('${esc(r.id)}','${esc(r.userId||'')}')">🗑️</button>
     </div></td>
   </tr>`}).join('');
 }
 async function updGas(id, status){
   try{
     await FirestoreService.updateGasRequestStatus(id, status);
-    toast('تم تحديث الحالة ✓');
 
-    // إشعار للمواطن
+    // تحديث gasStatus في حساب المواطن حتى تنعكس عليه فوراً
     const req = allGas.find(r => r.id === id);
     if(req?.userId){
-      const msgs = {
-        approved:  { title:'✅ تمت الموافقة على طلب الغاز', body:'تم قبول طلبك — تابع حالتك في بوابة المواطن' },
-        delivered: { title:'🚚 تم تسليم أسطوانة الغاز',    body:'تم تسليم غازك بنجاح' },
-        rejected:  { title:'❌ تم رفض طلب الغاز',          body:'للاستفسار تواصل مع إدارة المدينة' },
-      };
-      if(msgs[status]){
-        await sendNotificationToUser(req.userId, {
-          ...msgs[status], url: './citizen.html#gas', tag: 'gas',
+      if(status === 'rejected'){
+        // عند الرفض — أعد المواطن لـ eligible ليتمكن من الطلب مجدداً
+        await updateDoc(doc(db,'users',req.userId),{
+          gasStatus: 'eligible', ticket: null
         });
       }
+      // إشعار
+      const msgs = {
+        approved: { title:'✅ تمت الموافقة على طلب الغاز', body:'تم قبول طلبك — تابع حالتك في بوابة المواطن' },
+        rejected: { title:'❌ تم رفض طلب الغاز',           body:'يمكنك إعادة التقديم من بوابة المواطن' },
+      };
+      if(msgs[status]){
+        await sendNotificationToUser(req.userId,{ ...msgs[status], url:'./citizen.html#gas', tag:'gas' });
+      }
     }
-
+    toast('تم تحديث الحالة ✓');
     loadGas(); loadDash();
   }catch(e){ toast('خطأ في التحديث', false); }
+}
+
+async function deleteGas(id, userId){
+  if(!confirm('حذف هذا الطلب نهائياً وإعادة الترقيم؟')) return;
+  try{
+    // 1. احذف الطلب
+    await deleteDoc(doc(db,'gas_requests',id));
+    // 2. أعد gasStatus للمواطن إلى eligible (يمكنه الطلب مجدداً)
+    if(userId){
+      await updateDoc(doc(db,'users',userId),{
+        gasStatus:'eligible', ticket:null
+      });
+    }
+    // 3. أعد ترقيم كل الطلبات المتبقية بالترتيب الزمني
+    const snap = await getDocs(query(collection(db,'gas_requests'),orderBy('createdAt','asc')));
+    const batch_ops = snap.docs.map((d,i)=>
+      updateDoc(doc(db,'gas_requests',d.id),{queueNumber: i+1})
+    );
+    await Promise.all(batch_ops);
+    toast('✅ تم الحذف وإعادة الترقيم');
+    loadGas(); loadDash();
+  }catch(e){ console.error(e); toast('خطأ في الحذف',false); }
 }
 
 /* Complaints */

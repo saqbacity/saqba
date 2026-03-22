@@ -699,7 +699,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="sb-av">👤</div>
         <div>
           <div class="sb-name" id="sb-name">...</div>
-          <div class="sb-dist"><span id="sb-dist">سقبا</span></div>
+          <div id="sb-verified" style="display:none;font-size:.68rem;font-weight:700;padding:.15rem .55rem;border-radius:99px;margin-top:.2rem;display:inline-block"></div>
         </div>
       </div>
     </div>
@@ -1672,6 +1672,24 @@ async function fillProfile(){
 
   const gsEl = document.getElementById('p-gas-status');
   if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+
+  // ── badge موثق / غير موثق ──
+  const verified = ['eligible','booked','cooldown'].includes(gs);
+  const badge = document.getElementById('sb-verified');
+  if(badge){
+    badge.style.display = 'inline-block';
+    if(verified){
+      badge.textContent = '✓ موثّق';
+      badge.style.background = 'rgba(92,184,112,.2)';
+      badge.style.color = '#5cb870';
+      badge.style.border = '1px solid rgba(92,184,112,.4)';
+    } else {
+      badge.textContent = '✗ غير موثّق';
+      badge.style.background = 'rgba(239,68,68,.15)';
+      badge.style.color = '#f87171';
+      badge.style.border = '1px solid rgba(239,68,68,.3)';
+    }
+  }
 
   if(udata.lastReceived){
     ['p-last-row','p-next-row'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=''; });

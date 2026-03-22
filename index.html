@@ -616,7 +616,12 @@ try {
       const udata = usnap.exists() ? usnap.data() : {};
       const name  = udata.name || user.email?.split('@')[0] || 'مواطن';
       const role  = udata.role || 'citizen';
-      citizenBtn.innerHTML = `<span style="font-size:.8rem">🪪</span> ${name}`;
+      const gs    = udata.gasStatus || 'none';
+      const isVerified = ['eligible','booked','cooldown'].includes(gs);
+      const verBadge = isVerified
+        ? `<span style="font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:99px;background:rgba(92,184,112,.2);color:#5cb870;border:1px solid rgba(92,184,112,.4)">✓ موثّق</span>`
+        : `<span style="font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:99px;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)">✗ غير موثّق</span>`;
+      citizenBtn.innerHTML = `<span style="font-size:.8rem">🪪</span> ${name} ${verBadge}`;
       citizenBtn.href = 'citizen.html';
       adminBtn.style.display = role === 'admin' ? '' : 'none';
     } catch(e) {

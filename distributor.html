@@ -211,29 +211,36 @@ function clearForm(){
 
 <!-- Firebase Module -->
 <script type="module">
-import { initializeApp }        from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, updateDoc, query, where, orderBy, serverTimestamp }
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, updateDoc, query, where, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
   authDomain:        'saqba-portal.firebaseapp.com',
   projectId:         'saqba-portal',
   storageBucket:     'saqba-portal.firebasestorage.app',
   messagingSenderId: '135534184893',
   appId:             '1:135534184893:web:87feb3535016b650052ad4',
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+});
+const db = getFirestore(app);
 
 window.doDeliver = async function(){
   const qNum  = parseInt(document.getElementById('d-queue').value) || 0;
   const famId = document.getElementById('d-famid').value.trim();
   const btn   = document.getElementById('d-btn');
 
-  if(!qNum || !famId){
-    showErr('يرجى إدخال رقم الدور ورقم دفتر العائلة');
+  // تحقق من الإدخال
+  if(!qNum && !famId){
+    window.showErr('يرجى إدخال رقم الدور ورقم دفتر العائلة');
+    return;
+  }
+  if(!qNum){
+    window.showErr('يرجى إدخال رقم الدور');
+    return;
+  }
+  if(!famId){
+    window.showErr('يرجى إدخال رقم دفتر العائلة');
     return;
   }
 
@@ -243,75 +250,73 @@ window.doDeliver = async function(){
   document.getElementById('r-err').style.display = 'none';
 
   try{
-    const deliveryTime = new Date().toISOString();
-
-    // ── خطوة 1: ابحث برقم الدور بغض النظر عن الحالة ──
-    const snapAny = await getDocs(query(
+    // ── ابحث برقم الدور (بدون orderBy لتفادي index) ──
+    const snap = await getDocs(query(
       collection(db,'gas_requests'),
       where('queueNumber','==', qNum)
     ));
 
-    if(snapAny.empty){
-      showErr('❌ رقم الدور ' + qNum + ' غير موجود في النظام');
-      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+    if(snap.empty){
+      window.showErr('❌ رقم الدور ' + qNum + ' غير موجود في النظام');
+      btn.disabled=false; btn.classList.remove('btn-loading');
+      return;
     }
 
-    const anyDoc  = snapAny.docs[0];
-    const anyData = anyDoc.data();
+    const gasDoc  = snap.docs[0];
+    const gasData = gasDoc.data();
 
-    // ── خطوة 2: تحقق من دفتر العائلة ──
-    if(anyData.familyBookId && anyData.familyBookId !== famId){
-      showErr('❌ رقم دفتر العائلة خاطئ لهذا الدور');
-      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+    // ── تحقق من دفتر العائلة ──
+    if(gasData.familyBookId && gasData.familyBookId !== famId){
+      window.showErr('❌ رقم دفتر العائلة لا يتطابق مع رقم الدور ' + qNum);
+      btn.disabled=false; btn.classList.remove('btn-loading');
+      return;
     }
 
-    // ── خطوة 3: تحقق من الحالة ──
-    if(anyData.status === 'delivered'){
-      // احسب كم يوم مضى
-      const del   = anyData.deliveredAt?.toDate?.() || new Date(anyData.deliveredAt || Date.now());
-      const diff  = Math.ceil((Date.now()-del)/86400000);
-      const rem   = 22 - diff;
+    // ── تحقق من الحالة ──
+    if(gasData.status === 'delivered'){
+      const delDate = gasData.deliveredAt?.toDate
+        ? gasData.deliveredAt.toDate()
+        : new Date(gasData.deliveredAt || Date.now());
+      const diff = Math.ceil((Date.now() - delDate.getTime()) / 86400000);
+      const rem  = 22 - diff;
       if(rem > 0)
-        showErr('⏱️ تم الاستلام مسبقاً — يتبقى ' + rem + ' يوم للدور القادم');
+        window.showErr('⏱️ تم الاستلام مسبقاً — يتبقى ' + rem + ' يوم للدور القادم');
       else
-        showErr('✅ تم الاستلام سابقاً — يمكن الطلب الآن من بوابة المواطن');
-      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+        window.showErr('ℹ️ تم الاستلام سابقاً — يمكن للمواطن الطلب الآن');
+      btn.disabled=false; btn.classList.remove('btn-loading');
+      return;
     }
 
-    if(anyData.status === 'rejected'){
-      showErr('❌ هذا الطلب مرفوض — يجب على المواطن تقديم طلب جديد');
-      btn.disabled=false; btn.classList.remove('btn-loading'); return;
+    if(gasData.status === 'rejected'){
+      window.showErr('❌ هذا الطلب مرفوض — يجب على المواطن تقديم طلب جديد');
+      btn.disabled=false; btn.classList.remove('btn-loading');
+      return;
     }
 
-    // ── خطوة 4: نفّذ التسليم ──
-    await _deliver(anyDoc, deliveryTime);
-    showOk(anyData.name || 'المواطن');
+    // ── نفّذ التسليم ──
+    const deliveryTime = new Date().toISOString();
+    await updateDoc(doc(db,'gas_requests',gasDoc.id),{
+      status: 'delivered',
+      deliveredAt: serverTimestamp(),
+    });
+    if(gasData.userId){
+      await updateDoc(doc(db,'users',gasData.userId),{
+        gasStatus:    'cooldown',
+        lastReceived: deliveryTime,
+        ticket:       null,
+      });
+    }
 
-  }catch(e){
-    console.error(e);
-    showErr('خطأ في الاتصال بقاعدة البيانات: ' + e.message);
+    window.showOk(gasData.name || 'المواطن');
+
+  }catch(err){
+    console.error('doDeliver error:', err);
+    window.showErr('خطأ في الاتصال: ' + (err.message || err));
   }
 
-  btn.disabled=false;
+  btn.disabled = false;
   btn.classList.remove('btn-loading');
 };
-
-async function _deliver(gasDoc, deliveryTime){
-  const data = gasDoc.data();
-  // حدّث الطلب → delivered
-  await updateDoc(doc(db,'gas_requests',gasDoc.id),{
-    status: 'delivered',
-    deliveredAt: serverTimestamp(),
-  });
-  // حدّث المواطن → cooldown + ابدأ العداد
-  if(data.userId){
-    await updateDoc(doc(db,'users',data.userId),{
-      gasStatus:    'cooldown',
-      lastReceived: deliveryTime,
-      ticket:       null,
-    });
-  }
-}
 </script>
 
 </body>

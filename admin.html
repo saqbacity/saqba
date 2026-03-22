@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>لوحة الإدارة — بوابة سقبا</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="بوابة سقبا">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -434,6 +443,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 .mob-btn{display:none}
 
+
+/* ── PAGINATION ── */
+.pag-bar{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.75rem 0;margin-top:.5rem}
+.pag-btn{background:rgba(92,184,112,.08);border:1px solid rgba(92,184,112,.2);border-radius:8px;padding:.4rem 1rem;color:var(--t2);font-family:var(--fb);font-size:.82rem;cursor:pointer;transition:all .2s}
+.pag-btn:hover:not(:disabled){background:rgba(92,184,112,.15);border-color:var(--t2)}
+.pag-btn:disabled{opacity:.35;cursor:not-allowed}
+.pag-info{font-size:.85rem;color:var(--tx2);font-weight:600}
+/* ── SEARCH BOX ── */
+.tbl-search{padding:.55rem 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(92,184,112,.15);border-radius:9px;color:var(--tx1);font-family:var(--fb);font-size:.85rem;width:100%;margin-bottom:.75rem}
+.tbl-search:focus{outline:none;border-color:var(--t2)}
+.tbl-search::placeholder{color:var(--tx3)}
 </style>
 </head>
 <body>
@@ -586,6 +606,30 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div class="stat-card"><div class="stat-ico si-red">🔴</div><div><div class="stat-n" id="st-co">—</div><div class="stat-l">شكاوى مفتوحة</div></div></div>
           <div class="stat-card"><div class="stat-ico si-sky">📰</div><div><div class="stat-n" id="st-n">—</div><div class="stat-l">الأخبار</div></div></div>
         </div>
+
+        <!-- ── الرسوم البيانية ── -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.8rem" id="charts-row">
+          <!-- حالات طلبات الغاز -->
+          <div class="panel">
+            <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">حالات طلبات الغاز</span></div>
+            <div class="panel-body" style="padding:1.2rem">
+              <canvas id="chart-gas" height="200"></canvas>
+              <div id="chart-gas-empty" style="display:none;text-align:center;padding:2rem;color:var(--tx3)">لا توجد بيانات بعد</div>
+            </div>
+          </div>
+          <!-- حالات الشكاوى -->
+          <div class="panel">
+            <div class="panel-head"><div class="panel-icon pi-teal">📣</div><span class="panel-title">حالات الشكاوى</span></div>
+            <div class="panel-body" style="padding:1.2rem">
+              <canvas id="chart-comp" height="200"></canvas>
+              <div id="chart-comp-empty" style="display:none;text-align:center;padding:2rem;color:var(--tx3)">لا توجد بيانات بعد</div>
+            </div>
+          </div>
+        </div>
+        <style>
+        @media(max-width:700px){#charts-row{grid-template-columns:1fr!important}}
+        </style>
+
         <!-- recent gas -->
         <div class="panel">
           <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">أحدث طلبات الغاز</span></div><button class="btn btn-ghost btn-sm" onclick="gv('gas')">عرض الكل</button></div>
@@ -715,7 +759,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div id="v-users" class="vp">
         <div class="panel">
           <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">👥</div><span class="panel-title">إدارة المستخدمين</span></div><button class="btn btn-teal btn-sm" onclick="loadUsers()">🔄 تحديث</button></div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>الحي</th><th>تاريخ التسجيل</th><th>الصلاحية</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+          <div class="panel-body" style="padding-bottom:.5rem">
+            <input type="search" id="users-search" class="tbl-search" placeholder="🔍 بحث بالاسم أو البريد أو الهاتف..." oninput="filterUsers()">
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>الحي</th><th>تاريخ التسجيل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+          <div id="users-pagination"></div>
         </div>
       </div>
 
@@ -1130,6 +1178,8 @@ function gv(v){
 }
 
 /* Dashboard */
+let _chartGas = null, _chartComp = null;
+
 async function loadDash(){
   try{
     const s=await FirestoreService.getDashboardStats();
@@ -1137,8 +1187,139 @@ async function loadDash(){
     document.getElementById('nc-gas').textContent=s.pendingGasRequests;
     document.getElementById('nc-comp').textContent=s.openComplaints;
   }catch(e){}
-  try{const r=await FirestoreService.getAllGasRequests();renderGasTbl(r.slice(0,5),'d-gas-tbody')}catch(e){}
+
+  // رسم الـ Charts
+  try{
+    const gasData = await FirestoreService.getAllGasRequests();
+    renderCharts(gasData);
+    renderGasTbl(gasData.slice(0,5),'d-gas-tbody');
+  }catch(e){}
+
   try{const c=await FirestoreService.getAllComplaints();renderCompTbl(c.slice(0,5),'d-comp-tbody')}catch(e){}
+}
+
+function renderCharts(gasData){
+  if(typeof Chart === 'undefined') return;
+
+  // ── Chart 1: حالات الغاز ──
+  const gasStatus = {
+    'pending':'قيد الانتظار', 'approved':'مقبول',
+    'delivered':'تم التسليم', 'rejected':'مرفوض'
+  };
+  const gasCounts = Object.fromEntries(Object.keys(gasStatus).map(k=>[k,0]));
+  gasData.forEach(r=>{ if(gasCounts[r.status]!==undefined) gasCounts[r.status]++; });
+  const gasVals = Object.values(gasCounts);
+  const gasTotal = gasVals.reduce((a,b)=>a+b,0);
+
+  const gasEl = document.getElementById('chart-gas');
+  if(gasEl){
+    if(gasTotal===0){
+      gasEl.style.display='none';
+      document.getElementById('chart-gas-empty').style.display='block';
+    } else {
+      gasEl.style.display='';
+      document.getElementById('chart-gas-empty').style.display='none';
+      if(_chartGas) _chartGas.destroy();
+      _chartGas = new Chart(gasEl.getContext('2d'),{
+        type:'doughnut',
+        data:{
+          labels: Object.values(gasStatus),
+          datasets:[{
+            data: gasVals,
+            backgroundColor:['#f59e0b','#5cb870','#3b82f6','#ef4444'],
+            borderColor:'rgba(8,34,40,.8)',
+            borderWidth:2
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{
+            legend:{
+              position:'bottom',
+              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:12},padding:12}
+            },
+            tooltip:{
+              callbacks:{
+                label: ctx => ` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/gasTotal*100)}%)`
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ── Chart 2: حالات الشكاوى (يُحمَّل من الـ stats) ──
+  // نعرض نسبة مفتوحة vs مغلقة فقط بدون أحياء
+  const stU = parseInt(document.getElementById('st-c')?.textContent)||0;
+  const stO = parseInt(document.getElementById('st-co')?.textContent)||0;
+  const resolved = stU - stO;
+  const compEl = document.getElementById('chart-comp');
+  if(compEl){
+    if(stU===0){
+      compEl.style.display='none';
+      document.getElementById('chart-comp-empty').style.display='block';
+    } else {
+      compEl.style.display='';
+      document.getElementById('chart-comp-empty').style.display='none';
+      if(_chartComp) _chartComp.destroy();
+      _chartComp = new Chart(compEl.getContext('2d'),{
+        type:'doughnut',
+        data:{
+          labels:['مفتوحة','معالجة / مغلقة'],
+          datasets:[{
+            data:[stO, resolved],
+            backgroundColor:['#ef4444','#5cb870'],
+            borderColor:'rgba(8,34,40,.8)',
+            borderWidth:2
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{
+            legend:{
+              position:'bottom',
+              labels:{color:'#9bbfc5',font:{family:'Tajawal',size:12},padding:12}
+            }
+          }
+        }
+      });
+    }
+  }
+}
+
+/* ══ Push Notifications Helper ══
+   يحفظ الإشعار في Firestore collection "notifications"
+   يمكن استخدام Firebase Cloud Functions لاحقاً لإرسالها
+   أو استخدام FCM REST API مباشرة ══ */
+async function sendNotificationToAll({ title, body, url, tag }) {
+  try {
+    // نحفظ الإشعار في Firestore — Cloud Function ترسله لكل المستخدمين
+    await addDoc(collection(db, 'notifications'), {
+      title, body,
+      url:       url   || './citizen.html',
+      tag:       tag   || 'general',
+      scope:     'all', // all | uid
+      sentAt:    serverTimestamp(),
+      sentBy:    window.currentUser?.uid || 'admin',
+      status:    'pending',
+    });
+  } catch(e) {}
+}
+
+async function sendNotificationToUser(uid, { title, body, url, tag }) {
+  try {
+    await addDoc(collection(db, 'notifications'), {
+      title, body,
+      url:    url  || './citizen.html',
+      tag:    tag  || 'personal',
+      scope:  'uid',
+      toUid:  uid,
+      sentAt: serverTimestamp(),
+      sentBy: window.currentUser?.uid || 'admin',
+      status: 'pending',
+    });
+  } catch(e) {}
 }
 
 /* Gas */
@@ -1166,8 +1347,28 @@ function renderGasTbl(data,tid){
     </div></td>
   </tr>`}).join('');
 }
-async function updGas(id,status){
-  try{await FirestoreService.updateGasRequestStatus(id,status);toast('تم تحديث الحالة ✓');loadGas();loadDash()}catch(e){toast('خطأ في التحديث',false)}
+async function updGas(id, status){
+  try{
+    await FirestoreService.updateGasRequestStatus(id, status);
+    toast('تم تحديث الحالة ✓');
+
+    // إشعار للمواطن
+    const req = allGas.find(r => r.id === id);
+    if(req?.userId){
+      const msgs = {
+        approved:  { title:'✅ تمت الموافقة على طلب الغاز', body:'تم قبول طلبك — تابع حالتك في بوابة المواطن' },
+        delivered: { title:'🚚 تم تسليم أسطوانة الغاز',    body:'تم تسليم غازك بنجاح' },
+        rejected:  { title:'❌ تم رفض طلب الغاز',          body:'للاستفسار تواصل مع إدارة المدينة' },
+      };
+      if(msgs[status]){
+        await sendNotificationToUser(req.userId, {
+          ...msgs[status], url: './citizen.html#gas', tag: 'gas',
+        });
+      }
+    }
+
+    loadGas(); loadDash();
+  }catch(e){ toast('خطأ في التحديث', false); }
 }
 
 /* Complaints */
@@ -1198,7 +1399,18 @@ async function updComp(id,status){
 /* News */
 async function addNews(e){
   e.preventDefault();const btn=document.getElementById('n-btn');btn.disabled=true;btn.classList.add('btn-loading');
-  try{await FirestoreService.createNews({title:document.getElementById('n-title').value,content:document.getElementById('n-body').value},document.getElementById('n-img').files[0]||null);toast('تم نشر الخبر 📰');e.target.reset();loadNews();loadDash()}
+  try{
+    await FirestoreService.createNews({title:document.getElementById('n-title').value,content:document.getElementById('n-body').value},document.getElementById('n-img').files[0]||null);
+    toast('تم نشر الخبر 📰');
+    // إشعار لكل المستخدمين
+    await sendNotificationToAll({
+      title: '📰 خبر جديد من بوابة سقبا',
+      body:  document.getElementById('n-title').value,
+      url:   './index.html',
+      tag:   'news',
+    });
+    e.target.reset();loadNews();loadDash();
+  }
   catch(er){toast('خطأ في نشر الخبر',false)}
   btn.disabled=false;btn.classList.remove('btn-loading');
 }
@@ -1233,25 +1445,69 @@ async function loadGal(){
 }
 async function delGal(id){if(!confirm('حذف هذه الصورة؟'))return;try{await FirestoreService.deleteGalleryImage(id);toast('تم الحذف');loadGal()}catch(e){toast('خطأ في الحذف',false)}}
 
-/* Users */
+/* Users — مع Pagination */
+const PAGE_SIZE = 20;
+let usersPage = 0, allUsers = [], usersFiltered = [];
+
 async function loadUsers(){
   document.getElementById('users-tbody').innerHTML=etr(6,'⏳ جاري التحميل...');
   try{
-    const users = await (window._getAllUsers?.() || FirestoreService.getAllUsers());
-    document.getElementById('users-tbody').innerHTML=users.length?users.map(u=>`<tr>
-      <td>${esc(u.name||'—')}</td>
-      <td style="direction:ltr;text-align:right;font-size:.82rem">${esc(u.email||'—')}</td>
-      <td style="direction:ltr;text-align:right">${esc(u.phone||'—')}</td>
-      <td>${esc(u.district||'—')}</td>
-      <td style="font-size:.78rem">${formatDate(u.createdAt)}</td>
-      <td><span class="badge ${u.role==='admin'?'b-approved':'b-pending'}">${u.role==='admin'?'🛡️ مشرف':'👤 مواطن'}</span></td>
-      <td>
-        <button class="btn btn-teal btn-sm" onclick="resetUserPassword('${esc(u.email||'')}','${esc(u.name||'')}')" title="إرسال رابط استعادة كلمة المرور" ${!u.email?'disabled':''}>
-          🔑 إعادة تعيين
-        </button>
-      </td>
-    </tr>`).join(''):etr(6,'لا يوجد مستخدمون');
+    allUsers = await (window._getAllUsers?.() || FirestoreService.getAllUsers());
+    usersFiltered = allUsers;
+    usersPage = 0;
+    renderUsersPage();
   }catch(e){document.getElementById('users-tbody').innerHTML=etr(6,'⚠️ خطأ في التحميل')}
+}
+
+function filterUsers(){
+  const q = (document.getElementById('users-search')?.value||'').toLowerCase();
+  usersFiltered = q
+    ? allUsers.filter(u =>
+        (u.name||'').toLowerCase().includes(q) ||
+        (u.email||'').toLowerCase().includes(q) ||
+        (u.phone||'').includes(q))
+    : allUsers;
+  usersPage = 0;
+  renderUsersPage();
+}
+
+function renderUsersPage(){
+  const start = usersPage * PAGE_SIZE;
+  const page  = usersFiltered.slice(start, start + PAGE_SIZE);
+  const total = usersFiltered.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+
+  document.getElementById('users-tbody').innerHTML = page.length
+    ? page.map(u=>`<tr>
+        <td>${esc(u.name||'—')}</td>
+        <td style="direction:ltr;text-align:right;font-size:.82rem">${esc(u.email||'—')}</td>
+        <td style="direction:ltr;text-align:right">${esc(u.phone||'—')}</td>
+        <td>${esc(u.district||'—')}</td>
+        <td style="font-size:.78rem">${formatDate(u.createdAt)}</td>
+        <td><span class="badge ${u.role==='admin'?'b-approved':'b-pending'}">${u.role==='admin'?'🛡️ مشرف':'👤 مواطن'}</span></td>
+        <td>
+          <button class="btn btn-teal btn-sm" onclick="resetUserPassword('${esc(u.email||'')}','${esc(u.name||'')}')" ${!u.email?'disabled':''}>
+            🔑 إعادة تعيين
+          </button>
+        </td>
+      </tr>`).join('')
+    : etr(6,'لا يوجد مستخدمون');
+
+  // Pagination controls
+  const pEl = document.getElementById('users-pagination');
+  if(pEl) pEl.innerHTML = pages > 1 ? `
+    <div class="pag-bar">
+      <button class="pag-btn" onclick="usersChangePage(-1)" ${usersPage===0?'disabled':''}>→ السابق</button>
+      <span class="pag-info">${usersPage+1} / ${pages} <span style="color:var(--tx3)">(${total})</span></span>
+      <button class="pag-btn" onclick="usersChangePage(1)" ${usersPage>=pages-1?'disabled':''}>التالي ←</button>
+    </div>` : '';
+}
+
+function usersChangePage(dir){
+  const pages = Math.ceil(usersFiltered.length / PAGE_SIZE);
+  usersPage = Math.max(0, Math.min(pages-1, usersPage + dir));
+  renderUsersPage();
+  document.getElementById('v-users')?.scrollTo({top:0,behavior:'smooth'});
 }
 
 
@@ -1465,19 +1721,31 @@ async function approveKyc(uid){
   try{
     await window._updateUserDoc(uid,{gasStatus:'eligible',gasRejectedReason:null});
     toast('✅ تم قبول التوثيق وفتح خدمة الغاز للمستخدم');
+    await sendNotificationToUser(uid, {
+      title: '✅ تم توثيق هويتك بنجاح',
+      body:  'يمكنك الآن تسجيل طلب الغاز من بوابة المواطن',
+      url:   './citizen.html#gas',
+      tag:   'kyc',
+    });
     loadKyc();
   }catch(e){toast('خطأ في التحديث',false)}
 }
 
 async function rejectKyc(uid){
   const reason=prompt('سبب الرفض (سيظهر للمستخدم):');
-  if(reason===null)return; // المستخدم ألغى
+  if(reason===null)return;
   try{
     await window._updateUserDoc(uid,{
       gasStatus:'kyc_rejected',
       gasRejectedReason: reason||'وثائق غير مقبولة — يرجى إعادة التقديم بوثائق واضحة وصحيحة'
     });
     toast('تم رفض الطلب مع إشعار المستخدم بالسبب');
+    await sendNotificationToUser(uid, {
+      title: '⚠️ تم رفض طلب توثيق الغاز',
+      body:  reason || 'يرجى مراجعة البوابة لمعرفة السبب وإعادة التقديم',
+      url:   './citizen.html#gas',
+      tag:   'kyc',
+    });
     loadKyc();
   }catch(e){toast('خطأ',false)}
 }
@@ -1495,6 +1763,16 @@ async function revokeKyc(uid){
 function etr(cols,msg){return`<tr><td colspan="${cols}"><div class="empty"><div class="empty-ico">📋</div><div class="empty-title">${msg}</div></div></td></tr>`}
 function openLb(src){document.getElementById('lb-img').src=src;document.getElementById('lb').classList.add('on')}
 document.getElementById('lb').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('on')})
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(r=>console.log('SW registered'))
+      .catch(e=>console.log('SW error',e));
+  });
+}
 </script>
 </body>
 

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>حساب المواطن — بوابة سقبا</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="بوابة سقبا">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -1599,6 +1606,8 @@ document.addEventListener('userLoggedIn',async e=>{
   refreshGasView();
   const h=location.hash.replace('#','');
   if(['gas','complaint','track','profile'].includes(h))gv(h);
+  // تفعيل الإشعارات بعد الدخول
+  window.dispatchEvent(new Event('userLoggedIn_fcm'));
 });
 document.addEventListener('userLoggedOut',()=>{
   document.getElementById('page-loader').style.display='none';
@@ -1956,6 +1965,16 @@ function udrop(e){e.preventDefault();document.getElementById('uzone').classList.
 function usetf(f){if(f.size>5*1024*1024){toast('حجم الصورة يتجاوز 5MB',false);return}selFile=f;document.getElementById('fname').textContent=f.name;document.getElementById('fprev').style.display='flex'}
 function uclr(){selFile=null;document.getElementById('c-img').value='';document.getElementById('fprev').style.display='none'}
 </script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(r=>console.log('SW registered'))
+      .catch(e=>console.log('SW error',e));
+  });
+}
+</script>
 </body>
 
 <!-- Firebase Modular SDK -->
@@ -1988,6 +2007,9 @@ import {
   getStorage, ref as sRef,
   uploadBytes, getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js';
+import {
+  getMessaging, getToken, onMessage
+} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-messaging.js';
 
 /* ─── استبدل هذه القيم بإعداداتك من Firebase Console ─── */
 const firebaseConfig = {
@@ -2003,6 +2025,43 @@ const app     = initializeApp(firebaseConfig);
 const auth    = getAuth(app);
 const db      = getFirestore(app);
 const storage = getStorage(app);
+
+/* ─── Push Notifications (FCM) ───────────────────── */
+async function initFCM() {
+  try {
+    const messaging = getMessaging(app);
+
+    // طلب إذن الإشعارات
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    // الحصول على الـ Token — استبدل VAPID_KEY بمفتاحك
+    const token = await getToken(messaging, {
+      vapidKey: 'BNi1n04Qi-6qVe0A2W2z3NVhl2An2e3Hi1TM4D-_W0MWZYZpq1S-v4-FdbAkt8cbD-5UrGBrL4GqtW9Irj31m0Q',
+      serviceWorkerRegistration: await navigator.serviceWorker.ready,
+    });
+
+    if (token && window.currentUser) {
+      // حفظ الـ Token في Firestore لاستخدامه لاحقاً في الإرسال
+      await updateDoc(doc(db, 'users', window.currentUser.uid), {
+        fcmToken: token,
+        fcmUpdatedAt: serverTimestamp(),
+      }).catch(() => {});
+    }
+
+    // استقبال الإشعارات وهو في الواجهة (Foreground)
+    onMessage(messaging, payload => {
+      const { title, body } = payload.notification || {};
+      if (title) toast(`🔔 ${title}${body ? ': ' + body : ''}`);
+    });
+
+  } catch(e) {
+    // الإشعارات اختيارية — تجاهل الأخطاء
+  }
+}
+
+/* استدعاء FCM بعد تسجيل الدخول */
+window.addEventListener('userLoggedIn_fcm', () => initFCM());
 
 /* ─── Auth State ─────────────────────────────────────── */
 onAuthStateChanged(auth, (user) => {

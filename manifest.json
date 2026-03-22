@@ -1,0 +1,44 @@
+{
+  "name": "بوابة سقبا الرقمية",
+  "short_name": "سقبا",
+  "description": "منصة حكومية رقمية لخدمات أبناء مدينة سقبا",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b1410",
+  "theme_color": "#0b1410",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["government", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "بوابة المواطن",
+      "short_name": "المواطن",
+      "description": "تسجيل الدخول وإدارة طلباتك",
+      "url": "./citizen.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "سجل الشهداء",
+      "short_name": "الشهداء",
+      "description": "سجل شهداء مدينة سقبا",
+      "url": "./martyrs.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

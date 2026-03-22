@@ -24,7 +24,7 @@
   --fb:'Tajawal',sans-serif;--fd:'Amiri',serif;
   --eoe:cubic-bezier(.16,1,.3,1);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth;width:100%}
 body{font-family:var(--fb);background:var(--ink);color:var(--tx1);direction:rtl;min-height:100vh;width:100%;overflow-x:hidden}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--ink)}::-webkit-scrollbar-thumb{background:var(--t7);border-radius:99px}
@@ -310,7 +310,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .topbar-back:hover{color:var(--t2);border-color:var(--glbr)}
 
 .main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.content{padding:2rem;max-width:900px;width:100%}
+.content{padding:2rem;max-width:900px;width:100%;margin:0 auto}
 
 /* ── PANELS ── */
 .panel{
@@ -480,7 +480,28 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .sidebar{position:fixed;right:-265px;z-index:200;height:100vh;transition:right .35s var(--eoe)}
   .sidebar.open{right:0}
   .mob-btn{display:flex}
-  .content{padding:1rem}
+  .content{padding:1rem;margin:0 auto}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .gas-districts{grid-template-columns:1fr 1fr}
+  .panel-body{padding:1rem}
+  .panel-head{padding:.9rem 1rem}
+}
+@media(max-width:560px){
+  /* Phone — full single column */
+  .stats-row{grid-template-columns:1fr}
+  .gas-districts{grid-template-columns:1fr}
+  .auth-layout{grid-template-columns:1fr}
+  .auth-deco{display:none}
+  .hbtns{flex-direction:column;gap:.7rem;width:100%}
+  .bp,.bo{width:100%;justify-content:center}
+  /* KYC form upload zones */
+  .upload-zone{padding:1.2rem}
+  /* Profile rows */
+  .prof-row{flex-direction:column;align-items:flex-start;gap:.3rem}
+  /* Topbar */
+  .tb-title{font-size:.9rem}
+  /* Sidebar open overlay */
+  .sidebar.open::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:-1}
 }
 
 </style>
@@ -546,6 +567,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="fgrp">
         <label class="flbl">كلمة المرور <span class="req">*</span></label>
         <input class="finp" id="l-pass" type="password" placeholder="••••••••" required>
+      </div>
+      <!-- تذكرني -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-.3rem;margin-bottom:.8rem">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.83rem;color:var(--tx2)">
+          <input type="checkbox" id="l-remember" style="width:15px;height:15px;accent-color:var(--gold);cursor:pointer">
+          تذكرني
+        </label>
+        <span onclick="doForgotPassword()" style="font-size:.8rem;color:var(--t2);cursor:pointer;text-decoration:underline;text-underline-offset:3px">نسيت كلمة المرور؟</span>
       </div>
       <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-btn">
         <span class="btxt">تسجيل الدخول</span>
@@ -1389,19 +1418,22 @@ function aerr(c){return{['auth/user-not-found']:'لا يوجد حساب بهذا
 /* Login */
 async function doLogin(e){
   e.preventDefault();
-  const btn=document.getElementById('login-btn');
+  const btn = document.getElementById('login-btn');
   btn.disabled=true; btn.classList.add('btn-loading');
   try{
-    // انتظر Firebase مع timeout
     await Promise.race([
       window._firebaseReady,
       new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),8000))
     ]);
+    // تذكرني — استخدم LOCAL persistence إذا كان مفعلاً، وإلا SESSION
+    const remember = document.getElementById('l-remember')?.checked;
+    if(typeof window._setAuthPersistence === 'function') {
+      await window._setAuthPersistence(remember ? 'local' : 'session');
+    }
     await AuthService.login(
       document.getElementById('l-email').value.trim(),
       document.getElementById('l-pass').value
     );
-    // النجاح — userLoggedIn event سيُطلق تلقائياً
   } catch(er){
     console.error('Login error:', er.code, er.message);
     const msgs = {
@@ -1414,6 +1446,19 @@ async function doLogin(e){
     };
     toast(msgs[er.code] || msgs[er.message] || 'حدث خطأ في تسجيل الدخول', false);
     btn.disabled=false; btn.classList.remove('btn-loading');
+  }
+}
+
+/* نسيت كلمة المرور */
+async function doForgotPassword(){
+  const email = document.getElementById('l-email').value.trim();
+  if(!email){ toast('أدخل البريد الإلكتروني أولاً',false); return; }
+  try{
+    await window._firebaseReady;
+    await window._sendPasswordReset(email);
+    toast('✅ تم إرسال رابط إعادة التعيين إلى بريدك');
+  }catch(er){
+    toast('تعذر إرسال البريد — تحقق من العنوان',false);
   }
 }
 
@@ -1851,7 +1896,8 @@ import { initializeApp }
   from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
 import {
   getAuth, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged
+  signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  sendPasswordResetEmail, browserLocalPersistence, browserSessionPersistence, setPersistence
 } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
 import {
   getFirestore, collection, doc,
@@ -2153,6 +2199,9 @@ window.FirestoreService = {
   },
 };
 window.AuthService = AuthService;
+window._sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
+window._setAuthPersistence = (type) =>
+  setPersistence(auth, type === 'local' ? browserLocalPersistence : browserSessionPersistence);
 
 /* أعلن أن Firebase جاهز */
 if(window._firebaseReadyResolve) window._firebaseReadyResolve();

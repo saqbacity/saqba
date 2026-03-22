@@ -105,6 +105,7 @@ input[type=number]{font-family:monospace;font-size:1.2rem;text-align:center;lett
 
 <!-- Firebase Compat (لا مشاكل scope) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
 // ═══ الإعدادات ═══
@@ -120,7 +121,23 @@ firebase.initializeApp({
   messagingSenderId: '135534184893',
   appId:             '1:135534184893:web:87feb3535016b650052ad4',
 });
-const db = firebase.firestore();
+const db   = firebase.firestore();
+const auth = firebase.auth();
+
+// تسجيل دخول تلقائي بحساب الموزع
+const DIST_EMAIL = 'distributor@saqba.local';
+const DIST_PASS  = 'SaqbaGas2026!';
+
+auth.signInWithEmailAndPassword(DIST_EMAIL, DIST_PASS)
+  .then(() => console.log('✅ logged in'))
+  .catch(err => {
+    console.error('Auth error:', err.message);
+    document.getElementById('result-box').style.display = 'block';
+    document.getElementById('result-box').className = 'err';
+    document.getElementById('result-ico').textContent = '⚠️';
+    document.getElementById('result-title').textContent = 'خطأ في الاتصال';
+    document.getElementById('result-msg').textContent = 'تعذّر تسجيل الدخول: ' + err.message;
+  });
 
 // ═══ PIN ═══
 function checkPin(){

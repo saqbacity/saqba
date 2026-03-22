@@ -2127,14 +2127,12 @@ const FirestoreService = {
 
   /* ── Gas Requests ── */
   async createGasRequest(data) {
-    const qSnap = await getDocs(
-      query(collection(db, 'gas_requests'), where('district', '==', data.district))
-    );
+    // رقم الدور = إجمالي الطلبات الكلي + 1 (بدون فلترة بالحي)
+    const qSnap = await getDocs(collection(db, 'gas_requests'));
     const queueNumber = qSnap.size + 1;
     const ref = await addDoc(collection(db, 'gas_requests'), {
       ...data, queueNumber, status: 'pending', createdAt: serverTimestamp()
     });
-    // نُرجع queueNumber مباشرةً لتجنب استدعاء getDoc إضافي
     return { id: ref.id, queueNumber };
   },
   async getUserGasRequests(userId) {

@@ -748,16 +748,30 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div id="v-overview" class="vp">
         <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.3rem">مرحباً، <span id="wname" style="color:var(--goldb)">...</span> 👋</h2>
         <p style="color:var(--tx3);font-size:.85rem;margin-bottom:1.8rem">إليك ملخص حساباتك وآخر طلباتك</p>
+
+        <!-- إحصاءات -->
         <div class="stats-row">
           <div class="stat-card"><div class="stat-ico si-gold">🔥</div><div><div class="stat-n" id="ov-gn">—</div><div class="stat-l">طلبات الغاز</div></div></div>
           <div class="stat-card"><div class="stat-ico si-teal">📣</div><div><div class="stat-n" id="ov-cn">—</div><div class="stat-l">الشكاوى المقدمة</div></div></div>
         </div>
+
+        <!-- حالة الغاز الحالية -->
+        <div class="panel" style="margin-bottom:1.4rem">
+          <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">حالة الغاز الحالية</span></div>
+          <div class="panel-body" id="ov-gas-status">
+            <div class="empty"><div class="empty-ico">⏳</div><div class="empty-title">جاري التحميل...</div></div>
+          </div>
+        </div>
+
+        <!-- آخر طلبات الغاز -->
         <div class="panel">
-          <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">آخر طلبات الغاز</span></div>
+          <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">سجل طلبات الغاز</span><button class="btn btn-ghost btn-sm" onclick="gv('track')" style="width:auto;margin-right:auto">عرض الكل</button></div>
           <div class="panel-body"><div id="ov-glist"><div class="empty"><div class="empty-ico">🔥</div><div class="empty-title">لا توجد طلبات بعد</div><div style="margin-top:1rem"><button class="btn btn-primary btn-sm" onclick="gv('gas')">سجّل طلب الغاز</button></div></div></div></div>
         </div>
+
+        <!-- آخر الشكاوى -->
         <div class="panel">
-          <div class="panel-head"><div class="panel-icon pi-teal">📣</div><span class="panel-title">آخر الشكاوى</span></div>
+          <div class="panel-head"><div class="panel-icon pi-teal">📣</div><span class="panel-title">آخر الشكاوى</span><button class="btn btn-ghost btn-sm" onclick="gv('track')" style="width:auto;margin-right:auto">عرض الكل</button></div>
           <div class="panel-body"><div id="ov-clist"><div class="empty"><div class="empty-ico">📣</div><div class="empty-title">لا توجد شكاوى بعد</div><div style="margin-top:1rem"><button class="btn btn-primary btn-sm" onclick="gv('complaint')">أرسل شكوى</button></div></div></div></div>
         </div>
       </div>
@@ -999,12 +1013,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
                   <rect x="135" y="105" width="7" height="7" rx="1" fill="var(--goldb)"/>
                   <rect x="125" y="135" width="7" height="7" rx="1" fill="var(--t2)"/>
                 </svg>
-                <div style="font-size:.72rem;color:var(--tx3);margin-bottom:.4rem">رقم التذكرة الإلكترونية</div>
-                <div id="ticket-number" style="font-size:1.6rem;font-weight:900;color:var(--t2);font-family:monospace;letter-spacing:.08em;background:rgba(0,0,0,.3);border-radius:8px;padding:.5rem 1rem;display:inline-block">—</div>
+                <div style="font-size:.72rem;color:var(--tx3);margin-bottom:.4rem">رقم الدور في الطابور</div>
+                <div id="ticket-number" style="font-size:2rem;font-weight:900;color:var(--t2);font-family:monospace;letter-spacing:.08em;background:rgba(0,0,0,.3);border-radius:8px;padding:.5rem 1.5rem;display:inline-block">—</div>
+                <div style="margin-top:.75rem;font-size:.72rem;color:var(--tx3)">رقم دفتر العائلة (للتحقق)</div>
+                <div id="ticket-famid" style="font-size:.95rem;font-weight:700;color:var(--goldb);font-family:monospace;letter-spacing:.06em;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.2);border-radius:6px;padding:.3rem .9rem;display:inline-block;margin-top:.2rem">—</div>
               </div>
               <div style="background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.18);border-radius:10px;padding:.9rem;font-size:.8rem;color:var(--tx2);line-height:1.7">
                 ⚠️ أبرز هذه الشاشة للموزع المعتمد عند استلام الغاز.<br>
-                <strong style="color:var(--goldb)">مدة الصلاحية 20 يوم من تاريخ الاستلام الفعلي.</strong>
+                <strong style="color:var(--goldb)">الموزع سيطابق رقم الدور ورقم دفتر العائلة معاً.</strong>
               </div>
             </div>
           </div>
@@ -1100,20 +1116,26 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div class="panel-body">
             <div style="text-align:center;margin-bottom:1.5rem">
               <div style="font-size:2rem;margin-bottom:.5rem">📲</div>
-              <div style="font-size:.9rem;color:var(--tx3)">أدخل <strong style="color:var(--goldb)">رقم الدور</strong> أو <strong style="color:var(--goldb)">رقم دفتر العائلة</strong> لتأكيد التسليم</div>
+              <div style="font-size:.9rem;color:var(--tx3)">أدخل <strong style="color:var(--goldb)">رقم الدور</strong> و<strong style="color:var(--goldb)">رقم دفتر العائلة</strong> معاً للتأكيد</div>
             </div>
             <form onsubmit="deliverGas(event)">
-              <div class="fgrp">
-                <label class="flbl">رقم الدور أو رقم دفتر العائلة</label>
-                <input class="finp" id="scan-input" type="text" placeholder="مثال: 42 أو رقم دفتر العائلة" style="text-align:center;font-family:monospace;font-size:1.1rem;letter-spacing:.05em" dir="ltr" required>
+              <div class="fgrid">
+                <div class="fgrp">
+                  <label class="flbl">رقم الدور في الطابور <span class="req">*</span></label>
+                  <input class="finp" id="scan-queue" type="number" placeholder="مثال: 42" style="text-align:center;font-family:monospace;font-size:1.2rem" required>
+                </div>
+                <div class="fgrp">
+                  <label class="flbl">رقم دفتر العائلة <span class="req">*</span></label>
+                  <input class="finp" id="scan-famid" type="text" placeholder="رقم دفتر العائلة" style="text-align:center;font-family:monospace" dir="ltr" required>
+                </div>
               </div>
               <button type="submit" class="btn btn-primary btn-lg btn-full" id="deliver-btn">
-                <span class="btxt">✅ تأكيد التسليم وتفعيل عداد الحظر</span>
+                <span class="btxt">✅ تأكيد التسليم وتفعيل عداد 22 يوم</span>
               </button>
             </form>
             <div class="notice" style="margin-top:1.2rem">
-              <span class="notice-ico">⚠️</span>
-              <span>بمجرد التأكيد يبدأ عداد <strong>22 يوم</strong> في حساب المواطن فوراً — لا يمكنه طلب أسطوانة ثانية قبل انتهاء المدة.</span>
+              <span class="notice-ico">🔒</span>
+              <span>يجب أن يتطابق رقم الدور <strong>ورقم دفتر العائلة</strong> معاً — لمنع أي تزوير أو استلام بالنيابة غير المصرح به.</span>
             </div>
           </div>
         </div>
@@ -1131,15 +1153,29 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
       <!-- ── PROFILE ── -->
       <div id="v-profile" class="vp" style="display:none">
-        <div class="panel">
-          <div class="panel-head"><div class="panel-icon pi-gold">⚙️</div><span class="panel-title">معلومات الحساب</span></div>
+        <!-- معلومات شخصية -->
+        <div class="panel" style="margin-bottom:1.2rem">
+          <div class="panel-head"><div class="panel-icon pi-gold">👤</div><span class="panel-title">معلومات الحساب</span></div>
           <div class="panel-body">
-            <div class="prof-row"><span class="prof-key">الاسم</span><span class="prof-val" id="p-name">—</span></div>
-            <div class="prof-row"><span class="prof-key">البريد الإلكتروني</span><span class="prof-val" id="p-email" style="direction:ltr">—</span></div>
+            <div class="prof-row"><span class="prof-key">الاسم الكامل</span><span class="prof-val" id="p-name">—</span></div>
+            <div class="prof-row"><span class="prof-key">البريد الإلكتروني</span><span class="prof-val" id="p-email" style="direction:ltr;font-size:.82rem">—</span></div>
             <div class="prof-row"><span class="prof-key">رقم الهاتف</span><span class="prof-val" id="p-phone" style="direction:ltr">—</span></div>
-            <div class="prof-row"><span class="prof-key">الحي</span><span class="prof-val" id="p-dist">—</span></div>
             <div class="prof-row"><span class="prof-key">تاريخ التسجيل</span><span class="prof-val" id="p-date">—</span></div>
           </div>
+        </div>
+        <!-- حالة التوثيق -->
+        <div class="panel" style="margin-bottom:1.2rem">
+          <div class="panel-head"><div class="panel-icon pi-teal">📄</div><span class="panel-title">حالة توثيق الغاز</span></div>
+          <div class="panel-body">
+            <div class="prof-row"><span class="prof-key">رقم دفتر العائلة</span><span class="prof-val" id="p-famid" style="direction:ltr;font-family:monospace">—</span></div>
+            <div class="prof-row"><span class="prof-key">حالة التوثيق</span><span id="p-gas-status">—</span></div>
+            <div class="prof-row" id="p-last-row" style="display:none"><span class="prof-key">آخر استلام</span><span class="prof-val" id="p-last-received">—</span></div>
+            <div class="prof-row" id="p-next-row" style="display:none"><span class="prof-key">يمكن الطلب بعد</span><span class="prof-val" id="p-next-allowed" style="color:var(--goldb)">—</span></div>
+          </div>
+        </div>
+        <!-- تسجيل الخروج -->
+        <div style="text-align:center;padding-top:.5rem">
+          <button class="btn btn-danger" onclick="doLogout()" style="width:100%;max-width:320px">🚪 تسجيل الخروج</button>
         </div>
       </div>
 
@@ -1593,11 +1629,33 @@ document.addEventListener('userLoggedIn',async e=>{
   document.getElementById('sb-name').textContent=nm;
   document.getElementById('sb-dist').textContent=udata.district||'';
   document.getElementById('wname').textContent=nm;
-  document.getElementById('p-name').textContent=udata.name||'—';
-  document.getElementById('p-email').textContent=udata.email||user.email;
-  document.getElementById('p-phone').textContent=udata.phone||'—';
-  document.getElementById('p-dist').textContent=udata.district||'—';
-  document.getElementById('p-date').textContent=formatDate(udata.createdAt);
+  document.getElementById('p-name').textContent  = udata.name||'—';
+  document.getElementById('p-email').textContent = udata.email||user.email;
+  document.getElementById('p-phone').textContent = udata.phone||'—';
+  document.getElementById('p-date').textContent  = formatDate(udata.createdAt);
+  // حقول التوثيق
+  document.getElementById('p-famid').textContent = udata.familyBookId||'—';
+  // حالة الغاز في الـ profile
+  const gsLabels = {
+    none:'لم يتم التوثيق', kyc_pending:'قيد المراجعة',
+    kyc_rejected:'مرفوض', eligible:'موثّق ✅',
+    booked:'لديك حجز نشط', cooldown:'فترة انتظار'
+  };
+  const gsEl = document.getElementById('p-gas-status');
+  const gsCls = {none:'',kyc_pending:'b-pending',kyc_rejected:'b-rejected',
+                 eligible:'b-approved',booked:'b-pending',cooldown:'b-rejected'};
+  const gs = udata.gasStatus||'none';
+  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+  // آخر استلام + تاريخ السماح القادم
+  if(udata.lastReceived){
+    const lastRow = document.getElementById('p-last-row');
+    const nextRow = document.getElementById('p-next-row');
+    if(lastRow) lastRow.style.display='';
+    if(nextRow) nextRow.style.display='';
+    document.getElementById('p-last-received').textContent = formatDate(udata.lastReceived);
+    const nextDate = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
+    document.getElementById('p-next-allowed').textContent  = nextDate.toLocaleDateString('ar-SY');
+  }
   if(udata.name) document.getElementById('g-name').value=udata.name;
   if(udata.phone) document.getElementById('g-phone').value=udata.phone;
   if(udata.district) document.getElementById('g-dist').value=udata.district;
@@ -1651,11 +1709,87 @@ async function loadOverview(){
   if(!uid)return;
   try{
     const[g,c]=await Promise.all([FirestoreService.getUserGasRequests(uid),FirestoreService.getUserComplaints(uid)]);
-    document.getElementById('ov-gn').textContent=g.length;
-    document.getElementById('ov-cn').textContent=c.length;
-    if(g.length)document.getElementById('ov-glist').innerHTML='<div class="req-list">'+g.slice(0,3).map(r=>`<div class="req-item"><div class="req-num">#${esc(r.queueNumber)}</div><div class="req-info"><div class="req-title">طلب أسطوانة غاز</div><div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div></div><span class="badge ${(statusMap[r.status]||{}).cls||''}">${esc((statusMap[r.status]||{}).label||r.status)}</span></div>`).join('')+'</div>';
-    if(c.length)document.getElementById('ov-clist').innerHTML='<div class="req-list">'+c.slice(0,3).map(r=>`<div class="req-item"><div class="req-info"><div class="req-title">${esc(r.type)}</div><div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div></div><span class="badge ${(statusMap[r.status]||{}).cls||''}">${esc((statusMap[r.status]||{}).label||r.status)}</span></div>`).join('')+'</div>';
-  }catch(e){console.error(e)}
+
+    // ── إحصاءات ──
+    document.getElementById('ov-gn').textContent = g.length;
+    document.getElementById('ov-cn').textContent = c.length;
+
+    // ── حالة الغاز الحالية ──
+    const gs = udata.gasStatus || 'none';
+    const statusEl = document.getElementById('ov-gas-status');
+    const gasLabels = {
+      none:         {ico:'🔐', txt:'لم يتم توثيق الهوية بعد',       cls:'',           btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">ابدأ التوثيق</button>`},
+      kyc_pending:  {ico:'⏳', txt:'وثائقك قيد المراجعة من الإدارة', cls:'b-pending',   btn:''},
+      kyc_rejected: {ico:'❌', txt:'تم رفض طلب التوثيق',             cls:'b-rejected',  btn:`<button class="btn btn-danger btn-sm" onclick="gv('gas')" style="margin-top:.75rem">إعادة التقديم</button>`},
+      eligible:     {ico:'✅', txt:'موثّق — يمكنك طلب الغاز الآن',   cls:'b-approved',  btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`},
+      booked:       {ico:'📋', txt:'لديك طلب قيد الانتظار',           cls:'b-pending',   btn:`<button class="btn btn-ghost btn-sm" onclick="gv('gas')" style="margin-top:.75rem">عرض التذكرة</button>`},
+      cooldown:     {ico:'⏱️', txt:'في فترة الانتظار',               cls:'b-rejected',  btn:''},
+    };
+    const info = gasLabels[gs] || gasLabels.none;
+
+    // حساب أيام الانتظار المتبقية
+    let cooldownExtra = '';
+    if(gs === 'cooldown' && udata.lastReceived){
+      const diff     = Math.ceil((Date.now() - new Date(udata.lastReceived)) / 86400000);
+      const remaining = COOLDOWN_DAYS - diff;
+      if(remaining > 0){
+        const nextDate = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
+        cooldownExtra = `<div style="margin-top:.5rem;font-size:.82rem;color:var(--tx2)">
+          يتبقى <strong style="color:#f87171">${remaining} يوم</strong> —
+          يمكن الطلب في: <strong style="color:var(--goldb)">${nextDate.toLocaleDateString('ar-SY')}</strong>
+        </div>`;
+        info.txt = `في فترة الانتظار — آخر استلام: ${formatDate(udata.lastReceived)}`;
+      }
+    }
+
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+        <span style="font-size:1.6rem">${info.ico}</span>
+        <span class="badge ${info.cls}" style="font-size:.82rem">${info.txt}</span>
+      </div>
+      ${cooldownExtra}
+      ${info.btn}`;
+
+    // ── آخر طلبات الغاز مع الحالة التفصيلية ──
+    if(g.length){
+      document.getElementById('ov-glist').innerHTML='<div class="req-list">'+g.slice(0,5).map(r=>{
+        const s = statusMap[r.status]||{label:r.status,cls:''};
+        let extra = '';
+        if(r.status==='delivered' && r.deliveredAt){
+          const diff = Math.ceil((Date.now()-new Date(r.deliveredAt))/86400000);
+          const rem  = COOLDOWN_DAYS - diff;
+          extra = rem>0
+            ? `<span style="font-size:.72rem;color:#f87171">⏱️ ${rem} يوم متبقية</span>`
+            : `<span style="font-size:.72rem;color:var(--t2)">✅ يمكن الطلب مجدداً</span>`;
+        }
+        return `<div class="req-item">
+          <div class="req-num">#${esc(r.queueNumber)}</div>
+          <div class="req-info">
+            <div class="req-title">طلب أسطوانة غاز</div>
+            <div class="req-meta">
+              <span>📅 ${formatDate(r.createdAt)}</span>
+              ${extra}
+            </div>
+          </div>
+          <span class="badge ${s.cls}">${esc(s.label)}</span>
+        </div>`;
+      }).join('')+'</div>';
+    }
+
+    // ── آخر الشكاوى ──
+    if(c.length){
+      document.getElementById('ov-clist').innerHTML='<div class="req-list">'+c.slice(0,3).map(r=>{
+        const s=statusMap[r.status]||{label:r.status,cls:''};
+        return`<div class="req-item">
+          <div class="req-info">
+            <div class="req-title">${esc(r.type)}</div>
+            <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div>
+          </div>
+          <span class="badge ${s.cls}">${esc(s.label)}</span>
+        </div>`;
+      }).join('')+'</div>';
+    }
+  }catch(e){console.error('loadOverview:',e)}
 }
 
 /* Track */
@@ -1723,6 +1857,7 @@ async function refreshGasView() {
     if (udata.ticket) {
       document.getElementById('gas-ticket-card').style.display='block';
       document.getElementById('ticket-number').textContent = esc(udata.ticket);
+      document.getElementById('ticket-famid').textContent  = esc(udata.familyBookId||'—');
     } else {
       // في الطابور — أظهر رسالة الانتظار
       document.getElementById('gas-booking-section').style.display='block';
@@ -1949,21 +2084,24 @@ async function doGas(e) {
 /* Deliver gas — واجهة الموزع */
 async function deliverGas(e) {
   e.preventDefault();
-  const code = document.getElementById('scan-input').value.trim();
-  const btn  = document.getElementById('deliver-btn');
-  if(!code) return;
+  const queueNum = document.getElementById('scan-queue').value.trim();
+  const famId    = document.getElementById('scan-famid').value.trim();
+  const btn      = document.getElementById('deliver-btn');
+  if(!queueNum || !famId) return;
   btn.disabled=true; btn.classList.add('btn-loading');
 
   try {
-    // البحث عن المستخدم برقم التذكرة أو الرقم الوطني
-    const result = await FirestoreService.findAndDeliverGas(code);
+    const result = await FirestoreService.findAndDeliverGas(queueNum, famId);
     if (!result.found) {
-      toast('لم يُعثر على هذا الرمز في قاعدة البيانات', false);
+      toast('لم يُعثر على هذا الرقم في قاعدة البيانات', false);
+    } else if (result.mismatch) {
+      toast('❌ رقم دفتر العائلة لا يتطابق مع رقم الدور', false);
     } else if (result.notBooked) {
       toast('هذا المواطن لا يملك حجزاً متاحاً حالياً', false);
     } else {
-      toast(`✅ تم التوثيق! سلّم الأسطوانة لـ: ${esc(result.name)}`);
-      document.getElementById('scan-input').value = '';
+      toast(`✅ تم التسليم! المستفيد: ${esc(result.name)}`);
+      document.getElementById('scan-queue').value = '';
+      document.getElementById('scan-famid').value  = '';
     }
   } catch(er) {
     toast('خطأ في الاتصال — حاول مجدداً', false);
@@ -2276,63 +2414,54 @@ window.FirestoreService = {
     return updateDoc(doc(db,'users',userId), data);
   },
 
-  /* البحث عن مستخدم وتأكيد تسليم الغاز
-     البحث يتم بـ: رقم الدور في الطابور (queueNumber) أو رقم دفتر العائلة */
-  async findAndDeliverGas(code) {
+  /* تسليم الغاز — يتحقق من رقم الدور ورقم دفتر العائلة معاً */
+  async findAndDeliverGas(queueNum, famId) {
     const deliveryTime = new Date().toISOString();
+    const qNum = parseInt(queueNum) || 0;
 
-    // ── 1. ابحث في gas_requests برقم الدور ──
-    let snap = await getDocs(query(
+    // ابحث في gas_requests برقم الدور + حالة booked
+    const snap = await getDocs(query(
       collection(db,'gas_requests'),
-      where('queueNumber','==', parseInt(code) || 0),
+      where('queueNumber','==', qNum),
       where('status','==','booked')
     ));
 
-    // ── 2. ابحث في gas_requests برقم دفتر العائلة ──
     if (snap.empty) {
-      snap = await getDocs(query(
+      // ابحث برقم دفتر العائلة مباشرة
+      const byFam = await getDocs(query(
         collection(db,'gas_requests'),
-        where('familyBookId','==', code),
+        where('familyBookId','==', famId),
         where('status','==','booked')
       ));
-    }
-
-    // ── 3. ابحث في users مباشرة برقم دفتر العائلة ──
-    if (snap.empty) {
-      const userSnap = await getDocs(query(
-        collection(db,'users'),
-        where('familyBookId','==', code),
-        where('gasStatus','==','booked')
-      ));
-      if (userSnap.empty) return { found: false };
-      const userData = userSnap.docs[0].data();
-      await updateDoc(doc(db,'users',userSnap.docs[0].id), {
-        gasStatus:    'cooldown',
-        lastReceived: deliveryTime,
-        ticket:       null,
-      });
-      return { found: true, name: userData.name };
+      if (byFam.empty) return { found: false };
+      // تحقق من رقم الدور
+      const doc0 = byFam.docs[0];
+      if(doc0.data().queueNumber !== qNum) return { found: true, mismatch: true };
+      return await _doDeliver(doc0, deliveryTime);
     }
 
     const gasDoc  = snap.docs[0];
     const gasData = gasDoc.data();
 
-    // حدّث gas_requests → delivered
-    await updateDoc(doc(db,'gas_requests',gasDoc.id), {
-      status:      'delivered',
-      deliveredAt: serverTimestamp(),
-    });
-
-    // حدّث user → cooldown مع وقت التسليم الفعلي
-    if (gasData.userId) {
-      await updateDoc(doc(db,'users',gasData.userId), {
-        gasStatus:    'cooldown',
-        lastReceived: deliveryTime, // ← العداد يبدأ من هنا
-        ticket:       null,
-      });
+    // تحقق من رقم دفتر العائلة
+    if(gasData.familyBookId && gasData.familyBookId !== famId){
+      return { found: true, mismatch: true };
     }
 
-    return { found: true, name: gasData.name || '—' };
+    return await _doDeliver(gasDoc, deliveryTime);
+
+    async function _doDeliver(gasDoc, deliveryTime){
+      const gasData = gasDoc.data();
+      await updateDoc(doc(db,'gas_requests',gasDoc.id), {
+        status: 'delivered', deliveredAt: serverTimestamp(),
+      });
+      if(gasData.userId){
+        await updateDoc(doc(db,'users',gasData.userId), {
+          gasStatus: 'cooldown', lastReceived: deliveryTime, ticket: null,
+        });
+      }
+      return { found: true, name: gasData.name || '—' };
+    }
   },
 
   /* تسجيل عائلة جديدة */

@@ -836,18 +836,39 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
                   </div>
                 </div>
 
-                <!-- صورة الهوية الشخصية -->
+                <!-- صورة الهوية الشخصية — وجهان -->
                 <div class="fgrp">
                   <label class="flbl">🪪 صورة الهوية الشخصية (مقدم الطلب) <span class="req">*</span></label>
-                  <div class="upload-zone" id="uz-natid"
-                    onclick="document.getElementById('kyc-f-natid').click()"
-                    ondragover="event.preventDefault();this.classList.add('drag')"
-                    ondragleave="this.classList.remove('drag')"
-                    ondrop="handleKycDrop(event,'kyc-f-natid','uz-natid')">
-                    <input type="file" id="kyc-f-natid" accept="image/*" style="display:none"
-                      onchange="handleKycFile(this,'uz-natid')">
-                    <div class="upload-ico">🪪</div>
-                    <div class="upload-txt">الوجهان الأمامي والخلفي للهوية<br><span style="font-size:.72rem">JPG, PNG, WEBP</span></div>
+                  <div style="font-size:.75rem;color:var(--tx3);margin-bottom:.5rem">يجب رفع الوجهين — الأمامي والخلفي</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                    <!-- الوجه الأمامي -->
+                    <div>
+                      <div style="font-size:.75rem;color:var(--tx2);margin-bottom:.35rem;font-weight:600">الوجه الأمامي <span style="color:var(--goldb)">*</span></div>
+                      <div class="upload-zone" id="uz-natid-front"
+                        onclick="document.getElementById('kyc-f-natid-front').click()"
+                        ondragover="event.preventDefault();this.classList.add('drag')"
+                        ondragleave="this.classList.remove('drag')"
+                        ondrop="handleKycDrop(event,'kyc-f-natid-front','uz-natid-front')">
+                        <input type="file" id="kyc-f-natid-front" accept="image/*" style="display:none"
+                          onchange="handleKycFile(this,'uz-natid-front')">
+                        <div class="upload-ico">🪪</div>
+                        <div class="upload-txt" style="font-size:.72rem">الوجه الأمامي</div>
+                      </div>
+                    </div>
+                    <!-- الوجه الخلفي -->
+                    <div>
+                      <div style="font-size:.75rem;color:var(--tx2);margin-bottom:.35rem;font-weight:600">الوجه الخلفي <span style="color:var(--goldb)">*</span></div>
+                      <div class="upload-zone" id="uz-natid-back"
+                        onclick="document.getElementById('kyc-f-natid-back').click()"
+                        ondragover="event.preventDefault();this.classList.add('drag')"
+                        ondragleave="this.classList.remove('drag')"
+                        ondrop="handleKycDrop(event,'kyc-f-natid-back','uz-natid-back')">
+                        <input type="file" id="kyc-f-natid-back" accept="image/*" style="display:none"
+                          onchange="handleKycFile(this,'uz-natid-back')">
+                        <div class="upload-ico">🪪</div>
+                        <div class="upload-txt" style="font-size:.72rem">الوجه الخلفي</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1796,32 +1817,36 @@ async function submitGasKyc(e) {
   e.preventDefault();
   const btn   = document.getElementById('kyc-btn');
   const famId = document.getElementById('kyc-famid').value.trim();
-  const fBook = document.getElementById('kyc-f-fambook').files?.[0];
-  const fNat  = document.getElementById('kyc-f-natid').files?.[0];
-  const fProof= document.getElementById('kyc-f-proof').files?.[0];
-  const note  = document.getElementById('kyc-note').value.trim();
+  const fBook     = document.getElementById('kyc-f-fambook').files?.[0];
+  const fNatFront = document.getElementById('kyc-f-natid-front').files?.[0];
+  const fNatBack  = document.getElementById('kyc-f-natid-back').files?.[0];
+  const fProof    = document.getElementById('kyc-f-proof').files?.[0];
+  const note      = document.getElementById('kyc-note').value.trim();
 
-  if(!famId)  { toast('أدخل رقم دفتر العائلة', false); return; }
-  if(!fBook)  { toast('يجب رفع صورة دفتر العائلة', false); return; }
-  if(!fNat)   { toast('يجب رفع صورة الهوية الشخصية', false); return; }
-  if(!fProof) { toast('يجب رفع إثبات العنوان', false); return; }
+  if(!famId)      { toast('أدخل رقم دفتر العائلة', false); return; }
+  if(!fBook)      { toast('يجب رفع صورة دفتر العائلة', false); return; }
+  if(!fNatFront)  { toast('يجب رفع الوجه الأمامي للهوية', false); return; }
+  if(!fNatBack)   { toast('يجب رفع الوجه الخلفي للهوية', false); return; }
+  if(!fProof)     { toast('يجب رفع إثبات العنوان', false); return; }
 
   btn.disabled=true; btn.classList.add('btn-loading');
   toast('جاري رفع الوثائق...');
 
   try {
     // رفع الصور مع ضغط
-    const [bookUrl, natUrl, proofUrl] = await Promise.all([
-      uploadKycImage(fBook,  `kyc/${uid}/family_book`),
-      uploadKycImage(fNat,   `kyc/${uid}/national_id`),
-      uploadKycImage(fProof, `kyc/${uid}/address_proof`),
+    const [bookUrl, natFrontUrl, natBackUrl, proofUrl] = await Promise.all([
+      uploadKycImage(fBook,      `kyc/${uid}/family_book`),
+      uploadKycImage(fNatFront,  `kyc/${uid}/national_id_front`),
+      uploadKycImage(fNatBack,   `kyc/${uid}/national_id_back`),
+      uploadKycImage(fProof,     `kyc/${uid}/address_proof`),
     ]);
 
-    // تحديث Firestore
+    // ✅ تحديث Firestore
     await FirestoreService.updateUser(uid, {
       familyBookId:        famId,
       familyBookImg:       bookUrl,
-      nationalIdImg:       natUrl,
+      nationalIdFrontImg:  natFrontUrl,
+      nationalIdBackImg:   natBackUrl,
       addressProofImg:     proofUrl,
       gasStatus:           'kyc_pending',
       gasVerificationNote: note || null,
@@ -1832,7 +1857,8 @@ async function submitGasKyc(e) {
     udata = { ...udata,
       familyBookId:        famId,
       familyBookImg:       bookUrl,
-      nationalIdImg:       natUrl,
+      nationalIdFrontImg:  natFrontUrl,
+      nationalIdBackImg:   natBackUrl,
       addressProofImg:     proofUrl,
       gasStatus:           'kyc_pending',
       gasVerificationNote: note || null,

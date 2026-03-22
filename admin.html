@@ -1656,19 +1656,35 @@ async function loadKyc(){
               </div>
             </div>
 
-            <!-- الهوية الشخصية -->
+            <!-- الهوية الشخصية — وجهان -->
             <div style="border:1px solid rgba(0,212,216,.12);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.2)">
               <div style="height:130px;background:rgba(8,34,40,.8);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
-                ${u.nationalIdImg
-                  ? `<img src="${esc(u.nationalIdImg)}" onclick="openLb('${esc(u.nationalIdImg)}')"
+                ${u.nationalIdFrontImg
+                  ? `<img src="${esc(u.nationalIdFrontImg)}" onclick="openLb('${esc(u.nationalIdFrontImg)}')"
                        style="width:100%;height:100%;object-fit:cover;cursor:pointer;transition:transform .3s"
                        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`
                   : `<div style="text-align:center;color:var(--tx3)"><div style="font-size:1.8rem;margin-bottom:.3rem">🪪</div><div style="font-size:.7rem">لم يُرفع</div></div>`
                 }
               </div>
               <div style="padding:.5rem .7rem;display:flex;align-items:center;justify-content:space-between">
-                <div style="font-size:.72rem;color:var(--tx2);font-weight:600">🪪 الهوية الشخصية</div>
-                ${u.nationalIdImg?`<a href="${esc(u.nationalIdImg)}" target="_blank" style="font-size:.65rem;color:var(--t2);text-decoration:none">تكبير ↗</a>`:''}
+                <div style="font-size:.72rem;color:var(--tx2);font-weight:600">🪪 الهوية — أمامي</div>
+                ${u.nationalIdFrontImg?`<a href="${esc(u.nationalIdFrontImg)}" target="_blank" style="font-size:.65rem;color:var(--t2);text-decoration:none">تكبير ↗</a>`:''}
+              </div>
+            </div>
+
+            <!-- الهوية — الوجه الخلفي -->
+            <div style="border:1px solid rgba(0,212,216,.12);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.2)">
+              <div style="height:130px;background:rgba(8,34,40,.8);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+                ${u.nationalIdBackImg
+                  ? `<img src="${esc(u.nationalIdBackImg)}" onclick="openLb('${esc(u.nationalIdBackImg)}')"
+                       style="width:100%;height:100%;object-fit:cover;cursor:pointer;transition:transform .3s"
+                       onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`
+                  : `<div style="text-align:center;color:var(--tx3)"><div style="font-size:1.8rem;margin-bottom:.3rem">🪪</div><div style="font-size:.7rem">لم يُرفع</div></div>`
+                }
+              </div>
+              <div style="padding:.5rem .7rem;display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:.72rem;color:var(--tx2);font-weight:600">🪪 الهوية — خلفي</div>
+                ${u.nationalIdBackImg?`<a href="${esc(u.nationalIdBackImg)}" target="_blank" style="font-size:.65rem;color:var(--t2);text-decoration:none">تكبير ↗</a>`:''}
               </div>
             </div>
 

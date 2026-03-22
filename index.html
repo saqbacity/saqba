@@ -462,18 +462,27 @@ function cnt(el,t){const d=1800,s=performance.now();(function u(n){const p=Math.
 async function loadAll(){
   try{const s=await FirestoreService.getDashboardStats();cnt(document.getElementById('su'),s.totalUsers);cnt(document.getElementById('sr'),s.totalGasRequests);cnt(document.getElementById('sc2'),s.totalComplaints)}catch(e){}
 
+  // ── أخبار ──
   const nc=document.getElementById('news-con');
   try{
     const n=await FirestoreService.getNews(5);
-    if(!n.length){nc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--tx3)"><div style="font-size:2.5rem;margin-bottom:1rem">📰</div><div style="font-weight:600;color:var(--tx2)">لا توجد أخبار حالياً</div><div style="font-size:.82rem;margin-top:.5rem">سيتم نشر الأخبار قريباً</div></div>`;return}
-    nc.innerHTML=n.map((it,i)=>`<div class="ncard${i===0?' feat':''}"><div class="${it.image?'':'nimp'}">${it.image?`<img class="nim" src="${esc(it.image)}" alt="${esc(it.title)}" loading="lazy">`:'📰'}</div><div class="nb2"><div class="nm"><span class="ntg">إعلان</span><span class="nd">📅 ${fmtDate(it.createdAt)}</span></div><div class="ntc">${esc(it.title)}</div><div class="nex">${esc(it.content)}</div></div></div>`).join('');
+    if(!n.length){
+      nc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--tx3)"><div style="font-size:2.5rem;margin-bottom:1rem">📰</div><div style="font-weight:600;color:var(--tx2)">لا توجد أخبار حالياً</div><div style="font-size:.82rem;margin-top:.5rem">سيتم نشر الأخبار قريباً</div></div>`;
+      // لا return هنا — نكمل لتحميل المعرض
+    } else {
+      nc.innerHTML=n.map((it,i)=>`<div class="ncard${i===0?' feat':''}"><div class="${it.image?'':'nimp'}">${it.image?`<img class="nim" src="${esc(it.image)}" alt="${esc(it.title)}" loading="lazy">`:'📰'}</div><div class="nb2"><div class="nm"><span class="ntg">إعلان</span><span class="nd">📅 ${fmtDate(it.createdAt)}</span></div><div class="ntc">${esc(it.title)}</div><div class="nex">${esc(it.content)}</div></div></div>`).join('');
+    }
   }catch(e){nc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--tx3)">⚠️ تعذّر تحميل الأخبار</div>`}
 
+  // ── معرض الصور ──
   const gc=document.getElementById('gal-con');
   try{
     const g=await FirestoreService.getGallery();
-    if(!g.length){gc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--tx3)"><div style="font-size:2.5rem;margin-bottom:1rem">🖼️</div><div style="font-weight:600;color:var(--tx2)">لا توجد صور بعد</div></div>`;return}
-    gc.innerHTML=g.slice(0,6).map(it=>`<div class="gi" onclick="openLb('${esc(it.image)}')"><img class="gimg" src="${esc(it.image)}" alt="${esc(it.description||'')}" loading="lazy"><div class="gov"><span class="gl">${esc(it.description||'')}</span></div></div>`).join('');
+    if(!g.length){
+      gc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--tx3)"><div style="font-size:2.5rem;margin-bottom:1rem">🖼️</div><div style="font-weight:600;color:var(--tx2)">لا توجد صور بعد</div></div>`;
+    } else {
+      gc.innerHTML=g.slice(0,6).map(it=>`<div class="gi" onclick="openLb('${esc(it.image)}')"><img class="gimg" src="${esc(it.image)}" alt="${esc(it.description||'')}" loading="lazy"><div class="gov"><span class="gl">${esc(it.description||'')}</span></div></div>`).join('');
+    }
   }catch(e){gc.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--tx3)">⚠️ تعذّر تحميل المعرض</div>`}
 }
 
@@ -489,8 +498,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <!-- Firebase Modular SDK — أضف إعداداتك هنا -->
 <script type="module">
 import { initializeApp }     from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
-import { getFirestore, collection, getDocs, query, orderBy, limit, where, getCountFromServer }
+import { getFirestore, collection, getDocs, query, orderBy, limit, getCountFromServer, doc, getDoc }
   from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
@@ -529,35 +540,24 @@ try {
   if (typeof loadAll === 'function') loadAll();
 
   // ── مراقبة حالة تسجيل الدخول لتحديث الـ nav ──
-  const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js');
   const auth2 = getAuth(app);
-
   onAuthStateChanged(auth2, async (user) => {
     const citizenBtn = document.getElementById('nav-citizen-btn');
     const adminBtn   = document.getElementById('nav-admin-btn');
     if (!user) {
-      // ضيف
       citizenBtn.textContent = 'تسجيل / دخول';
       citizenBtn.href = 'citizen.html';
       adminBtn.style.display = 'none';
       return;
     }
-    // مستخدم مسجل — اجلب دوره
     try {
-      const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js');
       const usnap = await getDoc(doc(db,'users',user.uid));
       const udata = usnap.exists() ? usnap.data() : {};
       const name  = udata.name || user.email?.split('@')[0] || 'مواطن';
       const role  = udata.role || 'citizen';
-      // زر المواطن — يعرض الاسم
-      citizenBtn.innerHTML = \`<span style="font-size:.8rem">🪪</span> \${name}\`;
+      citizenBtn.innerHTML = `<span style="font-size:.8rem">🪪</span> ${name}`;
       citizenBtn.href = 'citizen.html';
-      // زر الإدارة — فقط للمشرف
-      if (role === 'admin') {
-        adminBtn.style.display = '';
-      } else {
-        adminBtn.style.display = 'none';
-      }
+      adminBtn.style.display = role === 'admin' ? '' : 'none';
     } catch(e) {
       citizenBtn.textContent = 'حسابي';
       citizenBtn.href = 'citizen.html';

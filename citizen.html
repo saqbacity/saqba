@@ -1706,9 +1706,16 @@ function ttab(id,btn){
 
 /* Overview */
 async function loadOverview(){
-  if(!uid)return;
+  if(!uid) return;
   try{
-    const[g,c]=await Promise.all([FirestoreService.getUserGasRequests(uid),FirestoreService.getUserComplaints(uid)]);
+    // تحديث udata أولاً لضمان أحدث حالة
+    const fresh = await FirestoreService.getUser(uid);
+    if(fresh) udata = fresh;
+
+    const[g,c]=await Promise.all([
+      FirestoreService.getUserGasRequests(uid),
+      FirestoreService.getUserComplaints(uid)
+    ]);
 
     // ── إحصاءات ──
     document.getElementById('ov-gn').textContent = g.length;
@@ -1718,78 +1725,92 @@ async function loadOverview(){
     const gs = udata.gasStatus || 'none';
     const statusEl = document.getElementById('ov-gas-status');
     const gasLabels = {
-      none:         {ico:'🔐', txt:'لم يتم توثيق الهوية بعد',       cls:'',           btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">ابدأ التوثيق</button>`},
-      kyc_pending:  {ico:'⏳', txt:'وثائقك قيد المراجعة من الإدارة', cls:'b-pending',   btn:''},
-      kyc_rejected: {ico:'❌', txt:'تم رفض طلب التوثيق',             cls:'b-rejected',  btn:`<button class="btn btn-danger btn-sm" onclick="gv('gas')" style="margin-top:.75rem">إعادة التقديم</button>`},
-      eligible:     {ico:'✅', txt:'موثّق — يمكنك طلب الغاز الآن',   cls:'b-approved',  btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`},
-      booked:       {ico:'📋', txt:'لديك طلب قيد الانتظار',           cls:'b-pending',   btn:`<button class="btn btn-ghost btn-sm" onclick="gv('gas')" style="margin-top:.75rem">عرض التذكرة</button>`},
-      cooldown:     {ico:'⏱️', txt:'في فترة الانتظار',               cls:'b-rejected',  btn:''},
+      none:         {ico:'🔐', txt:'لم يتم توثيق الهوية بعد',        cls:'',          btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">ابدأ التوثيق</button>`},
+      kyc_pending:  {ico:'⏳', txt:'وثائقك قيد المراجعة من الإدارة',  cls:'b-pending', btn:''},
+      kyc_rejected: {ico:'❌', txt:'تم رفض طلب التوثيق',              cls:'b-rejected',btn:`<button class="btn btn-danger btn-sm" onclick="gv('gas')" style="margin-top:.75rem">إعادة التقديم</button>`},
+      eligible:     {ico:'✅', txt:'موثّق — يمكنك طلب الغاز الآن',    cls:'b-approved',btn:`<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`},
+      booked:       {ico:'📋', txt:'لديك طلب قيد الانتظار',            cls:'b-pending', btn:`<button class="btn btn-ghost btn-sm" onclick="gv('gas')" style="margin-top:.75rem">عرض الدور</button>`},
+      cooldown:     {ico:'⏱️', txt:'في فترة الانتظار',                cls:'b-rejected',btn:''},
     };
-    const info = gasLabels[gs] || gasLabels.none;
+    const info = { ...(gasLabels[gs] || gasLabels.none) };
 
-    // حساب أيام الانتظار المتبقية
-    let cooldownExtra = '';
+    // عداد cooldown
+    let extra = '';
     if(gs === 'cooldown' && udata.lastReceived){
-      const diff     = Math.ceil((Date.now() - new Date(udata.lastReceived)) / 86400000);
+      const diff      = Math.ceil((Date.now() - new Date(udata.lastReceived)) / 86400000);
       const remaining = COOLDOWN_DAYS - diff;
       if(remaining > 0){
         const nextDate = new Date(new Date(udata.lastReceived).getTime() + COOLDOWN_DAYS*86400000);
-        cooldownExtra = `<div style="margin-top:.5rem;font-size:.82rem;color:var(--tx2)">
-          يتبقى <strong style="color:#f87171">${remaining} يوم</strong> —
-          يمكن الطلب في: <strong style="color:var(--goldb)">${nextDate.toLocaleDateString('ar-SY')}</strong>
+        extra = `<div style="margin-top:.4rem;font-size:.82rem;color:var(--tx2)">
+          يتبقى <strong style="color:#f87171">${remaining} يوم</strong> — يمكن الطلب في:
+          <strong style="color:var(--goldb)">${nextDate.toLocaleDateString('ar-SY')}</strong>
         </div>`;
-        info.txt = `في فترة الانتظار — آخر استلام: ${formatDate(udata.lastReceived)}`;
+      } else {
+        info.txt = 'انتهت فترة الانتظار — يمكنك الطلب الآن';
+        info.cls = 'b-approved';
+        info.btn = `<button class="btn btn-primary btn-sm" onclick="gv('gas')" style="margin-top:.75rem">🔥 اطلب الآن</button>`;
       }
     }
 
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
-        <span style="font-size:1.6rem">${info.ico}</span>
-        <span class="badge ${info.cls}" style="font-size:.82rem">${info.txt}</span>
-      </div>
-      ${cooldownExtra}
-      ${info.btn}`;
+    // رقم الدور إذا كان booked
+    if(gs === 'booked' && g.length){
+      const last = g[0];
+      info.txt = `لديك طلب قيد الانتظار — رقم الدور: #${last.queueNumber}`;
+    }
 
-    // ── آخر طلبات الغاز مع الحالة التفصيلية ──
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.4rem">
+        <span style="font-size:1.5rem;margin-top:.1rem">${info.ico}</span>
+        <div>
+          <span class="badge ${info.cls}" style="font-size:.82rem">${info.txt}</span>
+          ${extra}
+          ${info.btn}
+        </div>
+      </div>`;
+
+    // ── سجل طلبات الغاز ──
     if(g.length){
-      document.getElementById('ov-glist').innerHTML='<div class="req-list">'+g.slice(0,5).map(r=>{
-        const s = statusMap[r.status]||{label:r.status,cls:''};
-        let extra = '';
-        if(r.status==='delivered' && r.deliveredAt){
-          const diff = Math.ceil((Date.now()-new Date(r.deliveredAt))/86400000);
-          const rem  = COOLDOWN_DAYS - diff;
-          extra = rem>0
-            ? `<span style="font-size:.72rem;color:#f87171">⏱️ ${rem} يوم متبقية</span>`
-            : `<span style="font-size:.72rem;color:var(--t2)">✅ يمكن الطلب مجدداً</span>`;
-        }
-        return `<div class="req-item">
-          <div class="req-num">#${esc(r.queueNumber)}</div>
-          <div class="req-info">
-            <div class="req-title">طلب أسطوانة غاز</div>
-            <div class="req-meta">
-              <span>📅 ${formatDate(r.createdAt)}</span>
-              ${extra}
+      document.getElementById('ov-glist').innerHTML = '<div class="req-list">' +
+        g.slice(0,5).map(r => {
+          const s = statusMap[r.status] || {label:r.status, cls:''};
+          let cd = '';
+          if(r.status==='delivered'){
+            const ref = r.deliveredAt ? new Date(r.deliveredAt) : (udata.lastReceived ? new Date(udata.lastReceived) : null);
+            if(ref){
+              const diff2 = Math.ceil((Date.now()-ref)/86400000);
+              const rem2  = COOLDOWN_DAYS - diff2;
+              cd = rem2>0
+                ? `<span style="font-size:.7rem;color:#f87171">⏱️ ${rem2} يوم للطلب القادم</span>`
+                : `<span style="font-size:.7rem;color:var(--t2)">✅ يمكن الطلب الآن</span>`;
+            }
+          }
+          return `<div class="req-item">
+            <div class="req-num">#${esc(String(r.queueNumber))}</div>
+            <div class="req-info">
+              <div class="req-title">طلب أسطوانة غاز</div>
+              <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span>${cd}</div>
             </div>
-          </div>
-          <span class="badge ${s.cls}">${esc(s.label)}</span>
-        </div>`;
-      }).join('')+'</div>';
+            <span class="badge ${s.cls}">${esc(s.label)}</span>
+          </div>`;
+        }).join('') + '</div>';
     }
 
     // ── آخر الشكاوى ──
     if(c.length){
-      document.getElementById('ov-clist').innerHTML='<div class="req-list">'+c.slice(0,3).map(r=>{
-        const s=statusMap[r.status]||{label:r.status,cls:''};
-        return`<div class="req-item">
-          <div class="req-info">
-            <div class="req-title">${esc(r.type)}</div>
-            <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div>
-          </div>
-          <span class="badge ${s.cls}">${esc(s.label)}</span>
-        </div>`;
-      }).join('')+'</div>';
+      document.getElementById('ov-clist').innerHTML = '<div class="req-list">' +
+        c.slice(0,3).map(r => {
+          const s = statusMap[r.status]||{label:r.status,cls:''};
+          return `<div class="req-item">
+            <div class="req-info">
+              <div class="req-title">${esc(r.type)}</div>
+              <div class="req-meta"><span>📅 ${formatDate(r.createdAt)}</span></div>
+            </div>
+            <span class="badge ${s.cls}">${esc(s.label)}</span>
+          </div>`;
+        }).join('') + '</div>';
     }
-  }catch(e){console.error('loadOverview:',e)}
+
+  }catch(e){ console.error('loadOverview:', e) }
 }
 
 /* Track */
@@ -1853,16 +1874,21 @@ async function refreshGasView() {
     document.getElementById('kyc-reject-reason').textContent = '🚫 سبب الرفض: ' + reason;
 
   } else if (gs === 'booked') {
-    // لديه حجز — سواء كان لديه تذكرة أم لا يمنع من الحجز مرة أخرى
     if (udata.ticket) {
       document.getElementById('gas-ticket-card').style.display='block';
       document.getElementById('ticket-number').textContent = esc(udata.ticket);
       document.getElementById('ticket-famid').textContent  = esc(udata.familyBookId||'—');
     } else {
-      // في الطابور — أظهر رسالة الانتظار
+      // في الطابور — اجلب رقم الدور من آخر طلب
       document.getElementById('gas-booking-section').style.display='block';
       document.getElementById('gas-form').style.display='none';
       document.getElementById('gas-ok').style.display='block';
+      // اجلب رقم الدور الفعلي
+      try{
+        const reqs = await FirestoreService.getUserGasRequests(uid);
+        const last = reqs.find(r=>r.status==='pending'||r.status==='booked') || reqs[0];
+        if(last) document.getElementById('q-num').textContent = last.queueNumber;
+      }catch(e){}
     }
 
   } else if (gs === 'cooldown') {

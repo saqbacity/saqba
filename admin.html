@@ -1377,21 +1377,17 @@ async function deleteGas(id, userId){
   try{
     // 1. احذف الطلب
     await deleteDoc(doc(db,'gas_requests',id));
-    // 2. أعد gasStatus للمواطن إلى eligible (يمكنه الطلب مجدداً)
+    // 2. أعد gasStatus للمواطن إلى eligible
     if(userId){
-      await updateDoc(doc(db,'users',userId),{
-        gasStatus:'eligible', ticket:null
-      });
+      await updateDoc(doc(db,'users',userId),{gasStatus:'eligible',ticket:null});
     }
-    // 3. أعد ترقيم كل الطلبات المتبقية بالترتيب الزمني
-    const snap = await getDocs(query(collection(db,'gas_requests'),orderBy('createdAt','asc')));
-    const batch_ops = snap.docs.map((d,i)=>
-      updateDoc(doc(db,'gas_requests',d.id),{queueNumber: i+1})
-    );
-    await Promise.all(batch_ops);
+    // 3. أعد ترقيم — بدون orderBy لتفادي مشكلة الـ index
+    const snap = await getDocs(collection(db,'gas_requests'));
+    const sorted = snap.docs.sort((a,b)=>(a.data().createdAt?.seconds||0)-(b.data().createdAt?.seconds||0));
+    await Promise.all(sorted.map((d,i)=>updateDoc(doc(db,'gas_requests',d.id),{queueNumber:i+1})));
     toast('✅ تم الحذف وإعادة الترقيم');
     loadGas(); loadDash();
-  }catch(e){ console.error(e); toast('خطأ في الحذف',false); }
+  }catch(e){ console.error(e); toast('خطأ في الحذف: '+e.message, false); }
 }
 
 /* Complaints */

@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>حساب المواطن — بوابة سقبا</title>
+  <!-- Firebase Compat (يعمل في script عادي بدون module) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1410">
@@ -1544,7 +1549,7 @@ async function doLogin(e){
     if(typeof window._setAuthPersistence === 'function') {
       await window._setAuthPersistence(remember ? 'local' : 'session');
     }
-    await AuthService.login(
+    await window.AuthService.login(
       document.getElementById('l-email').value.trim(),
       document.getElementById('l-pass').value
     );
@@ -1597,7 +1602,7 @@ async function doRegister(e){
   const btn=document.getElementById('reg-btn');
   btn.disabled=true;btn.classList.add('btn-loading');
   try{
-    await AuthService.register(
+    await window.AuthService.register(
       document.getElementById('r-email').value,
       document.getElementById('r-pass').value,
       {
@@ -1616,7 +1621,8 @@ async function doRegister(e){
   }
 }
 
-async function doLogout(){await AuthService.logout()}
+async function doLogout(){ window.AuthService?.logout().then(()=>location.reload()); }
+function doLogout_old(){await window.AuthService.logout()}
 
 /* Auth state */
 document.addEventListener('userLoggedIn', async e => {
@@ -2151,41 +2157,11 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 
-<!-- Firebase Modular SDK -->
-<script type="module">
-/* ═══════════════════════════════════════════════════════
-   بوابة سقبا — firebase-config.js
-   Firebase Modular SDK v10 (Tree-shakeable)
+<script>
+/* ═══════════════════════════════════════
+   بوابة سقبا — Firebase Compat (بدون module)
+   ═══════════════════════════════════════ */
 
-   الفرق الجوهري عن نسخة compat:
-   ✅ يُحمَّل فقط ما نستخدمه (Tree-shaking) — أقل حجماً
-   ✅ الصياغة الرسمية الحديثة لـ Firebase 9/10
-   ✅ getCountFromServer لعد الوثائق دون تحميل بياناتها
-   ═══════════════════════════════════════════════════════ */
-
-import { initializeApp }
-  from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js';
-import {
-  getAuth, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut, onAuthStateChanged,
-  sendPasswordResetEmail, browserLocalPersistence, browserSessionPersistence, setPersistence
-} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js';
-import {
-  getFirestore, collection, doc,
-  addDoc, setDoc, getDoc, getDocs,
-  updateDoc, deleteDoc,
-  query, where, orderBy, limit,
-  serverTimestamp, getCountFromServer
-} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js';
-import {
-  getStorage, ref as sRef,
-  uploadBytes, getDownloadURL
-} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js';
-import {
-  getMessaging, getToken, onMessage
-} from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-messaging.js';
-
-/* ─── استبدل هذه القيم بإعداداتك من Firebase Console ─── */
 const firebaseConfig = {
   apiKey:            'AIzaSyCz5f8XWKtEmbc980X_KRBvRy-nkmrGDZE',
   authDomain:        'saqba-portal.firebaseapp.com',
@@ -2195,331 +2171,104 @@ const firebaseConfig = {
   appId:             '1:135534184893:web:87feb3535016b650052ad4',
 };
 
-const app     = initializeApp(firebaseConfig);
-const auth    = getAuth(app);
-const db      = getFirestore(app);
-const storage = getStorage(app);
+firebase.initializeApp(firebaseConfig);
+const auth    = firebase.auth();
+const db      = firebase.firestore();
+const storage = firebase.storage();
 
-/* ─── Push Notifications (FCM) ───────────────────── */
-async function initFCM() {
-  try {
-    const messaging = getMessaging(app);
-
-    // طلب إذن الإشعارات
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-
-    // الحصول على الـ Token — استبدل VAPID_KEY بمفتاحك
-    const token = await getToken(messaging, {
-      vapidKey: 'BNi1n04Qi-6qVe0A2W2z3NVhl2An2e3Hi1TM4D-_W0MWZYZpq1S-v4-FdbAkt8cbD-5UrGBrL4GqtW9Irj31m0Q',
-      serviceWorkerRegistration: await navigator.serviceWorker.ready,
+/* ── FirestoreService ── */
+window.FirestoreService = {
+  async getUser(uid){
+    const s = await db.collection('users').doc(uid).get();
+    return s.exists ? {id:s.id, ...s.data()} : null;
+  },
+  async updateUser(uid, data){
+    return db.collection('users').doc(uid).update(data);
+  },
+  async createUser(uid, data){
+    return db.collection('users').doc(uid).set({...data, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+  },
+  async getUserGasRequests(uid){
+    const s = await db.collection('gas_requests').where('userId','==',uid).get();
+    return s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  },
+  async getUserComplaints(uid){
+    const s = await db.collection('complaints').where('userId','==',uid).get();
+    return s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  },
+  async createGasRequest(data){
+    const all = await db.collection('gas_requests').get();
+    const queueNumber = all.size + 1;
+    const ref = await db.collection('gas_requests').add({
+      ...data, queueNumber, status:'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    if (token && window.currentUser) {
-      // حفظ الـ Token في Firestore لاستخدامه لاحقاً في الإرسال
-      await updateDoc(doc(db, 'users', window.currentUser.uid), {
-        fcmToken: token,
-        fcmUpdatedAt: serverTimestamp(),
-      }).catch(() => {});
+    return {id:ref.id, queueNumber};
+  },
+  async createComplaint(data, imageFile){
+    let image = null;
+    if(imageFile){
+      const ref = storage.ref(`complaints/${Date.now()}_${imageFile.name}`);
+      await ref.put(imageFile);
+      image = await ref.getDownloadURL();
     }
-
-    // استقبال الإشعارات وهو في الواجهة (Foreground)
-    onMessage(messaging, payload => {
-      const { title, body } = payload.notification || {};
-      if (title) toast(`🔔 ${title}${body ? ': ' + body : ''}`);
-    });
-
-  } catch(e) {
-    // الإشعارات اختيارية — تجاهل الأخطاء
-  }
-}
-
-/* استدعاء FCM بعد تسجيل الدخول */
-window.addEventListener('userLoggedIn_fcm', () => initFCM());
-
-/* ─── Auth State يُسجَّل في آخر الملف بعد تجهيز window.FirestoreService ─── */
-
-/* ─── رفع صورة مساعدة ───────────────────────────────── */
-async function uploadImage(file, path) {
-  const compressed = typeof ImageCompressor !== 'undefined'
-    ? await ImageCompressor.compress(file) : file;
-  const r = sRef(storage, `${path}/${Date.now()}_${compressed.name}`);
-  await uploadBytes(r, compressed);
-  return getDownloadURL(r);
-}
-
-/* ═══════════════════════════════════════════════════════
-   FirestoreService
-   ═══════════════════════════════════════════════════════ */
-const FirestoreService = {
-
-  /* ── Users ── */
-  async createUser(uid, data) {
-    return setDoc(doc(db, 'users', uid), { ...data, createdAt: serverTimestamp() });
-  },
-  async getUser(uid) {
-    const s = await getDoc(doc(db, 'users', uid));
-    return s.exists() ? { id: s.id, ...s.data() } : null;
-  },
-
-  /* ── Gas Requests ── */
-  async createGasRequest(data) {
-    // رقم الدور = إجمالي الطلبات الكلي + 1 (بدون فلترة بالحي)
-    const qSnap = await getDocs(collection(db, 'gas_requests'));
-    const queueNumber = qSnap.size + 1;
-    const ref = await addDoc(collection(db, 'gas_requests'), {
-      ...data, queueNumber, status: 'pending', createdAt: serverTimestamp()
-    });
-    return { id: ref.id, queueNumber };
-  },
-  async getUserGasRequests(userId) {
-    const s = await getDocs(
-      query(collection(db,'gas_requests'), where('userId','==',userId))
-    );
-    return s.docs.map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  },
-  async getAllGasRequests(status = null) {
-    const q = status
-      ? query(collection(db,'gas_requests'), where('status','==',status))
-      : collection(db,'gas_requests');
-    const s = await getDocs(q);
-    return s.docs.map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  },
-  async updateGasRequestStatus(id, status) {
-    return updateDoc(doc(db,'gas_requests',id), { status });
-  },
-
-  /* ── Complaints ── */
-  async createComplaint(data, imageFile) {
-    const image = imageFile
-      ? await uploadImage(imageFile, 'complaints') : null;
-    return addDoc(collection(db,'complaints'), {
-      ...data, image, status: 'open', createdAt: serverTimestamp()
+    return db.collection('complaints').add({
+      ...data, image, status:'open',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   },
-  async getUserComplaints(userId) {
-    const s = await getDocs(
-      query(collection(db,'complaints'), where('userId','==',userId))
-    );
-    return s.docs.map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  async getNews(n=10){
+    const s = await db.collection('news').orderBy('createdAt','desc').limit(n).get();
+    return s.docs.map(d=>({id:d.id,...d.data()}));
   },
-  async getAllComplaints() {
-    const s = await getDocs(
-      query(collection(db,'complaints'), orderBy('createdAt','desc'))
-    );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
-  },
-  async updateComplaintStatus(id, status) {
-    return updateDoc(doc(db,'complaints',id), { status });
-  },
-
-  /* ── News ── */
-  async getNews(n = 10) {
-    const s = await getDocs(
-      query(collection(db,'news'), orderBy('createdAt','desc'), limit(n))
-    );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
-  },
-  async createNews(data, imageFile) {
-    const image = imageFile
-      ? await uploadImage(imageFile, 'news') : null;
-    return addDoc(collection(db,'news'), {
-      ...data, image, createdAt: serverTimestamp()
-    });
-  },
-  async deleteNews(id) {
-    return deleteDoc(doc(db,'news',id));
-  },
-
-  /* ── Gallery ── */
-  async getGallery() {
-    const s = await getDocs(
-      query(collection(db,'gallery'), orderBy('createdAt','desc'))
-    );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
-  },
-  async addGalleryImage(data, imageFile) {
-    const image = await uploadImage(imageFile, 'gallery');
-    return addDoc(collection(db,'gallery'), {
-      ...data, image, createdAt: serverTimestamp()
-    });
-  },
-  async deleteGalleryImage(id) {
-    return deleteDoc(doc(db,'gallery',id));
-  },
-
-  /* ── Dashboard Stats (getCountFromServer = فعّال جداً) ── */
-  async getDashboardStats() {
-    const [u, ga, gp, ca, co, n] = await Promise.all([
-      getCountFromServer(collection(db,'users')),
-      getCountFromServer(collection(db,'gas_requests')),
-      getCountFromServer(query(collection(db,'gas_requests'), where('status','==','pending'))),
-      getCountFromServer(collection(db,'complaints')),
-      getCountFromServer(query(collection(db,'complaints'), where('status','==','open'))),
-      getCountFromServer(collection(db,'news')),
-    ]);
-    return {
-      totalUsers:         u.data().count,
-      totalGasRequests:   ga.data().count,
-      pendingGasRequests: gp.data().count,
-      totalComplaints:    ca.data().count,
-      openComplaints:     co.data().count,
-      totalNews:          n.data().count,
-    };
-  },
-
-  /* ── Users list (for admin) ── */
-  async getAllUsers() {
-    const s = await getDocs(
-      query(collection(db,'users'), orderBy('createdAt','desc'))
-    );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+  async getGallery(){
+    const s = await db.collection('gallery').orderBy('createdAt','desc').get();
+    return s.docs.map(d=>({id:d.id,...d.data()}));
   },
 };
 
-/* ═══════════════════════════════════════════════════════
-   AuthService
-   ═══════════════════════════════════════════════════════ */
-const AuthService = {
-  async register(email, password, userData) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await FirestoreService.createUser(cred.user.uid, { ...userData, email, role: 'citizen' });
+/* ── AuthService ── */
+window.AuthService = {
+  async register(email, password, userData){
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    await window.FirestoreService.createUser(cred.user.uid, {...userData, email, role:'citizen'});
     return cred.user;
   },
-  async login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async login(email, password){
+    return auth.signInWithEmailAndPassword(email, password);
   },
-  async logout() {
-    return signOut(auth);
-  },
-  async isAdmin(uid) {
-    const user = await FirestoreService.getUser(uid);
-    return user?.role === 'admin';
+  async logout(){
+    return auth.signOut();
   },
 };
 
-/* ─── تصدير عالمي ────────────────────────────────────── */
-/* Expose Firestore funcs for gas delivery and family registration */
-/* Storage upload helper */
+/* ── KYC upload ── */
+async function uploadKycImage(file, path){
+  if(!file) return null;
+  const ref = storage.ref(path + '_' + Date.now());
+  await ref.put(file);
+  return ref.getDownloadURL();
+}
 window._uploadFile = async (file, path) => {
-  const r = sRef(storage, path);
-  await uploadBytes(r, file);
-  return getDownloadURL(r);
+  const ref = storage.ref(path);
+  await ref.put(file);
+  return ref.getDownloadURL();
 };
-
-window.FirestoreService = {
-  ...FirestoreService,
-  /* updateUser — needed for KYC */
-  async updateUser(userId, data) {
-    return updateDoc(doc(db,'users',userId), data);
-  },
-
-  /* تسليم الغاز — يتحقق من رقم الدور ورقم دفتر العائلة معاً */
-  async findAndDeliverGas(queueNum, famId) {
-    const deliveryTime = new Date().toISOString();
-    const qNum = parseInt(queueNum) || 0;
-
-    // ابحث في gas_requests برقم الدور + حالة booked
-    const snap = await getDocs(query(
-      collection(db,'gas_requests'),
-      where('queueNumber','==', qNum),
-      where('status','==','booked')
-    ));
-
-    if (snap.empty) {
-      // ابحث برقم دفتر العائلة مباشرة
-      const byFam = await getDocs(query(
-        collection(db,'gas_requests'),
-        where('familyBookId','==', famId),
-        where('status','==','booked')
-      ));
-      if (byFam.empty) return { found: false };
-      // تحقق من رقم الدور
-      const doc0 = byFam.docs[0];
-      if(doc0.data().queueNumber !== qNum) return { found: true, mismatch: true };
-      return await _doDeliver(doc0, deliveryTime);
-    }
-
-    const gasDoc  = snap.docs[0];
-    const gasData = gasDoc.data();
-
-    // تحقق من رقم دفتر العائلة
-    if(gasData.familyBookId && gasData.familyBookId !== famId){
-      return { found: true, mismatch: true };
-    }
-
-    return await _doDeliver(gasDoc, deliveryTime);
-
-    async function _doDeliver(gasDoc, deliveryTime){
-      const gasData = gasDoc.data();
-      await updateDoc(doc(db,'gas_requests',gasDoc.id), {
-        status: 'delivered', deliveredAt: serverTimestamp(),
-      });
-      if(gasData.userId){
-        await updateDoc(doc(db,'users',gasData.userId), {
-          gasStatus: 'cooldown', lastReceived: deliveryTime, ticket: null,
-        });
-      }
-      return { found: true, name: gasData.name || '—' };
-    }
-  },
-
-  /* تسجيل عائلة جديدة */
-  async registerFamily(data, photoFile, proofFile) {
-    // التحقق من التكرار
-    const existing = await getDoc(doc(db,'families', data.nationalId));
-    if (existing.exists()) throw new Error('duplicate-national-id');
-
-    const famSnap = await getDocs(query(
-      collection(db,'families'),
-      where('familyBookId','==',data.familyBookId)
-    ));
-    if (!famSnap.empty) throw new Error('duplicate-family-book');
-
-    // رفع الصور
-    let photoUrl = null, proofUrl = null;
-    if (photoFile) {
-      const r = sRef(storage, `families/${data.nationalId}/book_${Date.now()}`);
-      await uploadBytes(r, photoFile);
-      photoUrl = await getDownloadURL(r);
-    }
-    if (proofFile) {
-      const r = sRef(storage, `families/${data.nationalId}/proof_${Date.now()}`);
-      await uploadBytes(r, proofFile);
-      proofUrl = await getDownloadURL(r);
-    }
-
-    return setDoc(doc(db,'families',data.nationalId), {
-      ...data,
-      bookPhotoUrl: photoUrl,
-      proofPhotoUrl: proofUrl,
-      status: 'pending',
-      gasStatus: 'none',
-      ticket: null,
-      lastReceived: null,
-      createdAt: serverTimestamp(),
-    });
-  },
-};
-window.AuthService = AuthService;
-window._sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
+window._sendPasswordReset = (email) => auth.sendPasswordResetEmail(email);
 window._setAuthPersistence = (type) =>
-  setPersistence(auth, type === 'local' ? browserLocalPersistence : browserSessionPersistence);
+  auth.setPersistence(type === 'local'
+    ? firebase.auth.Auth.Persistence.LOCAL
+    : firebase.auth.Auth.Persistence.SESSION);
 
-/* أعلن أن Firebase جاهز */
-if(window._firebaseReadyResolve) window._firebaseReadyResolve();
-
-/* ─── Auth State — بعد window.FirestoreService ─── */
-onAuthStateChanged(auth, (user) => {
+/* ── Auth State ── */
+auth.onAuthStateChanged(user => {
   window.currentUser = user ?? null;
   document.dispatchEvent(
-    new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', { detail: user })
+    new CustomEvent(user ? 'userLoggedIn' : 'userLoggedOut', {detail: user})
   );
 });
-
 </script>
 
 </html>

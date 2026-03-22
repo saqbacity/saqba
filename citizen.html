@@ -1487,6 +1487,8 @@ function formatFileSize(bytes) {
 let _firebaseReadyResolve;
 window._firebaseReady = new Promise(r => _firebaseReadyResolve = r);
 window._firebaseReadyResolve = _firebaseReadyResolve;
+// الـ compat SDK يتحمل بشكل متزامن — resolve فوراً
+window._firebaseReady = Promise.resolve();
 
 if(typeof FirestoreService==='undefined')window.FirestoreService=window._placeholderFS={createGasRequest:async()=>{throw'no-firebase'},getUserGasRequests:async()=>[],getUserComplaints:async()=>[],createComplaint:async()=>{throw'no-firebase'},getUser:async()=>null,createUser:async()=>{}};
 if(typeof AuthService==='undefined')window.AuthService={login:async()=>{throw{code:'auth/no-config'}},register:async()=>{throw{code:'auth/no-config'}},logout:async()=>{}};

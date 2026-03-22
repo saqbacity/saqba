@@ -472,36 +472,87 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .toast-err{background:var(--redf);border:1px solid var(--redb);color:#fca5a5}
 
 /* ── VIEW PANELS ── */
-.vp{display:none}.vp.on{display:block;animation:fadein .35s ease}
+.vp{display:none}
+.vp.on{display:block;animation:fadein .35s ease}
+#v-overview{display:block}/* الصفحة الافتراضية */
 
 /* ── MOBILE ── */
 .mob-btn{display:none;background:rgba(92,184,112,.08);border:1px solid var(--bd);border-radius:8px;padding:.45rem .65rem;font-size:1.1rem;cursor:pointer;color:var(--t2);align-items:center}
+
+/* ── شريط التنقل السفلي للموبايل ── */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:rgba(4,18,21,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(92,184,112,.15);
+  padding:.5rem 0 calc(.5rem + env(safe-area-inset-bottom));
+  box-shadow:0 -4px 30px rgba(0,0,0,.5);
+}
+.bottom-nav-inner{
+  display:flex;align-items:center;justify-content:space-around;
+}
+.bn-item{
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  padding:.4rem .5rem;border-radius:10px;
+  background:none;border:none;cursor:pointer;
+  color:var(--tx3);font-family:var(--fb);font-size:.62rem;font-weight:600;
+  transition:all .2s;min-width:52px;-webkit-tap-highlight-color:transparent;
+}
+.bn-item .bn-ico{font-size:1.3rem;line-height:1}
+.bn-item.on{color:var(--goldb)}
+.bn-item.on .bn-ico{filter:drop-shadow(0 0 6px rgba(201,162,39,.5))}
+
 @media(max-width:900px){
-  .sidebar{position:fixed;right:-265px;z-index:200;height:100vh;transition:right .35s var(--eoe)}
-  .sidebar.open{right:0}
-  .mob-btn{display:flex}
-  .content{padding:1rem;margin:0 auto}
-  .stats-row{grid-template-columns:1fr 1fr}
+  /* إخفاء الـ sidebar وإظهار الشريط السفلي */
+  .sidebar{display:none!important}
+  .bottom-nav{display:block}
+  .app{flex-direction:column}
+
+  /* إصلاح الـ main للموبايل */
+  .main{
+    width:100%;
+    min-height:calc(100vh - 56px - 70px);
+    overflow-y:visible;
+    display:block;
+  }
+
+  /* Topbar mobile */
+  .topbar{padding:.7rem 1rem}
+  .topbar-back{font-size:.75rem;padding:.35rem .6rem}
+
+  /* Content area */
+  .content{
+    padding:1rem 1rem calc(80px + env(safe-area-inset-bottom));
+    max-width:100%;
+    width:100%;
+    margin:0;
+  }
+
+  /* Cards & panels */
+  .stats-row{grid-template-columns:1fr 1fr;gap:.75rem}
   .gas-districts{grid-template-columns:1fr 1fr}
   .panel-body{padding:1rem}
   .panel-head{padding:.9rem 1rem}
+
+  /* Auth page on mobile */
+  .auth-deco{display:none}
+  .auth-layout{grid-template-columns:1fr;max-width:100%;border-radius:0;min-height:100vh}
 }
+
 @media(max-width:560px){
-  /* Phone — full single column */
+  .stats-row{grid-template-columns:1fr 1fr}
+  .gas-districts{grid-template-columns:1fr 1fr}
+  .upload-zone{padding:1.2rem}
+  .prof-row{flex-direction:column;align-items:flex-start;gap:.3rem}
+  .fgrid{grid-template-columns:1fr!important}
+  .content{padding:.85rem .85rem calc(80px + env(safe-area-inset-bottom))}
+}
+
+@media(max-width:400px){
   .stats-row{grid-template-columns:1fr}
   .gas-districts{grid-template-columns:1fr}
-  .auth-layout{grid-template-columns:1fr}
-  .auth-deco{display:none}
-  .hbtns{flex-direction:column;gap:.7rem;width:100%}
-  .bp,.bo{width:100%;justify-content:center}
-  /* KYC form upload zones */
-  .upload-zone{padding:1.2rem}
-  /* Profile rows */
-  .prof-row{flex-direction:column;align-items:flex-start;gap:.3rem}
-  /* Topbar */
-  .tb-title{font-size:.9rem}
-  /* Sidebar open overlay */
-  .sidebar.open::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:-1}
+  .bn-item{min-width:44px;font-size:.58rem}
 }
 
 </style>
@@ -652,6 +703,27 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <button class="btn btn-danger btn-sm" onclick="doLogout()" style="justify-content:center">🚪 تسجيل الخروج</button>
     </div>
   </aside>
+
+  <!-- ═══ شريط التنقل السفلي — للموبايل فقط ═══ -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="bn-item on" onclick="gv('overview')" id="bn-overview">
+        <span class="bn-ico">🏠</span><span>الرئيسية</span>
+      </button>
+      <button class="bn-item" onclick="gv('gas')" id="bn-gas">
+        <span class="bn-ico">🔥</span><span>الغاز</span>
+      </button>
+      <button class="bn-item" onclick="gv('complaint')" id="bn-complaint">
+        <span class="bn-ico">📣</span><span>شكوى</span>
+      </button>
+      <button class="bn-item" onclick="gv('track')" id="bn-track">
+        <span class="bn-ico">📋</span><span>طلباتي</span>
+      </button>
+      <button class="bn-item" onclick="gv('profile')" id="bn-profile">
+        <span class="bn-ico">⚙️</span><span>الحساب</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- Main -->
   <div class="main">
@@ -1538,18 +1610,24 @@ document.addEventListener('userLoggedOut',()=>{
 function gv(v){
   document.querySelectorAll('.vp').forEach(p=>p.style.display='none');
   document.getElementById('v-'+v).style.display='block';
+  // Sidebar desktop
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
   const ni=document.getElementById('ni-'+v);if(ni)ni.classList.add('on');
+  // Bottom nav mobile
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('on'));
+  const bn=document.getElementById('bn-'+v);if(bn)bn.classList.add('on');
   const ts={overview:'🏠 نظرة عامة',gas:'🔥 طلب الغاز',complaint:'📣 إرسال شكوى',track:'📋 طلباتي وشكاواي',profile:'⚙️ الحساب',distributor:'📦 واجهة الموزع'};
   document.getElementById('tb-title').textContent=ts[v]||'';
   if(v==='track')loadTrack();
   if(v==='gas')refreshGasView();
   document.getElementById('sidebar').classList.remove('open');
-  // Show distributor nav item if user has distributor role
+  // إظهار زر الموزع إذا كان الدور موزع
   if(udata && udata.role==='distributor') {
     const el=document.getElementById('ni-distributor');
     if(el) el.style.display='flex';
   }
+  // scroll to top on mobile
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* Tab */

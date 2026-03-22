@@ -1375,16 +1375,13 @@ async function updGas(id, status){
 async function deleteGas(id, userId){
   if(!confirm('حذف هذا الطلب نهائياً وإعادة الترقيم؟')) return;
   try{
-    // 1. احذف الطلب
-    await deleteDoc(doc(db,'gas_requests',id));
-    // 2. أعد gasStatus للمواطن إلى eligible
+    await window.deleteDoc(window.doc('gas_requests', id));
     if(userId){
-      await updateDoc(doc(db,'users',userId),{gasStatus:'eligible',ticket:null});
+      await window.updateDoc(window.doc('users', userId), {gasStatus:'eligible', ticket:null});
     }
-    // 3. أعد ترقيم — بدون orderBy لتفادي مشكلة الـ index
-    const snap = await getDocs(collection(db,'gas_requests'));
+    const snap = await window.getDocs(window.collection('gas_requests'));
     const sorted = snap.docs.sort((a,b)=>(a.data().createdAt?.seconds||0)-(b.data().createdAt?.seconds||0));
-    await Promise.all(sorted.map((d,i)=>updateDoc(doc(db,'gas_requests',d.id),{queueNumber:i+1})));
+    await Promise.all(sorted.map((d,i)=>window.updateDoc(window.doc('gas_requests',d.id),{queueNumber:i+1})));
     toast('✅ تم الحذف وإعادة الترقيم');
     loadGas(); loadDash();
   }catch(e){ console.error(e); toast('خطأ في الحذف: '+e.message, false); }
@@ -2047,6 +2044,13 @@ window._sendPasswordReset = async (email) => {
 window._db = db;
 window._firestoreAPI = { collection, getDocs, query, orderBy, where, updateDoc, doc };
 window._updateDoc = async (id, col, status) => updateDoc(doc(db, col, id), { status });
+
+/* تعريض دوال Firestore للـ scripts العادية */
+window.deleteDoc  = (ref) => deleteDoc(ref);
+window.updateDoc  = (ref, data) => updateDoc(ref, data);
+window.doc        = (col, id) => doc(db, col, id);
+window.getDocs    = (q) => getDocs(q);
+window.collection = (name) => collection(db, name);
 
 /* Admin KYC helpers */
 window._getAllUsers = async () => {

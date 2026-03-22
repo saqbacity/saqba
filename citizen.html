@@ -1658,12 +1658,6 @@ document.addEventListener('userLoggedIn', async e => {
 });
 
 async function fillProfile(){
-  // اجلب أحدث بيانات
-  if(uid){
-    const fresh = await window.FirestoreService.getUser(uid).catch(()=>null);
-    if(fresh) udata = fresh;
-  }
-
   const gsLabels = {none:'لم يتم التوثيق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق ✅',booked:'لديك حجز نشط',cooldown:'فترة انتظار'};
   const gsCls    = {none:'',kyc_pending:'b-pending',kyc_rejected:'b-rejected',eligible:'b-approved',booked:'b-pending',cooldown:'b-rejected'};
   const gs = udata.gasStatus||'none';
@@ -1672,7 +1666,7 @@ async function fillProfile(){
   set('p-name',  udata.name||'—');
   set('p-email', udata.email||'—');
   set('p-phone', udata.phone||'—');
-  set('p-date',  formatDate(udata.createdAt));
+  set('p-date',  udata.createdAt ? formatDate(udata.createdAt) : '—');
   set('p-famid', udata.familyBookId||'—');
 
   const gsEl = document.getElementById('p-gas-status');
@@ -1681,20 +1675,21 @@ async function fillProfile(){
   if(udata.lastReceived){
     ['p-last-row','p-next-row'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=''; });
     set('p-last-received', formatDate(udata.lastReceived));
-    const next = new Date(new Date(udata.lastReceived).getTime()+COOLDOWN_DAYS*86400000);
+    const next = new Date(new Date(udata.lastReceived).getTime() + 22*86400000);
     set('p-next-allowed', next.toLocaleDateString('ar-SY'));
   }
 
   // عداد الطلبات والشكاوى
-  if(uid){
-    try{
-      const [g, c] = await Promise.all([
-        window.FirestoreService.getUserGasRequests(uid),
-        window.FirestoreService.getUserComplaints(uid)
-      ]);
-      set('p-gas-count',  g.length + ' طلب');
-      set('p-comp-count', c.length + ' شكوى');
-    }catch(e){}
+  try{
+    const [g, c] = await Promise.all([
+      window.FirestoreService.getUserGasRequests(uid),
+      window.FirestoreService.getUserComplaints(uid)
+    ]);
+    set('p-gas-count',  g.length + ' طلب');
+    set('p-comp-count', c.length + ' شكوى');
+  }catch(e){
+    set('p-gas-count', '—');
+    set('p-comp-count', '—');
   }
 }
 document.addEventListener('userLoggedOut',()=>{

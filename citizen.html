@@ -1167,6 +1167,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <div class="prof-row"><span class="prof-key">البريد الإلكتروني</span><span class="prof-val" id="p-email" style="direction:ltr;font-size:.82rem">—</span></div>
             <div class="prof-row"><span class="prof-key">رقم الهاتف</span><span class="prof-val" id="p-phone" style="direction:ltr">—</span></div>
             <div class="prof-row"><span class="prof-key">تاريخ التسجيل</span><span class="prof-val" id="p-date">—</span></div>
+            <div class="prof-row"><span class="prof-key">طلبات الغاز</span><span class="prof-val" id="p-gas-count">—</span></div>
+            <div class="prof-row"><span class="prof-key">الشكاوى المقدمة</span><span class="prof-val" id="p-comp-count">—</span></div>
           </div>
         </div>
         <!-- حالة التوثيق -->
@@ -1655,23 +1657,44 @@ document.addEventListener('userLoggedIn', async e => {
   window.dispatchEvent(new Event('userLoggedIn_fcm'));
 });
 
-function fillProfile(){
+async function fillProfile(){
+  // اجلب أحدث بيانات
+  if(uid){
+    const fresh = await window.FirestoreService.getUser(uid).catch(()=>null);
+    if(fresh) udata = fresh;
+  }
+
   const gsLabels = {none:'لم يتم التوثيق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق ✅',booked:'لديك حجز نشط',cooldown:'فترة انتظار'};
   const gsCls    = {none:'',kyc_pending:'b-pending',kyc_rejected:'b-rejected',eligible:'b-approved',booked:'b-pending',cooldown:'b-rejected'};
   const gs = udata.gasStatus||'none';
   const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+
   set('p-name',  udata.name||'—');
   set('p-email', udata.email||'—');
   set('p-phone', udata.phone||'—');
   set('p-date',  formatDate(udata.createdAt));
   set('p-famid', udata.familyBookId||'—');
+
   const gsEl = document.getElementById('p-gas-status');
   if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+
   if(udata.lastReceived){
     ['p-last-row','p-next-row'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=''; });
     set('p-last-received', formatDate(udata.lastReceived));
     const next = new Date(new Date(udata.lastReceived).getTime()+COOLDOWN_DAYS*86400000);
     set('p-next-allowed', next.toLocaleDateString('ar-SY'));
+  }
+
+  // عداد الطلبات والشكاوى
+  if(uid){
+    try{
+      const [g, c] = await Promise.all([
+        window.FirestoreService.getUserGasRequests(uid),
+        window.FirestoreService.getUserComplaints(uid)
+      ]);
+      set('p-gas-count',  g.length + ' طلب');
+      set('p-comp-count', c.length + ' شكوى');
+    }catch(e){}
   }
 }
 document.addEventListener('userLoggedOut',()=>{
@@ -1694,6 +1717,7 @@ function gv(v){
   document.getElementById('tb-title').textContent=ts[v]||'';
   if(v==='track')loadTrack();
   if(v==='gas')refreshGasView();
+  if(v==='profile')fillProfile();
   document.getElementById('sidebar').classList.remove('open');
   // إظهار زر الموزع إذا كان الدور موزع
   if(udata && udata.role==='distributor') {

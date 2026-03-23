@@ -290,6 +290,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .pi-pur  {background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2)}
 .panel-title{font-size:.9rem;font-weight:700;color:var(--tx1)}
 .panel-body{padding:1.5rem}
+.prof-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--bd);gap:1rem}
+.prof-row:last-child{border-bottom:none}
+.prof-key{font-size:.82rem;color:var(--tx3);white-space:nowrap;flex-shrink:0}
+.prof-key::after{content:':'}
+.prof-val{font-size:.88rem;color:var(--tx1);text-align:left;direction:ltr;word-break:break-all}
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.1rem;margin-bottom:2rem}
@@ -795,6 +800,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <div class="panel-head">
               <div class="panel-icon pi-gold">👤</div>
               <span class="panel-title">معلومات الحساب</span>
+              <span id="cd-creator-badge" style="display:none;font-size:.7rem;background:rgba(201,162,39,.15);color:var(--goldb);border:1px solid rgba(201,162,39,.3);padding:.15rem .5rem;border-radius:99px;margin-right:.5rem">👑 المنشئ</span>
               <button class="btn btn-sm btn-teal" id="cd-edit-btn" onclick="toggleCitizenEdit()" style="margin-right:auto;width:auto">✏️ تعديل</button>
             </div>
             <div class="panel-body">
@@ -809,6 +815,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
               <div id="cd-edit-mode" style="display:none">
                 <div class="fgrp"><label class="flbl">الاسم الكامل</label><input class="finp" id="cd-edit-name" type="text"></div>
                 <div class="fgrp"><label class="flbl">رقم الهاتف</label><input class="finp" id="cd-edit-phone" type="tel" dir="ltr"></div>
+                <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><input class="finp" id="cd-edit-email" type="email" dir="ltr"></div>
+                <div class="fgrp"><label class="flbl">رقم دفتر العائلة</label><input class="finp" id="cd-edit-famid" type="text" dir="ltr" style="font-family:monospace"></div>
                 <div style="display:flex;gap:.75rem;margin-top:1rem">
                   <button class="btn btn-primary" onclick="saveCitizenEdit()" style="flex:1"><span class="btxt">💾 حفظ التعديلات</span></button>
                   <button class="btn btn-ghost" onclick="toggleCitizenEdit()" style="flex:1">إلغاء</button>
@@ -838,7 +846,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           </div>
 
           <!-- حذف المواطن -->
-          <div class="panel" style="border-color:rgba(239,68,68,.3)">
+          <div class="panel" id="cd-delete-panel" style="border-color:rgba(239,68,68,.3)">
             <div class="panel-head"><div class="panel-icon pi-red">🗑️</div><span class="panel-title" style="color:#f87171">حذف المواطن</span></div>
             <div class="panel-body">
               <p style="font-size:.85rem;color:var(--tx2);margin-bottom:1rem">حذف كامل للحساب من قاعدة البيانات — سيتمكن المواطن من التسجيل مجدداً بنفس البريد الإلكتروني.</p>
@@ -1694,8 +1702,21 @@ async function openCitizenDetail(uid){
     set('cd-gas-count',  g.length + ' طلب');
     set('cd-comp-count', c.length + ' شكوى');
   }catch(e){}
+
   document.getElementById('cd-view-mode').style.display = '';
   document.getElementById('cd-edit-mode').style.display = 'none';
+
+  // حماية المنشئ
+  const CREATOR_EMAIL = 'edlm83@hotmail.com';
+  const isCreator = u.email === CREATOR_EMAIL;
+  const editBtn      = document.getElementById('cd-edit-btn');
+  const deletePanel  = document.getElementById('cd-delete-panel');
+  const creatorBadge = document.getElementById('cd-creator-badge');
+  if(editBtn)      editBtn.style.display      = isCreator ? 'none' : '';
+  if(deletePanel)  deletePanel.style.display  = isCreator ? 'none' : '';
+  if(creatorBadge) creatorBadge.style.display = isCreator ? '' : 'none';
+
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function closeCitizenDetail(){
@@ -1711,6 +1732,8 @@ function toggleCitizenEdit(){
   if(!isEdit && selectedCitizen){
     document.getElementById('cd-edit-name').value  = selectedCitizen.name  || '';
     document.getElementById('cd-edit-phone').value = selectedCitizen.phone || '';
+    document.getElementById('cd-edit-email').value = selectedCitizen.email || '';
+    document.getElementById('cd-edit-famid').value = selectedCitizen.familyBookId || '';
   }
   viewMode.style.display = isEdit ? '' : 'none';
   editMode.style.display = isEdit ? 'none' : '';
@@ -1723,11 +1746,18 @@ async function saveCitizenEdit(){
   try{
     const newName  = document.getElementById('cd-edit-name').value.trim();
     const newPhone = document.getElementById('cd-edit-phone').value.trim();
+    const newEmail = document.getElementById('cd-edit-email').value.trim();
+    const newFamid = document.getElementById('cd-edit-famid').value.trim();
     if(!newName){ toast('الاسم مطلوب', false); if(btn){btn.disabled=false;btn.classList.remove('btn-loading');} return; }
-    await window.updateDoc(window.doc('users', selectedCitizen.id), { name: newName, phone: newPhone });
+    await window.updateDoc(window.doc('users', selectedCitizen.id), {
+      name: newName, phone: newPhone, email: newEmail, familyBookId: newFamid
+    });
     selectedCitizen.name=newName; selectedCitizen.phone=newPhone;
+    selectedCitizen.email=newEmail; selectedCitizen.familyBookId=newFamid;
     document.getElementById('cd-name').textContent  = newName;
     document.getElementById('cd-phone').textContent = newPhone;
+    document.getElementById('cd-email').textContent = newEmail;
+    document.getElementById('cd-famid').textContent = newFamid||'—';
     const idx = allUsers.findIndex(u=>u.id===selectedCitizen.id);
     if(idx>=0){ allUsers[idx].name=newName; allUsers[idx].phone=newPhone; }
     toggleCitizenEdit();

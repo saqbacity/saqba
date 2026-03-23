@@ -1555,12 +1555,14 @@ let selectedCitizen = null;
 async function loadUsers(){
   document.getElementById('users-tbody').innerHTML = etr(5,'⏳ جاري التحميل...');
   try{
-    allUsers = await (window._getAllUsers?.() || FirestoreService.getAllUsers());
-    allUsers = allUsers.filter(u => !['admin','distributor'].includes(u.role));
+    allUsers = await FirestoreService.getAllUsers();
     usersFiltered = allUsers;
     usersPage = 0;
     renderUsersPage();
-  }catch(e){ document.getElementById('users-tbody').innerHTML = etr(5,'⚠️ خطأ في التحميل'); }
+  }catch(e){
+    console.error('loadUsers error:', e);
+    document.getElementById('users-tbody').innerHTML = etr(5,'⚠️ خطأ: ' + e.message);
+  }
 }
 
 function filterUsersByStatus(status){
@@ -1603,12 +1605,24 @@ function renderUsersPage(){
   document.getElementById('users-tbody').innerHTML = page.length
     ? page.map(u=>{
         const gs = u.gasStatus||'none';
+        const roleLabel = {citizen:'👤 مواطن', admin:'🛡️ مشرف', distributor:'📦 موزع'}[u.role||'citizen'] || '👤 مواطن';
+        const roleCls   = {citizen:'b-pending', admin:'b-approved', distributor:'b-delivered'}[u.role||'citizen'] || 'b-pending';
         return `<tr style="cursor:pointer" onclick="openCitizenDetail('${esc(u.id)}')">
           <td><strong>${esc(u.name||'—')}</strong></td>
           <td style="direction:ltr;font-size:.82rem">${esc(u.phone||'—')}</td>
           <td style="font-size:.78rem">${esc(formatDate(u.createdAt))}</td>
           <td><span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span></td>
-          <td><button class="btn btn-teal btn-sm" onclick="event.stopPropagation();openCitizenDetail('${esc(u.id)}')">عرض ←</button></td>
+          <td>
+            <span class="badge ${roleCls}" style="margin-left:.3rem">${roleLabel}</span>
+            <select class="fsel" style="font-size:.75rem;padding:.2rem .4rem;margin-right:.3rem;width:auto;display:inline-block"
+              onclick="event.stopPropagation()"
+              onchange="changeUserRole('${esc(u.id)}','${esc(u.name||'')}',this.value,this)">
+              <option value="citizen"  ${(u.role||'citizen')==='citizen' ?'selected':''}>👤 مواطن</option>
+              <option value="distributor" ${u.role==='distributor'?'selected':''}>📦 موزع</option>
+              <option value="admin"    ${u.role==='admin'   ?'selected':''}>🛡️ مشرف</option>
+            </select>
+            <button class="btn btn-teal btn-sm" onclick="event.stopPropagation();openCitizenDetail('${esc(u.id)}')">عرض ←</button>
+          </td>
         </tr>`;
       }).join('')
     : etr(5,'لا يوجد مواطنون');
@@ -1626,6 +1640,22 @@ function usersChangePage(dir){
   const pages = Math.ceil(usersFiltered.length / PAGE_SIZE);
   usersPage = Math.max(0, Math.min(pages-1, usersPage + dir));
   renderUsersPage();
+}
+
+async function changeUserRole(uid, name, newRole, selectEl){
+  if(!confirm(`تغيير صلاحية ${name} إلى "${newRole==='admin'?'مشرف':newRole==='distributor'?'موزع':'مواطن'}"؟`)){
+    // إعادة القيمة القديمة
+    const u = allUsers.find(u=>u.id===uid);
+    if(u && selectEl) selectEl.value = u.role||'citizen';
+    return;
+  }
+  try{
+    await window.updateDoc(window.doc('users', uid), { role: newRole });
+    const idx = allUsers.findIndex(u=>u.id===uid);
+    if(idx>=0) allUsers[idx].role = newRole;
+    toast(`✅ تم تغيير صلاحية ${name}`);
+    renderUsersPage();
+  }catch(e){ toast('خطأ: '+e.message, false); }
 }
 
 async function openCitizenDetail(uid){

@@ -1615,7 +1615,7 @@ async function loadKyc(){
     }
 
     container.innerHTML=users.map(u=>{
-      const date=esc(u.gasRequestedAt?new Date(u.gasRequestedAt).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—'));
+      const date=esc(u.gasRequestedAt?new Date(u.gasRequestedAt).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—');
       const statusCls=u.gasStatus==='eligible'?'b-approved':u.gasStatus==='kyc_rejected'?'b-rejected':'b-pending';
       const statusTxt=u.gasStatus==='eligible'?'✅ موثّق':u.gasStatus==='kyc_rejected'?'❌ مرفوض':'⏳ قيد المراجعة';
 

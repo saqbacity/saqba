@@ -53,19 +53,21 @@ input[type=number]{font-family:monospace;font-size:1.2rem;text-align:center;lett
 </head>
 <body>
 
-<!-- شاشة PIN -->
+<!-- شاشة تسجيل الدخول -->
 <div class="page" id="pin-page">
   <div class="logo-row">
     <div class="logo-ico">📦</div>
     <div><div class="logo-text">بوابة الموزع</div><div class="logo-sub">مدينة سقبا — توزيع الغاز</div></div>
   </div>
   <div class="card">
-    <div class="card-title">🔑 رمز الدخول</div>
-    <div class="card-sub">أدخل رمز الموزع المعتمد للمتابعة</div>
-    <label>رمز الموزع</label>
-    <input type="password" id="pin-input" placeholder="••••" maxlength="8" autocomplete="off">
-    <button class="btn btn-primary" id="pin-btn" onclick="checkPin()"><span class="btxt">دخول ←</span></button>
-    <div id="pin-err">❌ رمز خاطئ — حاول مجدداً</div>
+    <div class="card-title">🔑 تسجيل دخول الموزع</div>
+    <div class="card-sub">أدخل بيانات حساب الموزع للمتابعة</div>
+    <label>البريد الإلكتروني</label>
+    <input type="email" id="dist-email" placeholder="distributor@..." autocomplete="username">
+    <label style="margin-top:.75rem">كلمة المرور</label>
+    <input type="password" id="dist-pass" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn btn-primary" id="pin-btn" onclick="doLogin()"><span class="btxt">دخول ←</span></button>
+    <div id="pin-err">❌ بيانات الدخول غير صحيحة — حاول مجدداً</div>
   </div>
   <a href="index.html" class="back">← العودة للبوابة</a>
 </div>
@@ -109,7 +111,6 @@ input[type=number]{font-family:monospace;font-size:1.2rem;text-align:center;lett
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
 // ═══ الإعدادات ═══
-const PIN = '1234'; // ← غيّر هذا الرمز
 const COOLDOWN = 22;
 
 // ═══ Firebase ═══
@@ -124,35 +125,34 @@ firebase.initializeApp({
 const db   = firebase.firestore();
 const auth = firebase.auth();
 
-// تسجيل دخول تلقائي بحساب الموزع
-const DIST_EMAIL = 'distributor@saqba.local';
-const DIST_PASS  = 'SaqbaGas2026!';
-
-auth.signInWithEmailAndPassword(DIST_EMAIL, DIST_PASS)
-  .then(() => console.log('✅ logged in'))
-  .catch(err => {
-    console.error('Auth error:', err.message);
-    document.getElementById('result-box').style.display = 'block';
-    document.getElementById('result-box').className = 'err';
-    document.getElementById('result-ico').textContent = '⚠️';
-    document.getElementById('result-title').textContent = 'خطأ في الاتصال';
-    document.getElementById('result-msg').textContent = 'تعذّر تسجيل الدخول: ' + err.message;
-  });
-
-// ═══ PIN ═══
-function checkPin(){
-  const v = document.getElementById('pin-input').value;
-  if(v === PIN){
-    document.getElementById('pin-page').style.display   = 'none';
-    document.getElementById('deliver-page').style.display = '';
-  } else {
-    document.getElementById('pin-err').style.display = 'block';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
+// ═══ تسجيل الدخول — Firebase Auth (لا بيانات مكشوفة في الكود) ═══
+async function doLogin(){
+  const email = document.getElementById('dist-email').value.trim();
+  const pass  = document.getElementById('dist-pass').value;
+  const btn   = document.getElementById('pin-btn');
+  const errEl = document.getElementById('pin-err');
+  errEl.style.display = 'none';
+  if(!email || !pass){ errEl.style.display = 'block'; return; }
+  btn.disabled = true;
+  btn.querySelector('.btxt').textContent = '⏳ جاري الدخول...';
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    const snap = await db.collection('users').doc(cred.user.uid).get();
+    if(snap.exists && snap.data().role === 'distributor'){
+      document.getElementById('pin-page').style.display    = 'none';
+      document.getElementById('deliver-page').style.display = '';
+    } else {
+      await auth.signOut();
+      errEl.style.display = 'block';
+    }
+  } catch(e){
+    errEl.style.display = 'block';
   }
+  btn.disabled = false;
+  btn.querySelector('.btxt').textContent = 'دخول ←';
 }
-document.getElementById('pin-input').addEventListener('keydown', e => {
-  if(e.key === 'Enter') checkPin();
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && document.getElementById('pin-page').style.display !== 'none') doLogin();
 });
 
 // ═══ عرض النتيجة ═══

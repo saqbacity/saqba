@@ -1174,10 +1174,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         </div>
         <!-- حالة التوثيق -->
         <div class="panel" style="margin-bottom:1.2rem">
-          <div class="panel-head"><div class="panel-icon pi-teal">📄</div><span class="panel-title">حالة توثيق الغاز</span></div>
+          <div class="panel-head"><div class="panel-icon pi-teal">🔥</div><span class="panel-title">حالة طلب الغاز</span></div>
           <div class="panel-body">
             <div class="prof-row"><span class="prof-key">رقم دفتر العائلة</span><span class="prof-val" id="p-famid" style="direction:ltr;font-family:monospace">—</span></div>
-            <div class="prof-row"><span class="prof-key">حالة التوثيق</span><span id="p-gas-status">—</span></div>
+            <div class="prof-row"><span class="prof-key">الوضع الحالي</span><span id="p-gas-status">—</span></div>
             <div class="prof-row" id="p-last-row" style="display:none"><span class="prof-key">آخر استلام</span><span class="prof-val" id="p-last-received">—</span></div>
             <div class="prof-row" id="p-next-row" style="display:none"><span class="prof-key">يمكن الطلب بعد</span><span class="prof-val" id="p-next-allowed" style="color:var(--goldb)">—</span></div>
           </div>
@@ -1671,7 +1671,7 @@ async function fillProfile(){
   set('p-famid', udata.familyBookId||'—');
 
   const gsEl = document.getElementById('p-gas-status');
-  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${esc(gsLabels[gs]||gs)}</span>`;
 
   // ── badge موثق / غير موثق ──
   const verified = ['eligible','booked','cooldown'].includes(gs);

@@ -1336,7 +1336,7 @@ function renderGasTbl(data,tid){
     <td><strong style="color:var(--goldb)">#${esc(String(r.queueNumber))}</strong></td>
     <td>${esc(r.name||'—')}</td>
     <td style="direction:ltr;text-align:right">${esc(r.phone||'—')}</td>
-    <td style="font-size:.78rem">${formatDate(r.createdAt)}</td>
+    <td style="font-size:.78rem">${esc(formatDate(r.createdAt))}</td>
     <td><span class="badge ${s.cls}">${esc(s.label)}</span></td>
     <td><div class="acts">
       ${r.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="updGas('${esc(r.id)}','approved')">✅ قبول</button>`:''}
@@ -1404,7 +1404,7 @@ function renderCompTbl(data,tid){
     <td>${esc(c.type||'—')}</td>
     <td style="max-width:200px;font-size:.8rem;color:var(--tx3)">${esc((c.description||'').substring(0,75))}${(c.description||'').length>75?'...':''}</td>
     <td>${c.image?`<img src="${esc(c.image)}" class="thumb" onclick="openLb('${esc(c.image)}')">`:'—'}</td>
-    <td style="font-size:.78rem">${formatDate(c.createdAt)}</td>
+    <td style="font-size:.78rem">${esc(formatDate(c.createdAt))}</td>
     <td><span class="badge ${s.cls}">${esc(s.label)}</span></td>
     <td><div class="acts">
       ${c.status==='open'?`<button class="btn btn-approve btn-sm" onclick="updComp('${esc(c.id)}','in_progress')">معالجة</button>`:''}
@@ -1442,7 +1442,7 @@ async function loadNews(){
       <td>${it.image?`<img src="${esc(it.image)}" class="thumb">`:'—'}</td>
       <td><strong>${esc(it.title)}</strong></td>
       <td style="max-width:200px;font-size:.8rem;color:var(--tx3)">${esc((it.content||'').substring(0,80))}...</td>
-      <td style="font-size:.78rem">${formatDate(it.createdAt)}</td>
+      <td style="font-size:.78rem">${esc(formatDate(it.createdAt))}</td>
       <td><button class="btn btn-danger btn-sm" onclick="delNews('${esc(it.id)}')">🗑️ حذف</button></td>
     </tr>`).join(''):etr(5,'لا توجد أخبار منشورة');
   }catch(e){document.getElementById('news-tbody').innerHTML=etr(5,'⚠️ خطأ')}
@@ -1504,7 +1504,7 @@ function renderUsersPage(){
         <td style="direction:ltr;text-align:right;font-size:.82rem">${esc(u.email||'—')}</td>
         <td style="direction:ltr;text-align:right">${esc(u.phone||'—')}</td>
         <td>${esc(u.district||'—')}</td>
-        <td style="font-size:.78rem">${formatDate(u.createdAt)}</td>
+        <td style="font-size:.78rem">${esc(formatDate(u.createdAt))}</td>
         <td><span class="badge ${u.role==='admin'?'b-approved':'b-pending'}">${u.role==='admin'?'🛡️ مشرف':'👤 مواطن'}</span></td>
         <td>
           <button class="btn btn-teal btn-sm" onclick="resetUserPassword('${esc(u.email||'')}','${esc(u.name||'')}')" ${!u.email?'disabled':''}>
@@ -1555,7 +1555,7 @@ async function loadMartyrs(){
         <td style="font-size:.78rem">${esc(d)}</td>
         <td>${esc(m.district||'—')}</td>
         <td>${esc(m.cause||'—')}</td>
-        <td><span class="badge ${s.c}">${s.l}</span></td>
+        <td><span class="badge ${s.c}">${esc(s.l)}</span></td>
         <td><div class="acts">
           ${m.status==='pending'?`<button class="btn btn-approve btn-sm" onclick="approveMartyr('${esc(m.id)}')">نشر</button>`:''}
           ${m.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="rejectMartyr('${esc(m.id)}')">رفض</button>`:''}
@@ -1615,7 +1615,7 @@ async function loadKyc(){
     }
 
     container.innerHTML=users.map(u=>{
-      const date=u.gasRequestedAt?new Date(u.gasRequestedAt).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—';
+      const date=esc(u.gasRequestedAt?new Date(u.gasRequestedAt).toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'}):'—'));
       const statusCls=u.gasStatus==='eligible'?'b-approved':u.gasStatus==='kyc_rejected'?'b-rejected':'b-pending';
       const statusTxt=u.gasStatus==='eligible'?'✅ موثّق':u.gasStatus==='kyc_rejected'?'❌ مرفوض':'⏳ قيد المراجعة';
 

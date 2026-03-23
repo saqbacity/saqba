@@ -1,7 +1,7 @@
 <div dir="rtl">
 
 # 🕌 بوابة سقبا الرقمية
-### SAQBA DIGITAL PORTAL
+### SAQBA DIGITAL PORTAL — v2.0
 
 منصة حكومية رقمية لتقديم الخدمات الإدارية لأبناء مدينة سقبا — ريف دمشق — سوريا.
 
@@ -11,12 +11,13 @@
 
 ```
 saqba/
-├── index.html       ← الصفحة الرئيسية
-├── citizen.html     ← بوابة المواطن (تسجيل، غاز، شكاوى، توثيق)
-├── admin.html       ← لوحة الإدارة
-├── martyrs.html     ← سجل الشهداء
-├── manifest.json    ← PWA manifest
-├── sw.js            ← Service Worker (offline + إشعارات)
+├── index.html          ← الصفحة الرئيسية
+├── citizen.html        ← بوابة المواطن
+├── admin.html          ← لوحة الإدارة
+├── martyrs.html        ← سجل الشهداء
+├── distributor.html    ← بوابة الموزع (جديد)
+├── manifest.json       ← PWA
+├── sw.js               ← Service Worker
 ├── README.md
 ├── LICENSE
 └── icons/
@@ -24,56 +25,56 @@ saqba/
     └── icon-512.png
 ```
 
-> كل ملف HTML مكتفٍ بذاته — CSS + JS + Firebase مدمجة بداخله.
-
 ---
 
 ## ✨ الميزات
 
 | الميزة | الوصف |
 |--------|-------|
-| 🔥 نظام الغاز | توثيق الهوية + رفع الوثائق (دفتر عائلة + هوية وجهين + إثبات عنوان) + طلب الأسطوانة |
-| 📣 الشكاوى | تقديم شكاوى مع صور + متابعة الحالة |
-| 📰 الأخبار | نشر الأخبار والإعلانات مع صور |
-| 🖼️ معرض الصور | معرض صور المدينة |
-| 🕊️ سجل الشهداء | توثيق وعرض أسماء شهداء المدينة |
-| 🔔 إشعارات | Push Notifications عبر Firebase Cloud Messaging |
-| 📱 PWA | تثبيت التطبيق على الهاتف مباشرة من المتصفح |
-| 📊 إحصاءات | رسوم بيانية لحالات الغاز والشكاوى |
+| 🔥 نظام الغاز | KYC كامل + طلب الدور + عداد 22 يوم |
+| 📦 بوابة الموزع | تأكيد التسليم برقم الدور + دفتر العائلة |
+| 📣 الشكاوى | تقديم شكاوى مع صور |
+| 📰 الأخبار | نشر أخبار المدينة |
+| 🕊️ سجل الشهداء | توثيق أسماء الشهداء |
+| 🔔 إشعارات | Push Notifications عبر FCM |
+| 📱 PWA | تثبيت كتطبيق على الهاتف |
+| 📊 إحصاءات | رسوم بيانية في لوحة الإدارة |
+| ✓ توثيق | badge موثق/غير موثق في كل مكان |
 
 ---
 
 ## ⚙️ الإعداد
 
-### 1. Firebase Config
-Firebase Config مُضمّن في كل الملفات للمشروع `saqba-portal`.
+### Firebase Config
+مضمّن في كل الملفات — المشروع: `saqba-portal`
 
-### 2. VAPID Key (Push Notifications)
-في `citizen.html` ابحث عن:
+### بوابة الموزع
+رمز الدخول الافتراضي في `distributor.html`:
 ```javascript
-vapidKey: 'BNi1n04Qi-...',
+const PIN = '1234'; // ← غيّره
 ```
-المفتاح مضبوط مسبقاً.
+حساب الموزع في Firebase Auth:
+```
+Email:    distributor@saqba.local
+Password: SaqbaGas2026!
+```
 
-### 3. GitHub Pages
-1. ارفع جميع الملفات مع مجلد `icons/`
-2. **Settings → Pages → Branch: main → Save**
-3. أضف الدومين في Firebase:
-   **Authentication → Settings → Authorized domains**
-   ```
-   saqbacity.github.io
-   ```
+### GitHub Pages
+```
+Settings → Pages → Branch: main → Save
+```
+أضف في Firebase → Authentication → Authorized domains:
+```
+saqbacity.github.io
+```
 
 ---
 
 ## 👤 إنشاء حساب المشرف
-
-1. سجّل حساباً عادياً في `citizen.html`
-2. Firebase Console → Firestore → `users` → `{uid}`
-3. أضف الحقل:
-   ```
-   role: "admin"
-   ```
+```
+Firebase Console → Firestore → users → {uid}
+role: "admin"
+```
 
 ---
 
@@ -83,87 +84,89 @@ vapidKey: 'BNi1n04Qi-...',
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isAdmin() {
       return request.auth != null &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     function isAuth() { return request.auth != null; }
+    function isDistributor() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'distributor';
+    }
+    function isKycVerified() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.gasStatus
+        in ['eligible', 'booked', 'cooldown'];
+    }
 
     match /users/{userId} {
       allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
       allow create: if isAuth() && request.auth.uid == userId;
+      // المواطن: لا يستطيع تغيير role أبداً
+      // الموزع: يستطيع فقط تحديث gasStatus وlastReceived وticket
+      // المشرف: صلاحيات كاملة
       allow update: if isAuth() && (
         (request.auth.uid == userId &&
          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
-        isAdmin()
+        isAdmin() ||
+        (isDistributor() &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['gasStatus', 'lastReceived', 'ticket']))
       );
       allow delete: if isAdmin();
     }
+
     match /gas_requests/{id} {
-      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin() || isDistributor());
+      // يُشترط أن يكون gasStatus == 'eligible' (فحص server-side لعداد 22 يوم)
+      allow create: if isAuth()
+        && request.resource.data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.gasStatus == 'eligible';
+      // الموزع يستطيع فقط تحديث حقول التسليم
+      allow update: if isAdmin() ||
+        (isDistributor() &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['status', 'deliveredAt', 'queueNumber']));
+      allow delete: if isAdmin();
     }
+
     match /complaints/{id} {
       allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
+
     match /news/{id}    { allow read: if true; allow write: if isAdmin(); }
     match /gallery/{id} { allow read: if true; allow write: if isAdmin(); }
+
     match /martyrs/{id} {
       allow read: if true;
-      allow create: if isAuth();
+      // يُشترط أن يكون المستخدم موثّقاً (KYC مقبول) لإضافة شهيد
+      allow create: if isAuth() && isKycVerified();
       allow update, delete: if isAdmin();
     }
+
     match /families/{id} {
       allow read: if isAuth() && (request.auth.uid == id || isAdmin());
       allow create: if isAuth()
         && !exists(/databases/$(database)/documents/families/$(request.resource.data.familyBookId));
       allow update, delete: if isAdmin();
     }
+
     match /village_registry/{id} {
-      allow read, create: if isAuth();
+      allow read: if isAuth();
+      // الكتابة مقيّدة: المستخدم يكتب سجله فقط
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
+
     match /notifications/{id} {
-      allow read: if isAuth() && (resource.data.scope == 'all' ||
-                  resource.data.toUid == request.auth.uid);
+      allow read: if isAuth();
       allow create: if isAdmin();
       allow delete: if isAdmin();
     }
   }
 }
 ```
-
----
-
-## 🗄️ Collections في Firestore
-
-| Collection | الوصف |
-|-----------|-------|
-| `users` | بيانات المستخدمين + حالة الغاز + FCM token |
-| `gas_requests` | طلبات توزيع الغاز |
-| `complaints` | الشكاوى |
-| `news` | الأخبار والإعلانات |
-| `gallery` | معرض الصور |
-| `martyrs` | سجل الشهداء |
-| `families` | بيانات KYC (دفتر عائلة + هوية وجهين + إثبات عنوان) |
-| `village_registry` | سجل السكان |
-| `notifications` | قائمة الإشعارات المُرسَلة |
-
----
-
-## 🔔 نظام الإشعارات (FCM)
-
-الإشعارات تُرسَل تلقائياً في الحالات التالية:
-
-| الحدث | المستلم |
-|-------|---------|
-| قبول/رفض طلب توثيق الغاز | المواطن المعني |
-| قبول/رفض/تسليم طلب الغاز | المواطن المعني |
-| نشر خبر جديد | جميع المستخدمين |
 
 ---
 

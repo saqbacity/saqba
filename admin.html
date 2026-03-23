@@ -756,14 +756,95 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- ── USERS ── -->
+      <!-- ── CITIZENS ── -->
       <div id="v-users" class="vp">
-        <div class="panel">
-          <div class="panel-head"><div class="ph-left"><div class="panel-icon pi-teal">👥</div><span class="panel-title">إدارة المستخدمين</span></div><button class="btn btn-teal btn-sm" onclick="loadUsers()">🔄 تحديث</button></div>
-          <div class="panel-body" style="padding-bottom:.5rem">
-            <input type="search" id="users-search" class="tbl-search" placeholder="🔍 بحث بالاسم أو البريد أو الهاتف..." oninput="filterUsers()">
+
+        <!-- قائمة المواطنين -->
+        <div id="citizens-list-view">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="ph-left"><div class="panel-icon pi-teal">👥</div><span class="panel-title">المواطنون المسجلون</span></div>
+              <button class="btn btn-teal btn-sm" onclick="loadUsers()">🔄 تحديث</button>
+            </div>
+            <div class="panel-body" style="padding-bottom:.5rem">
+              <input type="search" id="users-search" class="tbl-search" placeholder="🔍 بحث بالاسم أو البريد أو الهاتف..." oninput="filterUsers()">
+              <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
+                <button class="btn btn-sm btn-ghost" onclick="filterUsersByStatus('all')" id="uf-all" style="border-color:var(--t2);color:var(--t2)">الكل</button>
+                <button class="btn btn-sm btn-ghost" onclick="filterUsersByStatus('verified')" id="uf-ver">✅ موثّق</button>
+                <button class="btn btn-sm btn-ghost" onclick="filterUsersByStatus('unverified')" id="uf-unv">⏳ غير موثّق</button>
+              </div>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead><tr><th>الاسم</th><th>الهاتف</th><th>تاريخ التسجيل</th><th>حالة التوثيق</th><th>إجراء</th></tr></thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+            <div id="users-pagination"></div>
           </div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>الحي</th><th>تاريخ التسجيل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
-          <div id="users-pagination"></div>
+        </div>
+
+        <!-- صفحة تفاصيل المواطن -->
+        <div id="citizen-detail-view" style="display:none">
+          <div style="margin-bottom:1rem">
+            <button class="btn btn-ghost btn-sm" onclick="closeCitizenDetail()" style="width:auto">← رجوع للقائمة</button>
+          </div>
+
+          <!-- معلومات الحساب -->
+          <div class="panel" style="margin-bottom:1.2rem">
+            <div class="panel-head">
+              <div class="panel-icon pi-gold">👤</div>
+              <span class="panel-title">معلومات الحساب</span>
+              <button class="btn btn-sm btn-teal" id="cd-edit-btn" onclick="toggleCitizenEdit()" style="margin-right:auto;width:auto">✏️ تعديل</button>
+            </div>
+            <div class="panel-body">
+              <!-- عرض -->
+              <div id="cd-view-mode">
+                <div class="prof-row"><span class="prof-key">الاسم الكامل</span><span class="prof-val" id="cd-name">—</span></div>
+                <div class="prof-row"><span class="prof-key">البريد الإلكتروني</span><span class="prof-val" id="cd-email" style="direction:ltr">—</span></div>
+                <div class="prof-row"><span class="prof-key">رقم الهاتف</span><span class="prof-val" id="cd-phone" style="direction:ltr">—</span></div>
+                <div class="prof-row"><span class="prof-key">تاريخ التسجيل</span><span class="prof-val" id="cd-date">—</span></div>
+              </div>
+              <!-- تعديل -->
+              <div id="cd-edit-mode" style="display:none">
+                <div class="fgrp"><label class="flbl">الاسم الكامل</label><input class="finp" id="cd-edit-name" type="text"></div>
+                <div class="fgrp"><label class="flbl">رقم الهاتف</label><input class="finp" id="cd-edit-phone" type="tel" dir="ltr"></div>
+                <div style="display:flex;gap:.75rem;margin-top:1rem">
+                  <button class="btn btn-primary" onclick="saveCitizenEdit()" style="flex:1"><span class="btxt">💾 حفظ التعديلات</span></button>
+                  <button class="btn btn-ghost" onclick="toggleCitizenEdit()" style="flex:1">إلغاء</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- حالة الغاز -->
+          <div class="panel" style="margin-bottom:1.2rem">
+            <div class="panel-head"><div class="panel-icon pi-gold">🔥</div><span class="panel-title">حالة طلب الغاز</span></div>
+            <div class="panel-body">
+              <div class="prof-row"><span class="prof-key">رقم دفتر العائلة</span><span class="prof-val" id="cd-famid" style="direction:ltr;font-family:monospace">—</span></div>
+              <div class="prof-row"><span class="prof-key">الوضع الحالي</span><span id="cd-gas-status">—</span></div>
+              <div class="prof-row" id="cd-last-row" style="display:none"><span class="prof-key">آخر استلام</span><span class="prof-val" id="cd-last-received">—</span></div>
+              <div class="prof-row" id="cd-next-row" style="display:none"><span class="prof-key">يمكن الطلب بعد</span><span class="prof-val" id="cd-next-allowed" style="color:var(--goldb)">—</span></div>
+            </div>
+          </div>
+
+          <!-- إحصاءات -->
+          <div class="panel" style="margin-bottom:1.2rem">
+            <div class="panel-head"><div class="panel-icon pi-teal">📊</div><span class="panel-title">الإحصاءات</span></div>
+            <div class="panel-body">
+              <div class="prof-row"><span class="prof-key">طلبات الغاز</span><span class="prof-val" id="cd-gas-count">—</span></div>
+              <div class="prof-row"><span class="prof-key">الشكاوى المقدمة</span><span class="prof-val" id="cd-comp-count">—</span></div>
+            </div>
+          </div>
+
+          <!-- حذف المواطن -->
+          <div class="panel" style="border-color:rgba(239,68,68,.3)">
+            <div class="panel-head"><div class="panel-icon pi-red">🗑️</div><span class="panel-title" style="color:#f87171">حذف المواطن</span></div>
+            <div class="panel-body">
+              <p style="font-size:.85rem;color:var(--tx2);margin-bottom:1rem">حذف كامل للحساب من قاعدة البيانات — سيتمكن المواطن من التسجيل مجدداً بنفس البريد الإلكتروني.</p>
+              <button class="btn btn-danger" onclick="deleteCitizen()" style="width:100%">🗑️ حذف المواطن نهائياً</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1468,26 +1549,45 @@ async function delGal(id){if(!confirm('حذف هذه الصورة؟'))return;try
 
 /* Users — مع Pagination */
 const PAGE_SIZE = 20;
-let usersPage = 0, allUsers = [], usersFiltered = [];
+let usersPage = 0, allUsers = [], usersFiltered = [], currentStatusFilter = 'all';
+let selectedCitizen = null;
 
 async function loadUsers(){
-  document.getElementById('users-tbody').innerHTML=etr(6,'⏳ جاري التحميل...');
+  document.getElementById('users-tbody').innerHTML = etr(5,'⏳ جاري التحميل...');
   try{
     allUsers = await (window._getAllUsers?.() || FirestoreService.getAllUsers());
+    allUsers = allUsers.filter(u => !['admin','distributor'].includes(u.role));
     usersFiltered = allUsers;
     usersPage = 0;
     renderUsersPage();
-  }catch(e){document.getElementById('users-tbody').innerHTML=etr(6,'⚠️ خطأ في التحميل')}
+  }catch(e){ document.getElementById('users-tbody').innerHTML = etr(5,'⚠️ خطأ في التحميل'); }
+}
+
+function filterUsersByStatus(status){
+  currentStatusFilter = status;
+  ['uf-all','uf-ver','uf-unv'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.removeProperty('border-color');
+  });
+  const map = {all:'uf-all', verified:'uf-ver', unverified:'uf-unv'};
+  const btn = document.getElementById(map[status]);
+  if(btn) btn.style.borderColor = 'var(--t2)';
+  filterUsers();
 }
 
 function filterUsers(){
   const q = (document.getElementById('users-search')?.value||'').toLowerCase();
-  usersFiltered = q
-    ? allUsers.filter(u =>
-        (u.name||'').toLowerCase().includes(q) ||
-        (u.email||'').toLowerCase().includes(q) ||
-        (u.phone||'').includes(q))
-    : allUsers;
+  usersFiltered = allUsers.filter(u => {
+    const matchText = !q || (u.name||'').toLowerCase().includes(q)
+      || (u.email||'').toLowerCase().includes(q)
+      || (u.phone||'').includes(q);
+    const gs = u.gasStatus || 'none';
+    const isVerified = ['eligible','booked','cooldown'].includes(gs);
+    const matchStatus = currentStatusFilter === 'all'
+      || (currentStatusFilter === 'verified' && isVerified)
+      || (currentStatusFilter === 'unverified' && !isVerified);
+    return matchText && matchStatus;
+  });
   usersPage = 0;
   renderUsersPage();
 }
@@ -1497,24 +1597,22 @@ function renderUsersPage(){
   const page  = usersFiltered.slice(start, start + PAGE_SIZE);
   const total = usersFiltered.length;
   const pages = Math.ceil(total / PAGE_SIZE);
+  const gsLabels = {none:'غير موثّق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق',booked:'موثّق',cooldown:'موثّق'};
+  const gsCls   = {none:'b-rejected',kyc_pending:'b-pending',kyc_rejected:'b-rejected',eligible:'b-approved',booked:'b-approved',cooldown:'b-approved'};
 
   document.getElementById('users-tbody').innerHTML = page.length
-    ? page.map(u=>`<tr>
-        <td>${esc(u.name||'—')}</td>
-        <td style="direction:ltr;text-align:right;font-size:.82rem">${esc(u.email||'—')}</td>
-        <td style="direction:ltr;text-align:right">${esc(u.phone||'—')}</td>
-        <td>${esc(u.district||'—')}</td>
-        <td style="font-size:.78rem">${esc(formatDate(u.createdAt))}</td>
-        <td><span class="badge ${u.role==='admin'?'b-approved':'b-pending'}">${u.role==='admin'?'🛡️ مشرف':'👤 مواطن'}</span></td>
-        <td>
-          <button class="btn btn-teal btn-sm" onclick="resetUserPassword('${esc(u.email||'')}','${esc(u.name||'')}')" ${!u.email?'disabled':''}>
-            🔑 إعادة تعيين
-          </button>
-        </td>
-      </tr>`).join('')
-    : etr(6,'لا يوجد مستخدمون');
+    ? page.map(u=>{
+        const gs = u.gasStatus||'none';
+        return `<tr style="cursor:pointer" onclick="openCitizenDetail('${esc(u.id)}')">
+          <td><strong>${esc(u.name||'—')}</strong></td>
+          <td style="direction:ltr;font-size:.82rem">${esc(u.phone||'—')}</td>
+          <td style="font-size:.78rem">${esc(formatDate(u.createdAt))}</td>
+          <td><span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span></td>
+          <td><button class="btn btn-teal btn-sm" onclick="event.stopPropagation();openCitizenDetail('${esc(u.id)}')">عرض ←</button></td>
+        </tr>`;
+      }).join('')
+    : etr(5,'لا يوجد مواطنون');
 
-  // Pagination controls
   const pEl = document.getElementById('users-pagination');
   if(pEl) pEl.innerHTML = pages > 1 ? `
     <div class="pag-bar">
@@ -1528,7 +1626,97 @@ function usersChangePage(dir){
   const pages = Math.ceil(usersFiltered.length / PAGE_SIZE);
   usersPage = Math.max(0, Math.min(pages-1, usersPage + dir));
   renderUsersPage();
-  document.getElementById('v-users')?.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function openCitizenDetail(uid){
+  selectedCitizen = allUsers.find(u => u.id === uid);
+  if(!selectedCitizen) return;
+  const u = selectedCitizen;
+  document.getElementById('citizens-list-view').style.display = 'none';
+  document.getElementById('citizen-detail-view').style.display = 'block';
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.textContent = val||'—'; };
+  set('cd-name',  u.name);
+  set('cd-email', u.email);
+  set('cd-phone', u.phone);
+  set('cd-date',  formatDate(u.createdAt));
+  set('cd-famid', u.familyBookId);
+  const gsLabels = {none:'غير موثّق',kyc_pending:'قيد المراجعة',kyc_rejected:'مرفوض',eligible:'موثّق ✅',booked:'لديه حجز نشط',cooldown:'فترة انتظار'};
+  const gsCls    = {none:'b-rejected',kyc_pending:'b-pending',kyc_rejected:'b-rejected',eligible:'b-approved',booked:'b-approved',cooldown:'b-pending'};
+  const gs = u.gasStatus||'none';
+  const gsEl = document.getElementById('cd-gas-status');
+  if(gsEl) gsEl.innerHTML = `<span class="badge ${gsCls[gs]||''}">${gsLabels[gs]||gs}</span>`;
+  if(u.lastReceived){
+    document.getElementById('cd-last-row').style.display = '';
+    document.getElementById('cd-next-row').style.display = '';
+    set('cd-last-received', formatDate(u.lastReceived));
+    const next = new Date(new Date(u.lastReceived).getTime() + 22*86400000);
+    set('cd-next-allowed', next.toLocaleDateString('ar-SY'));
+  } else {
+    document.getElementById('cd-last-row').style.display = 'none';
+    document.getElementById('cd-next-row').style.display = 'none';
+  }
+  set('cd-gas-count', '⏳'); set('cd-comp-count', '⏳');
+  try{
+    const [g,c] = await Promise.all([
+      FirestoreService.getUserGasRequests(uid),
+      FirestoreService.getUserComplaints(uid)
+    ]);
+    set('cd-gas-count',  g.length + ' طلب');
+    set('cd-comp-count', c.length + ' شكوى');
+  }catch(e){}
+  document.getElementById('cd-view-mode').style.display = '';
+  document.getElementById('cd-edit-mode').style.display = 'none';
+}
+
+function closeCitizenDetail(){
+  document.getElementById('citizen-detail-view').style.display = 'none';
+  document.getElementById('citizens-list-view').style.display  = '';
+  selectedCitizen = null;
+}
+
+function toggleCitizenEdit(){
+  const viewMode = document.getElementById('cd-view-mode');
+  const editMode = document.getElementById('cd-edit-mode');
+  const isEdit   = editMode.style.display !== 'none';
+  if(!isEdit && selectedCitizen){
+    document.getElementById('cd-edit-name').value  = selectedCitizen.name  || '';
+    document.getElementById('cd-edit-phone').value = selectedCitizen.phone || '';
+  }
+  viewMode.style.display = isEdit ? '' : 'none';
+  editMode.style.display = isEdit ? 'none' : '';
+}
+
+async function saveCitizenEdit(){
+  if(!selectedCitizen) return;
+  const btn = document.querySelector('#cd-edit-mode .btn-primary');
+  if(btn){ btn.disabled=true; btn.classList.add('btn-loading'); }
+  try{
+    const newName  = document.getElementById('cd-edit-name').value.trim();
+    const newPhone = document.getElementById('cd-edit-phone').value.trim();
+    if(!newName){ toast('الاسم مطلوب', false); if(btn){btn.disabled=false;btn.classList.remove('btn-loading');} return; }
+    await window.updateDoc(window.doc('users', selectedCitizen.id), { name: newName, phone: newPhone });
+    selectedCitizen.name=newName; selectedCitizen.phone=newPhone;
+    document.getElementById('cd-name').textContent  = newName;
+    document.getElementById('cd-phone').textContent = newPhone;
+    const idx = allUsers.findIndex(u=>u.id===selectedCitizen.id);
+    if(idx>=0){ allUsers[idx].name=newName; allUsers[idx].phone=newPhone; }
+    toggleCitizenEdit();
+    toast('✅ تم حفظ التعديلات');
+  }catch(e){ toast('خطأ في الحفظ: '+e.message, false); }
+  if(btn){ btn.disabled=false; btn.classList.remove('btn-loading'); }
+}
+
+async function deleteCitizen(){
+  if(!selectedCitizen) return;
+  const name = selectedCitizen.name || 'هذا المواطن';
+  if(!confirm(`حذف ${name} نهائياً؟\nسيتمكن من التسجيل مجدداً بنفس البريد.`)) return;
+  try{
+    await window.deleteDoc(window.doc('users', selectedCitizen.id));
+    toast(`✅ تم حذف ${name}`);
+    allUsers = allUsers.filter(u=>u.id!==selectedCitizen.id);
+    closeCitizenDetail();
+    filterUsers();
+  }catch(e){ toast('خطأ في الحذف: '+e.message, false); }
 }
 
 
@@ -1996,10 +2184,9 @@ const FirestoreService = {
 
   /* ── Users list (for admin) ── */
   async getAllUsers() {
-    const s = await getDocs(
-      query(collection(db,'users'), orderBy('createdAt','desc'))
-    );
-    return s.docs.map(d => ({ id: d.id, ...d.data() }));
+    const s = await getDocs(collection(db,'users'));
+    return s.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   },
 };
 
@@ -2071,8 +2258,9 @@ window.collection = (name) => collection(db, name);
 
 /* Admin KYC helpers */
 window._getAllUsers = async () => {
-  const snap = await getDocs(query(collection(db,'users'), orderBy('createdAt','desc')));
-  return snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  const snap = await getDocs(collection(db,'users'));
+  return snap.docs.map(d => ({ id:d.id, ...d.data() }))
+    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
 };
 window._updateUserDoc = async (uid, data) => updateDoc(doc(db,'users',uid), data);
 
